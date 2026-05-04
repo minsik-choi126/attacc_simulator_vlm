@@ -1,0 +1,22 @@
+{
+  "tp": 1,
+  "model": "OpenGVLab/InternVL3-8B-hf",
+  "image_size": 448,
+  "seq_len": 316,
+  "lout": 128,
+  "repeats": 3,
+  "prefill_ms_runs": [
+    25.883130729198456,
+    26.091601699590683,
+    26.185541413724422
+  ],
+  "decode_total_ms_runs": [
+    851.8502712249756,
+    851.6058167442679,
+    861.1214011907578
+  ],
+  "prefill_ms_med": 26.091601699590683,
+  "decode_total_ms_med": 851.8502712249756,
+  "decode_ms_per_token": 6.7074824505903585,
+  "e2e_ms": 877.9418729245663
+}

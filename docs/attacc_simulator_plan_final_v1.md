@@ -546,6 +546,26 @@ trace_gen 파일은 `--maxlen` argparse 이미 있음 (변경 없음).
 
 **Pass**: `--max_L 8192` 정상 흘러가서 cache row 분리.
 
+Follow-up fix (2026-05-04 local verification): wrapper must fail fast when the
+Ramulator execution environment is incomplete. `run_ramulator()` now checks that
+`ramulator2/ramulator2` and `ramulator2/trace_gen/gen_trace_attacc_*.py` exist
+before generating traces, uses `sys.executable` instead of bare `python`, runs
+trace generation and Ramulator with `subprocess.run(..., check=True)`, and
+removes generated trace/yaml files via `os.remove()` in `finally` blocks. This is
+required because a missing binary or failed subprocess must not produce a
+zero-cycle cache row in `ramulator.out`.
+
+Additional wrapper consistency fixes:
+- `fast_mode` execution time is scaled by `num_ops_group` on freshly generated rows, matching cached-row behavior.
+- `PIMType.BUFFER` memory-access scaling is consistent between fresh and cached rows (`* 1`, not cached-only `* 2`).
+- Direct `System(..., hetero_name=DeviceType.PIM, hetero_config=...)` construction now instantiates `PIM(config, scaling_factor, ramulator)` with a valid Ramulator object.
+
+Environment gate for R2/R3:
+- `git submodule status` must not show `-... ramulator2`; the submodule must be initialized.
+- `ramulator2/ramulator2` must exist.
+- `ramulator2/trace_gen/gen_trace_attacc_bank.py` must exist.
+- If any of these are missing, R2/R3 are blocked by environment, not by simulator logic.
+
 ### M14 — Inter-GPU NVLink4 all-reduce (1.5 hr)
 
 **기존 [devices.py](../src/devices.py#L225) G2G time model 그대로 유지** (6060 ns latency + bandwidth + traffic/num_xpu*(num_xpu-1)). M14는 다음만:
@@ -684,6 +704,20 @@ Gate helper:
 python tests/r2_paper_repro.py
 ```
 
+Precondition: `ramulator2` submodule initialized and built. The helper requires
+both `ramulator2/ramulator2` and `ramulator2/trace_gen/gen_trace_attacc_bank.py`.
+If either file is absent, do not interpret R2 as a failed paper repro; fix the
+Ramulator environment first.
+
+Locked Ramulator commit caveat (2026-05-04): the SHA in `set_pim_ramulator.sh`
+(`b7c70275f04126c647edb989270cc429776955d1`) is no longer reachable in
+`CMU-SAFARI/ramulator2` upstream. The closest commit whose tree matches every
+patch's index header is `37a3fd4734e6352b03eb68fc2eae61ff113fc564` (2024-01-27,
+"Merge pull request #29 from cyyself/fix_cstdint"). All 21 patches apply
+cleanly there. Calibration drift between the lost SHA and `37a3fd4` should be
+treated as a known unknown when interpreting absolute PIM cycles, but gain
+trends should remain comparable.
+
 ### R3 — corrected E2 (Phase 3 gate, after M6+M9+M12+M14)
 
 Setup: Qwen3-VL-4B, 672² (L_in=569, L_out=128), batch=1, full proposal, chunk=512.
@@ -704,6 +738,10 @@ Gate helper:
 ```powershell
 python tests/r3_gate.py
 ```
+
+Precondition: same Ramulator environment as R2. A `dgx-attacc` smoke should fail
+fast with `FileNotFoundError` when the trace generator or binary is missing; it
+must not append zero-cycle rows to `ramulator.out`.
 
 ### R4 — Sensitivity sweep
 

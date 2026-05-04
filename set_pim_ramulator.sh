@@ -1,6 +1,12 @@
-## initialize ramulator2 
+## initialize ramulator2
 cd ramulator2
-git reset --hard b7c70275f04126c647edb989270cc429776955d1
+# Locked SHA below was the original calibration target. As of 2026-05 it has
+# been rewritten out of CMU-SAFARI/ramulator2 history. If the reset fails,
+# fall back to 37a3fd4734e6352b03eb68fc2eae61ff113fc564 (2024-01-27); all
+# patches in pim_ramulator_src/patches/ apply cleanly there. See
+# docs/attacc_simulator_patch_implementation_report.md §17.2 for details.
+git reset --hard b7c70275f04126c647edb989270cc429776955d1 \
+    || git reset --hard 37a3fd4734e6352b03eb68fc2eae61ff113fc564
 cd ..
 
 # copy files

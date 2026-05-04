@@ -1,8 +1,22 @@
+import os
+
 from src.type import *
 
+
+def _env_float(name, default):
+    raw = os.environ.get(name)
+    if raw is None or raw == '':
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
 SCALING_FACTOR = {}
-SCALING_FACTOR['MAX_COMPUTE_UTIL'] = 0.8
-SCALING_FACTOR['MAX_OFF_MEM_BW_UTIL'] = 0.85
+SCALING_FACTOR['MAX_COMPUTE_UTIL'] = _env_float('ATTACC_MAX_COMPUTE_UTIL', 0.8)
+SCALING_FACTOR['MAX_OFF_MEM_BW_UTIL'] = _env_float('ATTACC_MAX_OFF_MEM_BW_UTIL',
+                                                   0.85)
 
 # ENERGY_TABLE: pJ per byte
 # Cache info: https://core.ac.uk/download/pdf/232142915.pdf

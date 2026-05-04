@@ -1,0 +1,51 @@
+# Simulator runtime (dgx-attacc PIM cache + main simulator)
+pandas>=2.0
+numpy>=1.24
+
+# ---------------------------------------------------------------------------
+# Tier 1 — simulator only (CPU paths, dgx / dgx-cpu / dgx-attacc):
+# Just the lines above. R1/R2/R3 simulator gates work with these.
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Tier 2 — paper-grade real-H100 measurement (tests/r6_vllm_measurement.py,
+# tests/r7_paper_runner.sh).
+#
+# Verified working stack on driver 535.274.02 + H100 80GB:
+#   torch 2.5.1+cu121
+#   vllm 0.7.3
+#   transformers 4.49.0
+#   mistral_common 1.4.4   (pin: vllm 0.7.3's >=1.5 requirement is too strict;
+#                          1.4.4 is the last release before mistral_common
+#                          dropped ImageChunk that vllm 0.7.3 imports.)
+#
+# Install order — torch first from the cu121 index, then the rest:
+#   pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
+#       --index-url https://download.pytorch.org/whl/cu121
+#   pip install -r requirements.txt
+#
+# Driver 535 caveats (this node):
+#   - cuDNN 9.19 (bundled by torch 2.5.1+cu121) hits CUDNN_STATUS_NOT_INITIALIZED
+#     on H100 + driver 535. Pass --disable_cudnn to the measurement script;
+#     it falls back to ATen native conv (vision tower only, decoder unaffected).
+#   - NCCL 2.21+ (bundled) hits "CUDA driver version is insufficient for CUDA
+#     runtime version" on TP>=2. paper-grade R6.S2 / R7.S2 needs driver 545+
+#     or a node with newer NCCL/driver pairing. TP=1 paths work fully.
+#   - Qwen3-VL-4B requires transformers >=5.x; vllm 0.7.3 conflicts with
+#     transformers 5.x (rope_type vs type=mrope). Use Qwen2.5-VL-7B / LLaVA
+#     family for paper-grade on this stack. See docs §17.8 for full caveats.
+# ---------------------------------------------------------------------------
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+transformers==4.49.0
+accelerate>=1.0,<2.0
+qwen-vl-utils>=0.0.14
+pillow>=10.0
+mistral_common==1.4.4
+vllm==0.7.3
+
+# Tier 2 extras for paper-grade real-data measurement (tests/r9, r10):
+#   - real MMMU-Pro / sharegpt-vision dataset loading
+#   - power/energy sampling via nvidia-smi (no extra Python deps)
+datasets>=4.0,<5.0

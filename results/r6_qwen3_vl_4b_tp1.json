@@ -1,0 +1,22 @@
+{
+  "tp": 1,
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "image_size": 672,
+  "seq_len": 500,
+  "lout": 128,
+  "repeats": 3,
+  "prefill_ms_runs": [
+    36.32448147982359,
+    37.35602740198374,
+    44.28332671523094
+  ],
+  "decode_total_ms_runs": [
+    1560.4096679016948,
+    1544.288655743003,
+    1528.0689829960465
+  ],
+  "prefill_ms_med": 37.35602740198374,
+  "decode_total_ms_med": 1544.288655743003,
+  "decode_ms_per_token": 12.159753194826795,
+  "e2e_ms": 1581.6446831449866
+}
