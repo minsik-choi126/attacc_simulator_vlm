@@ -350,20 +350,8 @@ class PIM:
                 return 0, [0, 0, 0, 0, 0, 0]
 
         elif layer.type == LayerType.SOFTMAX:
-            # Execution time
-            compute_time = self._compute_time(layer)
-            mem_time = self._mem_time(layer)
-
-            if compute_time > mem_time:
-                layer.bound = 'compute'
-            else:
-                layer.bound = 'memory'
-            exec_time = max(compute_time, mem_time)
-            layer.time = exec_time
-
-            energy = self._get_energy(layer)
-
-            return exec_time, energy
+            # Score's Ramulator trace already includes softmax cycles.
+            return 0, [0, 0, 0, 0, 0, 0]
 
         else:
             assert 0, "PIM does not support this layer."

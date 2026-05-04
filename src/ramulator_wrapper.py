@@ -1,10 +1,14 @@
-import pandas as pd
 import subprocess
 import math
 import os
 from src.config import *
 from src.model import *
 from src.type import *
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
 
 
 class Ramulator:
@@ -14,15 +18,21 @@ class Ramulator:
                  ramulator_dir,
                  output_log='',
                  fast_mode=False,
-                 num_hbm=5):
-        self.df = pd.DataFrame()
+                 num_hbm=5,
+                 max_L=2048):
+        self.df = pd.DataFrame() if pd is not None else None
         self.ramulator_dir = ramulator_dir
         self.output_log = output_log
-        if os.path.exists(output_log):
+        if pd is None:
+            self.df = None
+        elif os.path.exists(output_log):
             self.df = pd.read_csv(output_log)
+            if 'max_L' not in self.df.columns:
+                self.df = pd.DataFrame()
         self.tCK = 0.769  # ns
         self.num_hbm = num_hbm
-        self.nhead = modelinfos['num_heads']
+        self.max_L = max_L
+        self.nhead = modelinfos.get('num_kv_heads', modelinfos.get('num_heads'))
         self.dhead = modelinfos['dhead']
         self.fast_mode = fast_mode
 
@@ -68,21 +78,26 @@ class Ramulator:
             f.write(line)
 
     def update_log_file(self, log):
+        assert pd is not None, "Ramulator logging requires pandas"
         if self.df.empty:
             if os.path.exists(self.output_log):
                 df = pd.read_csv(self.output_log)
             else:
                 columns = [
-                    'L', 'nhead', 'dhead', 'dbyte', 'pim_type',
+                    'L', 'max_L', 'nhead', 'dhead', 'dbyte', 'pim_type',
                     'power_constraint', 'cycle', 'mac', 'softmax', 'mvgb',
                     'mvsb', 'wrgb'
                 ]
                 df = pd.DataFrame(columns=columns)
         else:
             df = self.df
-        if len(df.columns) > 12:
-            import pdb
-            pdb.set_trace()
+        if 'max_L' not in df.columns:
+            columns = [
+                'L', 'max_L', 'nhead', 'dhead', 'dbyte', 'pim_type',
+                'power_constraint', 'cycle', 'mac', 'softmax', 'mvgb',
+                'mvsb', 'wrgb'
+            ]
+            df = pd.DataFrame(columns=columns)
         new_df = pd.DataFrame(columns=df.columns)
         new_df.loc[0] = log
         df = pd.concat([df, new_df]).drop_duplicates()
@@ -99,8 +114,8 @@ class Ramulator:
         trace_exc = os.path.join(
             self.ramulator_dir,
             "trace_gen/gen_trace_attacc_{}.py".format(pim_type_name))
-        trace_args = "--dhead {} --nhead {} --seqlen {} --dbyte {} --output {}".format(
-            self.dhead, num_ops_per_hbm, l, dbyte, trace_file)
+        trace_args = "--dhead {} --nhead {} --seqlen {} --maxlen {} --dbyte {} --output {}".format(
+            self.dhead, num_ops_per_hbm, l, self.max_L, dbyte, trace_file)
 
         gen_trace_cmd = f"python {trace_exc} {trace_args}"
 
@@ -159,7 +174,7 @@ class Ramulator:
             l = layer.n
             dhead = self.dhead
             dbyte = layer.dbyte
-            num_ops_per_attacc = layer.numOp
+            num_ops_per_attacc = getattr(layer, 'pim_numOp', layer.numOp)
             num_ops_per_hbm = math.ceil(num_ops_per_attacc / self.num_hbm)
             num_ops_group = 1
             if self.fast_mode:
@@ -167,8 +182,9 @@ class Ramulator:
                 num_ops_group = math.ceil(num_ops_per_hbm / minimum_heads)
                 num_ops_per_hbm = minimum_heads
 
-            file_name = "attacc_l{}_nattn{}_dhead{}_dbyte{}_pc{}".format(
-                l, num_ops_per_hbm, dhead, layer.dbyte, int(power_constraint))
+            file_name = "attacc_l{}_maxl{}_nattn{}_dhead{}_dbyte{}_pc{}".format(
+                l, self.max_L, num_ops_per_hbm, dhead, layer.dbyte,
+                int(power_constraint))
             yaml_file = os.path.join(self.ramulator_dir, file_name + '.yaml')
             self.make_yaml_file(yaml_file, file_name, power_constraint)
 
@@ -202,7 +218,7 @@ class Ramulator:
             ## update log file
 
             log = [
-                l, num_ops_per_hbm, dhead, dbyte, pim_type.name,
+                l, self.max_L, num_ops_per_hbm, dhead, dbyte, pim_type.name,
                 power_constraint
             ] + result
             self.update_log_file(log)
@@ -218,10 +234,11 @@ class Ramulator:
             assert 0, "Need to install ramulator"
 
     def output(self, pim_type: PIMType, layer: Layer, power_constraint=True):
+        assert pd is not None, "Ramulator execution requires pandas"
         if self.df.empty:
             self.run(pim_type, layer, power_constraint)
 
-        num_ops_per_attacc = layer.numOp
+        num_ops_per_attacc = getattr(layer, 'pim_numOp', layer.numOp)
         num_ops_per_hbm = math.ceil(num_ops_per_attacc / self.num_hbm)
         num_ops_group = 1
         if self.fast_mode:
@@ -232,7 +249,8 @@ class Ramulator:
         l = layer.n
         dhead = layer.k
         dbyte = layer.dbyte
-        row = self.df[(self.df['L'] == l) & (self.df['nhead'] == num_ops_per_hbm) & \
+        row = self.df[(self.df['L'] == l) & (self.df['max_L'] == self.max_L) & \
+                      (self.df['nhead'] == num_ops_per_hbm) & \
                       (self.df['dbyte'] == dbyte) & (self.df['dhead'] == dhead) & \
                       (self.df['power_constraint'] == power_constraint) &  \
                       (self.df['pim_type'] == pim_type.name)]

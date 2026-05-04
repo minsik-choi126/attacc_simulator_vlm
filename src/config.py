@@ -215,15 +215,198 @@ def make_model_config(name, dtype):
     model_table['MT-1008B'] = [128, 25600, 160, 160, 4, 1]
     model_table['OPT-66B'] = [64, 9216, 72, 128, 4, 1]
 
-    ndec, hdim, nheads, dhead, ff_scale, gqa_size = model_table[name]
-    config = {
-        'name': name,
-        'ndec': ndec,
-        'hdim': hdim,
-        'num_heads': nheads,
-        'dhead': dhead,
-        'ff_scale': ff_scale,
-        'gqa_size': gqa_size,
-        'dtype': dtype
+    model_table['Qwen3-4B'] = {
+        'ndec': 36,
+        'hdim': 2560,
+        'num_q_heads': 32,
+        'num_kv_heads': 8,
+        'dhead': 128,
+        'ff_intermediate': 9728,
+        'ffn_type': 'gated',
+        'activation': 'silu',
     }
+    model_table['Qwen3-VL-4B'] = {
+        'ndec': 36,
+        'hdim': 2560,
+        'num_q_heads': 32,
+        'num_kv_heads': 8,
+        'dhead': 128,
+        'ff_intermediate': 9728,
+        'ffn_type': 'gated',
+        'activation': 'silu',
+        'vit_layers': 24,
+        'vit_hidden': 1024,
+        'vit_num_heads': 16,
+        'vit_intermediate': 4096,
+        'vit_out_hidden': 2560,
+        'vit_activation': 'gelu_pytorch_tanh',
+        'patch_size': 16,
+        'image_size_default': 672,
+        'spatial_merge_size': 2,
+        'num_vis_tokens_per_image': 441,
+        'projector_type': 'mlp_with_merger',
+        'has_deepstack': True,
+        'deepstack_layers': [5, 11, 17],
+        'is_anyres': False,
+        'image_grid_pinpoints': [],
+        'use_image_newline_parameter': False,
+        'is_concat_style': True,
+        'is_cross_attn': False,
+    }
+    model_table['Qwen2.5-VL-7B'] = {
+        'ndec': 28,
+        'hdim': 3584,
+        'num_q_heads': 28,
+        'num_kv_heads': 4,
+        'dhead': 128,
+        'ff_intermediate': 18944,
+        'ffn_type': 'gated',
+        'activation': 'silu',
+        'vit_layers': 32,
+        'vit_hidden': 1280,
+        'vit_num_heads': 16,
+        'vit_intermediate': 3420,
+        'vit_out_hidden': 3584,
+        'vit_activation': 'silu',
+        'patch_size': 14,
+        'image_size_default': 672,
+        'spatial_merge_size': 2,
+        'num_vis_tokens_per_image': 576,
+        'projector_type': 'mlp_with_merger',
+        'has_deepstack': False,
+        'deepstack_layers': [],
+        'is_anyres': False,
+        'image_grid_pinpoints': [],
+        'use_image_newline_parameter': False,
+        'is_concat_style': True,
+        'is_cross_attn': False,
+    }
+    model_table['InternVL3-8B-hf'] = {
+        'ndec': 28,
+        'hdim': 3584,
+        'num_q_heads': 28,
+        'num_kv_heads': 4,
+        'dhead': 128,
+        'ff_intermediate': 18944,
+        'ffn_type': 'gated',
+        'activation': 'silu',
+        'vit_layers': 24,
+        'vit_hidden': 1024,
+        'vit_num_heads': 16,
+        'vit_intermediate': 4096,
+        'vit_out_hidden': 3584,
+        'vit_activation': 'gelu',
+        'patch_size': 14,
+        'image_size_default': 448,
+        'spatial_merge_size': 2,
+        'num_vis_tokens_per_image': 256,
+        'projector_type': 'pixel_shuffle_mlp',
+        'has_deepstack': False,
+        'deepstack_layers': [],
+        'is_anyres': False,
+        'image_grid_pinpoints': [],
+        'use_image_newline_parameter': False,
+        'is_concat_style': True,
+        'is_cross_attn': False,
+    }
+    model_table['Vicuna-7B'] = {
+        'ndec': 32,
+        'hdim': 4096,
+        'num_q_heads': 32,
+        'num_kv_heads': 32,
+        'dhead': 128,
+        'ff_intermediate': 11008,
+        'ffn_type': 'gated',
+        'activation': 'silu',
+    }
+    model_table['LLaVA-1.5-7B'] = {
+        **model_table['Vicuna-7B'],
+        'vit_layers': 24,
+        'vit_hidden': 1024,
+        'vit_num_heads': 16,
+        'vit_intermediate': 4096,
+        'vit_out_hidden': 4096,
+        'vit_activation': 'gelu',
+        'patch_size': 14,
+        'image_size_default': 336,
+        'spatial_merge_size': 1,
+        'num_vis_tokens_per_image': 576,
+        'projector_type': 'mlp',
+        'has_deepstack': False,
+        'deepstack_layers': [],
+        'is_anyres': False,
+        'image_grid_pinpoints': [],
+        'use_image_newline_parameter': False,
+        'is_concat_style': True,
+        'is_cross_attn': False,
+    }
+    model_table['Mistral-7B'] = {
+        'ndec': 32,
+        'hdim': 4096,
+        'num_q_heads': 32,
+        'num_kv_heads': 8,
+        'dhead': 128,
+        'ff_intermediate': 14336,
+        'ffn_type': 'gated',
+        'activation': 'silu',
+    }
+    model_table['LLaVA-Next-Mistral-7B'] = {
+        **model_table['Mistral-7B'],
+        'vit_layers': 24,
+        'vit_hidden': 1024,
+        'vit_num_heads': 16,
+        'vit_intermediate': 4096,
+        'vit_out_hidden': 4096,
+        'vit_activation': 'gelu',
+        'patch_size': 14,
+        'image_size_default': 336,
+        'spatial_merge_size': 1,
+        'num_vis_tokens_per_image': 2880,
+        'projector_type': 'mlp',
+        'has_deepstack': False,
+        'deepstack_layers': [],
+        'is_anyres': True,
+        'image_grid_pinpoints': [[336, 672], [672, 336], [672, 672],
+                                 [1008, 336], [336, 1008]],
+        'use_image_newline_parameter': True,
+        'is_concat_style': True,
+        'is_cross_attn': False,
+    }
+
+    entry = model_table[name]
+    if isinstance(entry, list):
+        ndec, hdim, nheads, dhead, ff_scale, gqa_size = entry
+        config = {
+            'name': name,
+            'ndec': ndec,
+            'hdim': hdim,
+            'num_heads': nheads,
+            'num_q_heads': nheads,
+            'num_kv_heads': int(nheads / gqa_size),
+            'dhead': dhead,
+            'ff_scale': ff_scale,
+            'gqa_size': gqa_size,
+            'dtype': dtype,
+            'ffn_type': 'gated' if 'LLAMA' in name else 'standard',
+            'activation': 'silu' if 'LLAMA' in name else 'gelu',
+        }
+    else:
+        config = dict(entry)
+        config['name'] = name
+        config['num_heads'] = config['num_q_heads']
+        config['gqa_size'] = int(config['num_q_heads'] / config['num_kv_heads'])
+        config['ff_scale'] = config['ff_intermediate'] / config['hdim']
+        config['dtype'] = dtype
+
+    config['q_proj_out'] = config['num_q_heads'] * config['dhead']
+    config['kv_proj_out'] = config['num_kv_heads'] * config['dhead']
+    config['qkv_proj_out_total'] = config['q_proj_out'] + 2 * config[
+        'kv_proj_out']
+    config.setdefault('has_deepstack', False)
+    config.setdefault('deepstack_layers', [])
+    config.setdefault('is_anyres', False)
+    config.setdefault('image_grid_pinpoints', [])
+    config.setdefault('use_image_newline_parameter', False)
+    config.setdefault('is_concat_style', False)
+    config.setdefault('is_cross_attn', False)
     return config
