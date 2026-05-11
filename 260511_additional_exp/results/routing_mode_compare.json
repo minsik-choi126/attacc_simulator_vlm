@@ -1,0 +1,125 @@
+{
+  "experiment": "routing_mode_compare",
+  "config": {
+    "modes": [
+      "conservative",
+      "optimistic",
+      "list"
+    ],
+    "platform": "A6000 x 1 A1 dgx-attacc"
+  },
+  "results": {
+    "models": [
+      {
+        "model": "Qwen3-VL-4B",
+        "image_size": 672,
+        "lin": 569,
+        "ds": true,
+        "modes": [
+          {
+            "mode": "conservative",
+            "s_time_ms": 51.551589288569645,
+            "g_time_ms": 7.521755796261104,
+            "total_ms": 1006.8145754137298
+          },
+          {
+            "mode": "optimistic",
+            "s_time_ms": 51.551589288569645,
+            "g_time_ms": 7.521755796261104,
+            "total_ms": 1006.8145754137298
+          },
+          {
+            "mode": "list",
+            "s_time_ms": 51.551589288569645,
+            "g_time_ms": 7.521755796261104,
+            "total_ms": 1006.8145754137298
+          }
+        ]
+      },
+      {
+        "model": "Qwen2.5-VL-7B",
+        "image_size": 672,
+        "lin": 704,
+        "ds": false,
+        "modes": [
+          {
+            "mode": "conservative",
+            "s_time_ms": 95.61592744903443,
+            "g_time_ms": 3.7871158444984534,
+            "total_ms": 576.579639700338
+          },
+          {
+            "mode": "optimistic",
+            "s_time_ms": 89.78268857306803,
+            "g_time_ms": 10.753643306445474,
+            "total_ms": 1455.4953884916433
+          },
+          {
+            "mode": "list",
+            "s_time_ms": 89.78268857306801,
+            "g_time_ms": 10.753643306445461,
+            "total_ms": 1455.4953884916417
+          }
+        ]
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "image_size": 336,
+        "lin": 704,
+        "ds": false,
+        "modes": [
+          {
+            "mode": "conservative",
+            "s_time_ms": 82.78239023570386,
+            "g_time_ms": 8.08651000410594,
+            "total_ms": 1109.769160757158
+          },
+          {
+            "mode": "optimistic",
+            "s_time_ms": 78.1439285252837,
+            "g_time_ms": 13.430871401046074,
+            "total_ms": 1783.864596458135
+          },
+          {
+            "mode": "list",
+            "s_time_ms": 78.14392852528367,
+            "g_time_ms": 13.430871401046067,
+            "total_ms": 1783.8645964581342
+          }
+        ]
+      },
+      {
+        "model": "LLaVA-Next-Mistral-7B",
+        "image_size": 672,
+        "lin": 3008,
+        "ds": false,
+        "modes": [
+          {
+            "mode": "conservative",
+            "s_time_ms": 564.9018254433042,
+            "g_time_ms": 5.786535113630438,
+            "total_ms": 1299.79178487437
+          },
+          {
+            "mode": "optimistic",
+            "s_time_ms": 555.8874489834724,
+            "g_time_ms": 14.238028868961601,
+            "total_ms": 2364.1171153415958
+          },
+          {
+            "mode": "list",
+            "s_time_ms": 555.8874489834725,
+            "g_time_ms": 14.23802886896159,
+            "total_ms": 2364.1171153415944
+          }
+        ]
+      }
+    ],
+    "note": "list mode for DeepStack model auto-forced (M7)"
+  },
+  "metadata": {
+    "timestamp": "2026-05-11T17:39:59.742138Z",
+    "git_commit": "47007cb",
+    "platform": "A6000 x 1 A1 dgx-attacc"
+  }
+}

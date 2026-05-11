@@ -372,8 +372,8 @@
     ]
   },
   "metadata": {
-    "timestamp": "2026-05-11T12:43:22.092415Z",
-    "git_commit": "89a9aba",
+    "timestamp": "2026-05-11T17:43:32.348590Z",
+    "git_commit": "47007cb",
     "platform": "A6000 roofline (A6000 ridge primary, H100 paper ref)"
   }
 }

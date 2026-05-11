@@ -2,7 +2,8 @@
   "experiment": "vit_recalibration",
   "config": {
     "purpose": "Derive per-model s_corr to identify _build_vit() fix path",
-    "method": "compare simulated TTFT vs vLLM measured TTFT p50 (MMMU-Pro)"
+    "method": "compare simulated TTFT vs vLLM measured TTFT p50 (MMMU-Pro)",
+    "platform": "A6000 simulator vs prior H100x1 vLLM measurement (measured numbers re-used from earlier campaign)"
   },
   "results": {
     "per_model": [
@@ -10,34 +11,34 @@
         "model": "Qwen2.5-VL-7B",
         "image_size": 672,
         "lin_text": 334,
-        "sim_s_ms": 13.592,
-        "sim_g_ms": 5.8095,
+        "sim_s_ms": 48.839,
+        "sim_g_ms": 22.6002,
         "meas_ttft_ms": 107.43,
         "meas_itl_ms": 8.72,
-        "s_corr": 7.904,
-        "g_corr": 1.501
+        "s_corr": 2.2,
+        "g_corr": 0.386
       },
       {
         "model": "LLaVA-1.5-7B",
         "image_size": 336,
         "lin_text": 620,
-        "sim_s_ms": 18.734,
-        "sim_g_ms": 5.9727,
+        "sim_s_ms": 59.451,
+        "sim_g_ms": 23.4539,
         "meas_ttft_ms": 41.16,
         "meas_itl_ms": 7.27,
-        "s_corr": 2.197,
-        "g_corr": 1.217
+        "s_corr": 0.692,
+        "g_corr": 0.31
       },
       {
         "model": "LLaVA-Next-Mistral-7B",
         "image_size": 672,
         "lin_text": 1979,
-        "sim_s_ms": 94.257,
-        "sim_g_ms": 7.3364,
+        "sim_s_ms": 289.658,
+        "sim_g_ms": 28.1694,
         "meas_ttft_ms": 102.53,
         "meas_itl_ms": 7.63,
-        "s_corr": 1.088,
-        "g_corr": 1.04
+        "s_corr": 0.354,
+        "g_corr": 0.271
       }
     ],
     "architecture_diag": [
@@ -47,7 +48,7 @@
         "vit_hidden": 1280,
         "vit_tokens": 2304,
         "flops_est": 4783519825920,
-        "s_corr": 7.904
+        "s_corr": 2.2
       },
       {
         "model": "LLaVA-1.5-7B",
@@ -55,7 +56,7 @@
         "vit_hidden": 1024,
         "vit_tokens": 576,
         "flops_est": 538145980416,
-        "s_corr": 2.197
+        "s_corr": 0.692
       },
       {
         "model": "LLaVA-Next-Mistral-7B",
@@ -63,14 +64,14 @@
         "vit_hidden": 1024,
         "vit_tokens": 2304,
         "flops_est": 2348273369088,
-        "s_corr": 1.088
+        "s_corr": 0.354
       }
     ],
     "decode_g_corr_universal_est": 1.46
   },
   "metadata": {
-    "timestamp": "2026-05-11T08:55:14.130880Z",
-    "git_commit": "44f8caa",
-    "platform": "H100x1 driver 535-compatible"
+    "timestamp": "2026-05-11T17:32:20.258218Z",
+    "git_commit": "47007cb",
+    "platform": "A6000 simulator vs prior H100x1 vLLM measurement (measured numbers re-used from earlier campaign)"
   }
 }

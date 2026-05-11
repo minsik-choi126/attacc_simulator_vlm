@@ -1,0 +1,78 @@
+{
+  "experiment": "ablation_contribution",
+  "config": {
+    "model": "Qwen3-VL-4B",
+    "lin": 569,
+    "lout": 128,
+    "batch": 1,
+    "platform": "A6000 x 1 A1",
+    "image_size": 672,
+    "deepstack_indices": [
+      5,
+      11,
+      17
+    ]
+  },
+  "results": {
+    "variants": [
+      {
+        "label": "A_no_pim",
+        "overrides": {
+          "system": "dgx"
+        },
+        "s_ms": 44.53318204499817,
+        "g_ms": 13.56427384717299,
+        "total_ms": 1767.1959606359678,
+        "gain_vs_gpu": 1.0
+      },
+      {
+        "label": "A_no_chunked",
+        "overrides": {
+          "prefill_chunk": 569
+        },
+        "s_ms": 53.6304731285696,
+        "g_ms": 7.521755796261104,
+        "total_ms": 1008.8934592537298,
+        "gain_vs_gpu": 1.752
+      },
+      {
+        "label": "A_no_routing",
+        "overrides": {
+          "routing": "conservative",
+          "pim_layers": ""
+        },
+        "s_ms": 51.551589288569645,
+        "g_ms": 7.521755796261104,
+        "total_ms": 1006.8145754137298,
+        "gain_vs_gpu": 1.755
+      },
+      {
+        "label": "A_full",
+        "overrides": {},
+        "s_ms": 51.551589288569645,
+        "g_ms": 7.521755796261104,
+        "total_ms": 1006.8145754137298,
+        "gain_vs_gpu": 1.755
+      }
+    ],
+    "future_ablations": [
+      {
+        "label": "A_no_efflat",
+        "status": "requires_code_patch",
+        "note": "Toggle eff_lat in src/system.py _apply_eff_lat()"
+      },
+      {
+        "label": "A_no_deepstack",
+        "status": "requires_code_patch",
+        "note": "Set has_deepstack=False in Qwen3-VL-4B config in src/config.py"
+      }
+    ],
+    "baseline_gpu_ms": 1767.1959606359678,
+    "full_proposal_ms": 1006.8145754137298
+  },
+  "metadata": {
+    "timestamp": "2026-05-11T17:32:18.299366Z",
+    "git_commit": "47007cb",
+    "platform": "A6000 x 1 A1"
+  }
+}
