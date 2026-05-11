@@ -1,0 +1,79 @@
+{
+  "experiment": "upstream_baseline",
+  "config": {
+    "platform": "simulated DGX-A100 x8 dgx-attacc",
+    "purpose": "Verify our M-mods do not regress legacy upstream behavior"
+  },
+  "results": {
+    "models": [
+      {
+        "model": "GPT-175B",
+        "lin": 2048,
+        "lout": 128,
+        "s_time_ms": 4542.180812488739,
+        "g_time_ms": 21.83759582719009,
+        "required_cap_per_gpu": 53759503872.0,
+        "status": "ok"
+      },
+      {
+        "model": "GPT-89B",
+        "lin": 2048,
+        "lout": 128,
+        "s_time_ms": 2271.0904062443697,
+        "g_time_ms": 10.918797913595045,
+        "required_cap_per_gpu": 26884763136.0,
+        "status": "ok"
+      },
+      {
+        "model": "GPT-13B",
+        "lin": 1024,
+        "lout": 64,
+        "s_time_ms": 228.9758113086199,
+        "g_time_ms": 5.176933879570488,
+        "required_cap_per_gpu": 4038285440.0,
+        "status": "ok"
+      },
+      {
+        "model": "LLAMA-65B",
+        "lin": 2048,
+        "lout": 128,
+        "s_time_ms": 1856.9894942353465,
+        "g_time_ms": 13.026391352211478,
+        "required_cap_per_gpu": 21898327040.0,
+        "status": "ok"
+      },
+      {
+        "model": "LLAMA-7B",
+        "lin": 1024,
+        "lout": 64,
+        "s_time_ms": 141.25138423930568,
+        "g_time_ms": 3.9009068053812035,
+        "required_cap_per_gpu": 2190572032.0,
+        "status": "ok"
+      },
+      {
+        "model": "MT-530B",
+        "lin": 2048,
+        "lout": 128,
+        "s_time_ms": 11555.345712754577,
+        "g_time_ms": 43.688966931470105,
+        "required_cap_per_gpu": 150842419200.0,
+        "status": "ok"
+      },
+      {
+        "model": "OPT-66B",
+        "lin": 2048,
+        "lout": 128,
+        "s_time_ms": 1787.490444206726,
+        "g_time_ms": 11.057528051579416,
+        "required_cap_per_gpu": 21446439552.0,
+        "status": "ok"
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-05-11T16:54:37.762846Z",
+    "git_commit": "f4d1525",
+    "platform": "simulated DGX-A100 x8 dgx-attacc"
+  }
+}

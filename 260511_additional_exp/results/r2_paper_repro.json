@@ -1,0 +1,87 @@
+{
+  "experiment": "r2_paper_repro",
+  "config": {
+    "model": "GPT-175B",
+    "lin": 2048,
+    "lout": 128,
+    "batch": 64,
+    "platform": "simulated DGX-A100 x8"
+  },
+  "results": {
+    "configs": [
+      {
+        "label": "DGX_Base_FP16",
+        "system": "dgx",
+        "word": 2,
+        "total_ms": 38759.75219214528,
+        "s_time": 30595.651223918507,
+        "g_time": 64.28425959233677
+      },
+      {
+        "label": "DGX_AttAcc_FP16",
+        "system": "dgx-attacc",
+        "word": 2,
+        "total_ms": 37637.11641445503,
+        "s_time": 33681.39531505357,
+        "g_time": 31.147410231507585
+      },
+      {
+        "label": "DGX_Base_W8A8",
+        "system": "dgx",
+        "word": 1,
+        "total_ms": 20103.20167446802,
+        "s_time": 15369.671670354637,
+        "g_time": 37.27188979616835
+      },
+      {
+        "label": "DGX_AttAcc_W8A8",
+        "system": "dgx-attacc",
+        "word": 1,
+        "total_ms": 19500.739950938903,
+        "s_time": 16871.192826450173,
+        "g_time": 20.7050954684152
+      }
+    ],
+    "targets": [
+      {
+        "tag": "FP16_base",
+        "kind": "must",
+        "target_x": 4.84,
+        "speedup_x": 1.03,
+        "tolerance": 0.2,
+        "status": "FAIL"
+      },
+      {
+        "tag": "FP16_large",
+        "kind": "should",
+        "status": "skip",
+        "target_x": 2.48,
+        "baseline": "DGX_Large_FP16",
+        "attacc": "DGX_AttAcc_FP16",
+        "reason": "baseline not modeled by current CLI"
+      },
+      {
+        "tag": "INT8_base",
+        "kind": "should",
+        "target_x": 3.47,
+        "speedup_x": 1.031,
+        "tolerance": 0.2,
+        "status": "FAIL"
+      },
+      {
+        "tag": "INT8_large",
+        "kind": "should",
+        "status": "skip",
+        "target_x": 2.59,
+        "baseline": "DGX_Large_W8A8",
+        "attacc": "DGX_AttAcc_W8A8",
+        "reason": "baseline not modeled by current CLI"
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-05-11T16:32:31.042777Z",
+    "git_commit": "f4d1525",
+    "platform": "simulated DGX-A100 x8"
+  }
+}

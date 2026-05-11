@@ -1,0 +1,343 @@
+{
+  "experiment": "quant_stability_test",
+  "config": {
+    "n_runs": 50,
+    "lout": 64,
+    "image_size": 672,
+    "platform": "vLLM 0.7.3 TP=1"
+  },
+  "results": {
+    "variants": [
+      {
+        "label": "BF16",
+        "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+        "n_runs": 50,
+        "nan_count": 0,
+        "empty_count": 0,
+        "short_count": 0,
+        "nan_rate": 0.0,
+        "raw_sample": [
+          {
+            "run": 0,
+            "seq_out": 64,
+            "text_preview": "The image is a simple, minimalist design featuring",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 1,
+            "seq_out": 32,
+            "text_preview": "The image you provided is a solid black square wit",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 2,
+            "seq_out": 51,
+            "text_preview": "The image provided is a solid black square with no",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 3,
+            "seq_out": 21,
+            "text_preview": "The image you provided is a solid gray color. Ther",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 4,
+            "seq_out": 51,
+            "text_preview": "The image shows a solid gray background with no di",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 45,
+            "seq_out": 64,
+            "text_preview": "The image is a solid, uniform shade of dark gray. ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 46,
+            "seq_out": 32,
+            "text_preview": "The image you provided is a solid black square wit",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 47,
+            "seq_out": 55,
+            "text_preview": "The image provided is a solid gray square with no ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 48,
+            "seq_out": 16,
+            "text_preview": "The image you provided is a solid white background",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 49,
+            "seq_out": 58,
+            "text_preview": "The image shows a solid black background with no d",
+            "empty": false,
+            "short": false
+          }
+        ]
+      },
+      {
+        "label": "FP16",
+        "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+        "n_runs": 50,
+        "nan_count": 0,
+        "empty_count": 0,
+        "short_count": 0,
+        "nan_rate": 0.0,
+        "raw_sample": [
+          {
+            "run": 0,
+            "seq_out": 64,
+            "text_preview": "The image is a simple, minimalist design featuring",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 1,
+            "seq_out": 31,
+            "text_preview": "The image provided is a solid black square with no",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 2,
+            "seq_out": 55,
+            "text_preview": "The image provided is a solid black square with no",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 3,
+            "seq_out": 14,
+            "text_preview": "The image is entirely black. There are no other co",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 4,
+            "seq_out": 51,
+            "text_preview": "The image shows a solid gray background with no di",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 45,
+            "seq_out": 64,
+            "text_preview": "The image is a solid, uniform shade of dark gray. ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 46,
+            "seq_out": 31,
+            "text_preview": "The image provided is a solid black square with no",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 47,
+            "seq_out": 55,
+            "text_preview": "The image provided is a solid gray square with no ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 48,
+            "seq_out": 15,
+            "text_preview": "The image is a solid white rectangle with no addit",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 49,
+            "seq_out": 58,
+            "text_preview": "The image shows a solid black background with no d",
+            "empty": false,
+            "short": false
+          }
+        ]
+      },
+      {
+        "label": "W4A16",
+        "model": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+        "n_runs": 50,
+        "nan_count": 0,
+        "empty_count": 0,
+        "short_count": 0,
+        "nan_rate": 0.0,
+        "raw_sample": [
+          {
+            "run": 0,
+            "seq_out": 64,
+            "text_preview": "The image shows a minimalist design with a solid l",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 1,
+            "seq_out": 31,
+            "text_preview": "The image provided is a solid black color with no ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 2,
+            "seq_out": 56,
+            "text_preview": "The image provided is a solid black square with no",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 3,
+            "seq_out": 30,
+            "text_preview": "The image provided is a solid, uniform color. It a",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 4,
+            "seq_out": 50,
+            "text_preview": "The image shows a plain, solid black background wi",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 45,
+            "seq_out": 64,
+            "text_preview": "The image shows a minimalist design with a solid, ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 46,
+            "seq_out": 31,
+            "text_preview": "The image provided is a solid black color with no ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 47,
+            "seq_out": 49,
+            "text_preview": "The image provided is a solid, uniform shade of li",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 48,
+            "seq_out": 20,
+            "text_preview": "The image provided is a solid white color. There a",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 49,
+            "seq_out": 43,
+            "text_preview": "The image shows a solid black background with no d",
+            "empty": false,
+            "short": false
+          }
+        ]
+      },
+      {
+        "label": "W8A16",
+        "model": "wanzhenchn/Qwen2.5-VL-7B-Instruct-gptqmodel-int8",
+        "n_runs": 50,
+        "nan_count": 0,
+        "empty_count": 0,
+        "short_count": 0,
+        "nan_rate": 0.0,
+        "raw_sample": [
+          {
+            "run": 0,
+            "seq_out": 64,
+            "text_preview": "The image is a simple, minimalist design featuring",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 1,
+            "seq_out": 32,
+            "text_preview": "The image you provided is a solid black square wit",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 2,
+            "seq_out": 55,
+            "text_preview": "The image provided is a solid black square with no",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 3,
+            "seq_out": 21,
+            "text_preview": "The image you provided is a solid gray color. Ther",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 4,
+            "seq_out": 51,
+            "text_preview": "The image shows a solid gray background with no di",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 45,
+            "seq_out": 64,
+            "text_preview": "The image is a solid, uniform shade of dark gray. ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 46,
+            "seq_out": 32,
+            "text_preview": "The image you provided is a solid black square wit",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 47,
+            "seq_out": 55,
+            "text_preview": "The image provided is a solid gray square with no ",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 48,
+            "seq_out": 15,
+            "text_preview": "The image is a solid white rectangle with no addit",
+            "empty": false,
+            "short": false
+          },
+          {
+            "run": 49,
+            "seq_out": 58,
+            "text_preview": "The image shows a solid black background with no d",
+            "empty": false,
+            "short": false
+          }
+        ]
+      }
+    ],
+    "interpretation": "BF16/W4A16/W8A16 expected nan_count=0; FP16 may produce nan on long VLM sequences"
+  },
+  "metadata": {
+    "timestamp": "2026-05-11T16:49:18.103096Z",
+    "git_commit": "f4d1525",
+    "platform": "vLLM 0.7.3 TP=1"
+  }
+}
