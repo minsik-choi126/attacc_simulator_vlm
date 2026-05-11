@@ -1,0 +1,117 @@
+{
+  "experiment": "capacity_regime",
+  "config": {
+    "platform": "H100 80 GB simulator capacity breakdown",
+    "note": "max_batch_estimate from get_capacity_breakdown()"
+  },
+  "results": {
+    "rows": [
+      {
+        "model": "Qwen3-VL-4B",
+        "deployment": "S1 (TP=1)",
+        "lin": 569,
+        "weight_per_gpu_mib": 6930.0,
+        "kv_per_gpu_mib": 97.88,
+        "available_kv_mib": 74989.9,
+        "max_batch_estimate": 766
+      },
+      {
+        "model": "Qwen3-VL-4B",
+        "deployment": "S2 (TP=2)",
+        "lin": 569,
+        "weight_per_gpu_mib": 3465.0,
+        "kv_per_gpu_mib": 48.94,
+        "available_kv_mib": 78454.9,
+        "max_batch_estimate": 1603
+      },
+      {
+        "model": "Qwen2.5-VL-7B",
+        "deployment": "S1 (TP=1)",
+        "lin": 704,
+        "weight_per_gpu_mib": 12446.0,
+        "kv_per_gpu_mib": 45.45,
+        "available_kv_mib": 69473.9,
+        "max_batch_estimate": 1528
+      },
+      {
+        "model": "Qwen2.5-VL-7B",
+        "deployment": "S2 (TP=2)",
+        "lin": 704,
+        "weight_per_gpu_mib": 6223.0,
+        "kv_per_gpu_mib": 22.72,
+        "available_kv_mib": 75696.9,
+        "max_batch_estimate": 3331
+      },
+      {
+        "model": "InternVL3-8B-hf",
+        "deployment": "S1 (TP=1)",
+        "lin": 384,
+        "weight_per_gpu_mib": 12446.0,
+        "kv_per_gpu_mib": 27.95,
+        "available_kv_mib": 69473.9,
+        "max_batch_estimate": 2486
+      },
+      {
+        "model": "InternVL3-8B-hf",
+        "deployment": "S2 (TP=2)",
+        "lin": 384,
+        "weight_per_gpu_mib": 6223.0,
+        "kv_per_gpu_mib": 13.97,
+        "available_kv_mib": 75696.9,
+        "max_batch_estimate": 5417
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "deployment": "S1 (TP=1)",
+        "lin": 704,
+        "weight_per_gpu_mib": 12352.0,
+        "kv_per_gpu_mib": 415.5,
+        "available_kv_mib": 69567.8,
+        "max_batch_estimate": 167
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "deployment": "S2 (TP=2)",
+        "lin": 704,
+        "weight_per_gpu_mib": 6176.0,
+        "kv_per_gpu_mib": 207.75,
+        "available_kv_mib": 75743.8,
+        "max_batch_estimate": 364
+      },
+      {
+        "model": "LLaVA-Next-Mistral-7B",
+        "deployment": "S1 (TP=1)",
+        "lin": 3008,
+        "weight_per_gpu_mib": 13312.0,
+        "kv_per_gpu_mib": 391.88,
+        "available_kv_mib": 68607.4,
+        "max_batch_estimate": 175
+      },
+      {
+        "model": "LLaVA-Next-Mistral-7B",
+        "deployment": "S2 (TP=2)",
+        "lin": 3008,
+        "weight_per_gpu_mib": 6656.0,
+        "kv_per_gpu_mib": 195.94,
+        "available_kv_mib": 75263.4,
+        "max_batch_estimate": 384
+      }
+    ],
+    "interpretation": {
+      "capacity_bound": [
+        "LLaVA-1.5-7B",
+        "LLaVA-Next-Mistral-7B"
+      ],
+      "throughput_bound": [
+        "Qwen3-VL-4B",
+        "Qwen2.5-VL-7B",
+        "InternVL3-8B-hf"
+      ]
+    }
+  },
+  "metadata": {
+    "timestamp": "2026-05-11T03:28:09.536530Z",
+    "git_commit": "9045947",
+    "platform": "H100x1 driver 535-compatible"
+  }
+}

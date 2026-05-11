@@ -1,6 +1,8 @@
 import subprocess
 import math
 import os
+import pathlib
+import sys
 from src.config import *
 from src.model import *
 from src.type import *
@@ -23,15 +25,15 @@ class Ramulator:
         self.df = pd.DataFrame() if pd is not None else None
         self.ramulator_dir = ramulator_dir
         self.output_log = output_log
+        self.max_L = max_L
         if pd is None:
             self.df = None
         elif os.path.exists(output_log):
             self.df = pd.read_csv(output_log)
             if 'max_L' not in self.df.columns:
-                self.df = pd.DataFrame()
+                self.df.insert(1, 'max_L', self.max_L)
         self.tCK = 0.769  # ns
         self.num_hbm = num_hbm
-        self.max_L = max_L
         self.nhead = modelinfos.get('num_kv_heads', modelinfos.get('num_heads'))
         self.dhead = modelinfos['dhead']
         self.fast_mode = fast_mode
@@ -92,12 +94,7 @@ class Ramulator:
         else:
             df = self.df
         if 'max_L' not in df.columns:
-            columns = [
-                'L', 'max_L', 'nhead', 'dhead', 'dbyte', 'pim_type',
-                'power_constraint', 'cycle', 'mac', 'softmax', 'mvgb',
-                'mvsb', 'wrgb'
-            ]
-            df = pd.DataFrame(columns=columns)
+            df.insert(1, 'max_L', self.max_L)
         new_df = pd.DataFrame(columns=df.columns)
         new_df.loc[0] = log
         df = pd.concat([df, new_df]).drop_duplicates()
@@ -111,40 +108,56 @@ class Ramulator:
         ) if not pim_type == PIMType.BA else "bank"
         trace_file = os.path.join(self.ramulator_dir, file_name + '.trace')
 
-        trace_exc = os.path.join(
-            self.ramulator_dir,
-            "trace_gen/gen_trace_attacc_{}.py".format(pim_type_name))
-        trace_args = "--dhead {} --nhead {} --seqlen {} --maxlen {} --dbyte {} --output {}".format(
-            self.dhead, num_ops_per_hbm, l, self.max_L, dbyte, trace_file)
-
-        gen_trace_cmd = f"python {trace_exc} {trace_args}"
+        root = pathlib.Path(__file__).resolve().parents[1]
+        trace_candidates = [
+            pathlib.Path(self.ramulator_dir) / "trace_gen" /
+            "gen_trace_attacc_{}.py".format(pim_type_name),
+            root / "pim_ramulator_src" / "trace_gen" /
+            "gen_trace_attacc_{}.py".format(pim_type_name),
+        ]
+        trace_exc = next((p for p in trace_candidates if p.exists()), None)
+        if trace_exc is None:
+            raise FileNotFoundError(
+                "Missing trace generator for PIM mode {}".format(
+                    pim_type_name))
 
         # generate trace
-        try:
-            os.system(gen_trace_cmd)
-        except Exception as e:
-            print(f"Error: {e}")
+        subprocess.run([
+            sys.executable, str(trace_exc),
+            "--dhead", str(self.dhead),
+            "--nhead", str(num_ops_per_hbm),
+            "--seqlen", str(l),
+            "--maxlen", str(self.max_L),
+            "--dbyte", str(dbyte),
+            "--output", trace_file,
+        ], check=True, capture_output=True, text=True)
 
         # run ramulator
-        ramulator_file = os.path.join(self.ramulator_dir, "ramulator2")
-        run_ramulator_cmd = f"{ramulator_file} -f {yaml_file}"
+        ramulator_candidates = [
+            pathlib.Path(self.ramulator_dir) / "ramulator2",
+            pathlib.Path(self.ramulator_dir) / "ramulator2.exe",
+            pathlib.Path(self.ramulator_dir) / "build" / "ramulator2",
+            pathlib.Path(self.ramulator_dir) / "build" / "ramulator2.exe",
+        ]
+        ramulator_file = next((p for p in ramulator_candidates if p.exists()),
+                              None)
+        if ramulator_file is None:
+            raise FileNotFoundError(
+                "Missing ramulator2 executable under {}".format(
+                    self.ramulator_dir))
         try:
-            result = subprocess.run(run_ramulator_cmd,
+            result = subprocess.run([str(ramulator_file), "-f", yaml_file],
+                                    check=True,
                                     stdout=subprocess.PIPE,
-                                    text=True,
-                                    shell=True)
+                                    stderr=subprocess.PIPE,
+                                    text=True)
             output_lines = result.stdout.strip().split('\n')
-            output_list = [line.strip() for line in output_lines]
-        except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")
-            assert 0
-
-        # remove trace
-        rm_trace_cmd = f"rm {trace_file}"
-        try:
-            os.system(rm_trace_cmd)
-        except Exception as e:
-            print(f"Error: {e}")
+            output_list = [
+                line.strip() for line in output_lines if line.strip()
+            ]
+        finally:
+            if os.path.exists(trace_file):
+                os.remove(trace_file)
 
         # parsing output
         n_cmds = {"mac": 0, "sfm": 0, "mvgb": 0, "mvsb": 0, "wrgb": 0}
@@ -162,6 +175,9 @@ class Ramulator:
                 n_cmds["wrgb"] += int(line.split()[-1])
             elif "memory_system_cycles" in line:
                 cycle += int(line.split()[-1])
+
+        if cycle == 0:
+            raise RuntimeError("Ramulator produced no memory_system_cycles")
 
         out = [
             cycle, n_cmds["mac"], n_cmds["sfm"], n_cmds["mvgb"], n_cmds["mvsb"],
@@ -188,15 +204,12 @@ class Ramulator:
             yaml_file = os.path.join(self.ramulator_dir, file_name + '.yaml')
             self.make_yaml_file(yaml_file, file_name, power_constraint)
 
-            result = self.run_ramulator(pim_type, l, num_ops_per_hbm,
-                                        layer.dbyte, yaml_file, file_name)
-
-            # remove trace
-            rm_yaml_cmd = f"rm {yaml_file}"
             try:
-                os.system(rm_yaml_cmd)
-            except Exception as e:
-                print(f"Error: {e}")
+                result = self.run_ramulator(pim_type, l, num_ops_per_hbm,
+                                            layer.dbyte, yaml_file, file_name)
+            finally:
+                if os.path.exists(yaml_file):
+                    os.remove(yaml_file)
 
             # post processing
             # 32: read granularity

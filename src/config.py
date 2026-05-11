@@ -404,6 +404,12 @@ def make_model_config(name, dtype):
             'ffn_type': 'gated' if 'LLAMA' in name else 'standard',
             'activation': 'silu' if 'LLAMA' in name else 'gelu',
         }
+        llama_ff_intermediate = {
+            'LLAMA-7B': 11008,
+            'LLAMA-65B': 22016,
+        }
+        if name in llama_ff_intermediate:
+            config['ff_intermediate'] = llama_ff_intermediate[name]
     else:
         config = dict(entry)
         config['name'] = name
