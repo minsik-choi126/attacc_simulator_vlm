@@ -353,7 +353,9 @@ Do this before using the results in paper tables:
   measurement stack.
 - TP=2 vLLM measurements are deferred to a driver 545+ node because of the
   known NCCL/driver issue on this stack.
-- FP8 dynamic quantization is not included in the main claims on driver 535.
+- Quantization scope is **W4A16 (AWQ) and W8A16 (GPTQ-Int8)** only -- both
+  use public Hugging Face checkpoints. FP8 (Hopper transformer engine) is
+  out of scope for this paper.
 
 ---
 
