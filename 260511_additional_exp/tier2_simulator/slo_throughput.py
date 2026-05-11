@@ -4,7 +4,7 @@ Sweep batch from 1 -> 64. For each batch, use simulator decode latency
 (`g_time`) as ITL in ms/token. Plot throughput (tokens/sec) vs per-token
 latency SLO.
 
-For each VLM x (dgx baseline, dgx-attacc S1, dgx-attacc S2-sim):
+For each VLM x (dgx baseline, dgx-attacc A1):
   - For SLO ∈ {30, 50, 70, 100, 150 ms}, find max batch that stays below SLO
   - Throughput = batch * 1000 / ITL_ms tokens/sec
 """
@@ -25,6 +25,10 @@ MODELS = [
 BATCHES = [1, 2, 4, 8, 16, 32, 64]
 LOUT = 128
 SLO_LIST_MS = [30, 50, 70, 100, 150, 200]
+SYSTEMS = [("dgx", 1, "GPU only"),
+           ("dgx-attacc", 1, "AttAcc A1")]
+# Future hook, intentionally not used in the first paper pass.
+FUTURE_SYSTEMS = [("dgx-attacc", 2, "AttAcc A2")]
 
 
 def measure(model, img, lin, batch, system, ngpu=1):
@@ -65,9 +69,7 @@ def main():
     for model, img, lin in MODELS:
         per_model = {"model": model, "image_size": img, "lin": lin,
                      "systems": []}
-        for system, ngpu, label in [("dgx", 1, "GPU only"),
-                                       ("dgx-attacc", 1, "AttAcc S1"),
-                                       ("dgx-attacc", 2, "AttAcc S2")]:
+        for system, ngpu, label in SYSTEMS:
             curve = []
             for b in BATCHES:
                 r = measure(model, img, lin, b, system, ngpu)
@@ -91,7 +93,9 @@ def main():
     save("slo_throughput",
          {"batches": BATCHES, "lout": LOUT,
           "slo_per_token_ms": SLO_LIST_MS,
-          "platform": "A6000 simulator A1 + A2"},
+          "deployment_scope": "A1 TP=1 only",
+          "future_hooks": [label for _, _, label in FUTURE_SYSTEMS],
+          "platform": "A6000 simulator A1"},
          {"models": results})
     print("Done")
 

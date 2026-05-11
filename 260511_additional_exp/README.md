@@ -7,17 +7,16 @@ experiments and real measurement experiments.
 Target stack:
 
 - Simulator: repo-root `main.py` + Ramulator2-backed AttAcc PIM path.
-  Default deployment is **A6000 / NVLink Bridge**; A1 (TP=1) / A2 (TP=2)
-  scenarios are both produced from the same matrix. Override via
-  `--gpu` / `--interface` / `--ngpu` / `--tp` for other devices.
+  Default deployment is **A6000 / NVLink Bridge / A1 (TP=1)**. The A2
+  (TP=2) hook is kept in code (`--tp 2`) but is **out of scope for the
+  first paper pass**; revisit after A1 results are stable.
 - Measurement: vLLM 0.7.3 stack (CUDA 12.x, driver 535-compatible).
-  All scripts default to **`--tp 1`** (single GPU). For A2 measurements on
-  A6000 x 2, pass `--tp 2` explicitly — currently treated as the test /
-  validation path, not the default.
+  All scripts default to **`--tp 1`** and the first-pass plan runs only
+  TP=1. `--tp 2` is left as a future-validation hook, not a default flow.
 - Output: JSON files under `260511_additional_exp/results/`.
 
-See [`RUNNING_ON_A6000x2.md`](RUNNING_ON_A6000x2.md) for the full A6000 x 2
-deployment guide (hardware comparison, A1/A2 scenarios, pass criteria).
+See [`RUNNING_ON_A6000x2.md`](RUNNING_ON_A6000x2.md) for the A6000 deployment
+guide. A1 is the current TP=1 scope; A2 remains a future hook.
 
 The scripts are intended to fail loudly.  If a simulator subprocess fails,
 `shared/sim_runner.py` raises by default and the top-level script exits
@@ -55,8 +54,8 @@ Notes:
 
 Required:
 
-- GPU node with `nvidia-smi` (default deployment: A6000 x 1 or A6000 x 2;
-  H100 / A100 also works — only the platform metadata label changes).
+- GPU node with `nvidia-smi` (default deployment: A6000 x 1 / TP=1;
+  H100 / A100 also work if explicitly configured).
 - `vllm==0.7.3`, `torch==2.5.1`, `transformers==4.49.0`, `pillow`.
 - Hugging Face cache/access for the selected model checkpoints.
 
@@ -65,8 +64,9 @@ It does not install vLLM or download models.
 
 ### Shell
 
-`run_all_h100x1.sh` requires bash.  On Windows, run it through WSL/Git Bash or
-run the Python scripts directly from PowerShell.
+`run_all_h100x1.sh` is a legacy filename; it now drives the A6000 A1 / TP=1
+default flow. It requires bash. On Windows, run it through WSL/Git Bash or run
+the Python scripts directly from PowerShell.
 
 ---
 
@@ -83,7 +83,7 @@ run the Python scripts directly from PowerShell.
 ├── tier1_simulator/
 │   ├── r2_paper_repro.py        # AttAcc GPT-175B paper-repro gate
 │   ├── upstream_baseline.py     # Legacy LLM simulator regression sweep
-│   ├── multi_vlm_full_sim.py    # VLM GPU-only vs AttAcc S1 matrix
+│   ├── multi_vlm_full_sim.py    # VLM GPU-only vs AttAcc A1 matrix
 │   ├── ablation_contribution.py # Main modification ablation table
 │   └── vit_recalibration.py     # Measured TTFT vs simulated ViT fit
 │
@@ -137,8 +137,8 @@ Tier 2 simulator sweep:
 bash run_all_h100x1.sh --tier 2sim
 ```
 
-Real-GPU measurements (default A6000 x 1 with `--tp 1`; add `--tp 2`
-for A6000 x 2 / TP=2 runs):
+Real-GPU measurements (default A6000 x 1 with `--tp 1` — current scope).
+`--tp 2` hook 은 코드에 남아 있지만 1차 실험에서는 돌리지 않음:
 
 ```bash
 HF_HOME=/your/cache python tier2_measurement/w4a16_awq_measure.py
@@ -229,16 +229,16 @@ them for A100a paper reproduction).
 |---|---|---|---|
 | `tier2_simulator/chunk_size_sweep.py` | `results/chunk_size_sweep.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B; chunks 4/16/64/128/256/512/1024/full | Chunked prefill sensitivity. |
 | `tier2_simulator/routing_mode_compare.py` | `results/routing_mode_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B; conservative/optimistic/list routing | Routing policy sensitivity. |
-| `tier2_simulator/eff_lat_ablation.py` | `results/eff_lat_ablation.json` | Five VLMs; reports A1/A2 effective latency factors and A1 simulator latency | Documents §6.1 caveat. Full on/off ablation still needs code patch. |
-| `tier2_simulator/nvlink_compare.py` | `results/nvlink_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; NVLINK_BRIDGE plus NVLink3/4 references; ngpu 1/2 | Simulator-only A2/NVLink comparison. |
+| `tier2_simulator/eff_lat_ablation.py` | `results/eff_lat_ablation.json` | Five VLMs; reports A1 effective latency caveat and A1 simulator latency | Documents §6.1 caveat. Full on/off ablation still needs code patch. |
+| `tier2_simulator/nvlink_compare.py` | `results/nvlink_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; A6000 NVLINK_BRIDGE; ngpu 1 | Simulator-only A1 interface sanity. NVLink3/4 and TP=2 hooks are kept for later. |
 | `tier2_simulator/roofline_per_vlm.py` | `results/roofline_per_vlm.json` | Five VLMs; prefill `L=569` and decode `L=1`; qkv/score/context/ffn AI | PIM target justification. Does not require Ramulator2. |
-| `tier2_simulator/capacity_regime.py` | `results/capacity_regime.json` | Five VLMs; A1/A2 capacity breakdown (A6000 48 GB) | Capacity-bound vs throughput-bound argument. Does not require Ramulator2. |
+| `tier2_simulator/capacity_regime.py` | `results/capacity_regime.json` | Five VLMs; A1 capacity breakdown (A6000 48 GB) | Capacity-bound vs throughput-bound argument. A2 hook is kept for later. Does not require Ramulator2. |
 | `tier2_simulator/pim_mode_compare.py` | `results/pim_mode_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; bank/bg/buffer | PIM organization sensitivity. |
 | `tier2_simulator/slo_throughput.py` | `results/slo_throughput.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; batches 1/2/4/8/16/32/64; SLO 30/50/70/100/150/200 ms/token | SLO-throughput curve. |
 | `tier2_simulator/sensitivity_sweep.py` | `results/sensitivity_sweep.json` | Qwen3-VL-4B; batch 1/4/8/16/32 x `L` 569/1024/2048 x chunk 16/64/256/512 x PIM layer count 0/11/22/36 | Long heatmap grid, 240 simulator runs. |
 | `tier2_simulator/w4a16_pim_sim.py` | `results/w4a16_pim_sim.json` | Five VLMs; batches 1/4/8; analytical projection of FC weight-byte ratio for BF16 / W8A16 / W4A16 over `dgx` and `dgx-attacc` | Sim panel of paper Fig.8 (quant x PIM compound gain); validate against measured w4a16/w8a16 runs. |
 
-### Tier 2: real-GPU measurement (A6000 default; --tp 1 single GPU, --tp 2 A6000 x 2)
+### Tier 2: real-GPU measurement (A6000 default, TP=1 only — current scope)
 
 | Step / script | Output JSON | Default run | Success / use |
 |---|---|---|---|
@@ -286,8 +286,8 @@ bash run_all_h100x1.sh --tier 1
 bash run_all_h100x1.sh --tier 2sim
 ```
 
-Finally run measurement on the GPU node (A6000 by default; pass `--tp 2`
-to the individual scripts for A6000 x 2 / TP=2 runs):
+Finally run measurement on the GPU node (A6000 default, `--tp 1`).
+A2 / TP=2 runs are deferred to a later pass:
 
 ```bash
 bash run_all_h100x1.sh --tier meas
@@ -348,9 +348,9 @@ Do this before using the results in paper tables:
 | SLO throughput | `tier2_simulator/slo_throughput.py` | Uses per-token ITL SLO. |
 | Roofline | `tier2_simulator/roofline_per_vlm.py` | Does not require Ramulator2. |
 | Capacity regime | `tier2_simulator/capacity_regime.py` | Does not require Ramulator2. |
-| Quantization (measured) | `tier2_measurement/w4a16_awq_measure.py`, `tier2_measurement/w8a16_gptq_measure.py` | Real H100/vLLM required. |
+| Quantization (measured) | `tier2_measurement/w4a16_awq_measure.py`, `tier2_measurement/w8a16_gptq_measure.py` | Real GPU/vLLM required. |
 | Quantization x PIM (sim panel) | `tier2_simulator/w4a16_pim_sim.py` | Analytical projection; validate against measured AWQ/GPTQ JSONs. |
-| Image/prompt sensitivity | `tier2_measurement/image_size_sweep.py`, `tier2_measurement/prompt_pattern_matrix.py` | Real H100/vLLM required. |
+| Image/prompt sensitivity | `tier2_measurement/image_size_sweep.py`, `tier2_measurement/prompt_pattern_matrix.py` | Real GPU/vLLM required. |
 | Sim vs measured overlay | `tier2_measurement/vllm_bf16_baseline_aligned.py` paired with `tier1_simulator/multi_vlm_full_sim.py` | Matches `lin/lout/image_size/batch` 1-to-1. Qwen3-VL / InternVL3 deferred to driver 545+. |
 
 ---
@@ -391,8 +391,8 @@ the correct model-family image placeholder.
 
 ## Remaining Measurement Gaps
 
-The scripts above are enough to collect the core simulator and synthetic H100
-measurement evidence for the VLM + PIM paper.  They are not the complete set of
+The scripts above are enough to collect the core simulator and A6000 A1 / TP=1
+measurement evidence for the VLM + PIM paper. They are not the complete set of
 all possible paper-grade measurements.
 
 Before writing final claims, verify whether the following are already covered
@@ -402,8 +402,8 @@ by existing `results/` or external logs.  If not, add them:
 |---|---|---|
 | Real workload VLM latency | Generalization beyond dummy gray images / synthetic prompts | Run the existing repo-level MMMU-Pro measurement scripts, e.g. `tests/r9_mmmu_pro_measurement.py`, for Qwen2.5-VL and LLaVA family. |
 | Concurrent serving contention | Serving/SLO claims under request overlap | Run the existing repo-level concurrent serving script, e.g. `tests/r10_concurrent_serving.py`, or state that SLO-throughput is simulator-only. |
-| BF16 baseline matched to quantized runs | W4A16/W8A16 speedup vs BF16 on identical prompt/image setup | Reuse existing BF16 H100 JSON only if prompt/image/`lout` match; otherwise rerun a BF16 baseline. |
-| TP=2 real measurement | S2 real-system validation | Requires driver 545+ or a node where vLLM TP=2/NCCL works. |
+| BF16 baseline matched to quantized runs | W4A16/W8A16 speedup vs BF16 on identical prompt/image setup | Reuse existing BF16 JSON only if prompt/image/`lout` match; otherwise rerun a BF16 baseline. |
+| TP=2 real measurement | Optional later validation outside the first paper pass | Requires driver 545+ or a node where vLLM TP=2/NCCL works. |
 | Full `A_no_efflat` / `A_no_deepstack` ablation | Complete component-attribution figure | Patch simulator toggles and rerun `tier1_simulator/ablation_contribution.py`. |
 | `DGX_Large` paper baseline | Direct comparison to AttAcc paper's 2.48x / 2.59x large-baseline targets | Add a distinct `DGX_Large` system model or mark those paper targets as skipped. |
 
@@ -414,7 +414,7 @@ Minimum paper-ready set for the VLM + PIM results section:
 - Ablation table with clearly marked code-patch-only entries.
 - Chunk/routing/PIM-mode/sensitivity sweeps.
 - Roofline and capacity-regime justification.
-- H100 BF16 measurement calibration plus quantization/image/prompt sensitivity.
+- A6000 A1 BF16 measurement calibration plus quantization/image/prompt sensitivity.
 - Real-workload latency evidence, unless the paper explicitly scopes results to
   synthetic VLM prompts.
 
@@ -460,7 +460,7 @@ copy the script to a sandbox name and adjust the constant lists at the top
 `tier1_simulator/vit_recalibration.py` compares the simulator's prefill
 latency against a hard-coded `MEASURED` dict.  The dict currently uses
 results from the previous campaign (MMMU-Pro real data, n=32).  When a new
-H100 measurement campaign is run, refresh as follows:
+A6000 A1 / TP=1 measurement campaign is run, refresh as follows:
 
 1. Run the measurement scripts you trust (e.g.
    `tier2_measurement/w4a16_awq_measure.py`, an MMMU-Pro script, etc.).

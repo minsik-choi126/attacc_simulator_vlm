@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Master driver — runs all 260511 additional experiments on H100 × 1.
+# Master driver — runs all 260511 additional experiments.
+# Legacy filename; current default is A6000 A1 / TP=1.
 #
 # Usage:
 #   bash run_all_h100x1.sh             # run everything
@@ -77,12 +78,12 @@ if [[ "$TIER" == "all" || "$TIER" == "2" || "$TIER" == "2sim" ]]; then
 fi
 
 # ============================================================
-# Tier 2 — Real H100 measurement (vLLM 0.7.3 + driver 535 compatible)
+# Tier 2 — Real GPU measurement (A6000 A1 / TP=1 default)
 # ============================================================
 if [[ "$TIER" == "all" || "$TIER" == "2" || "$TIER" == "meas" ]]; then
     if have_gpu; then
         echo
-        echo "###############  Tier 2 — Measurement (H100)  ###############"
+        echo "###############  Tier 2 — Measurement (A6000 A1 / TP=1)  ###############"
         run_step w4a16_awq_measure       python "$SCRIPT_DIR/tier2_measurement/w4a16_awq_measure.py"
         run_step w8a16_gptq_measure      python "$SCRIPT_DIR/tier2_measurement/w8a16_gptq_measure.py"
         run_step quant_stability_test    python "$SCRIPT_DIR/tier2_measurement/quant_stability_test.py" --n_runs 50

@@ -1,7 +1,8 @@
-# Running Guide: RTX A6000 x 2
+# Running Guide: RTX A6000
 
-본 fork의 실험을 RTX A6000 x 2 환경에서 돌리는 step-by-step 가이드.
-H100 deployment guide와의 차이점만 정리.
+본 fork의 실험을 RTX A6000 환경에서 돌리는 step-by-step 가이드.
+현재 1차 paper pass는 A1 (A6000 x 1 / TP=1)만 사용하고, A2/TP=2는
+future hook으로만 유지한다.
 
 ---
 
@@ -26,8 +27,8 @@ H100 deployment guide와의 차이점만 정리.
   더 커짐** (memory-bound 부분이 더 dominant)
 - AttAcc PIM은 여전히 HBM3 기반 hypothetical 가속기로 simulator에서 모델링.
   GPU baseline만 A6000으로 교체
-- TP=2가 driver 535에서도 NCCL 정상 동작 -> **S2 measurement도 실측 가능**
-  (H100 + driver 535에서 못 했던 측정)
+- TP=2 hook은 남겨 두되, 1차 paper pass는 **TP=1만** 사용.
+  A2/S2 measurement는 추후 NCCL stress validation 이후 재검토.
 
 ---
 
@@ -141,10 +142,16 @@ overhead가 1/5 정도로 underestimate됨.)
 
 ## 3. Deployment Scenarios for A6000 x 2
 
-| Scenario | GPUs | TP | NUM_ATTACC | NUM_HBM | Inter-GPU | PIM aggregate |
-|---|---|---|---|---|---|---|
-| **A1: A6000 x 1** | 1 | 1 | 1 | 5 | none | 18.1 TB/s |
-| **A2: A6000 x 2** | 2 | 2 | 2 | 5 | NVLink Bridge 112 GB/s | 36.2 TB/s |
+| Scenario | GPUs | TP | NUM_ATTACC | NUM_HBM | Inter-GPU | PIM aggregate | 현재 스코프 |
+|---|---|---|---|---|---|---|---|
+| **A1: A6000 x 1** | 1 | 1 | 1 | 5 | none | 18.1 TB/s | ✅ 1차 paper 실험 |
+| A2: A6000 x 2 | 2 | 2 | 2 | 5 | NVLink Bridge 112 GB/s | 36.2 TB/s | ⏸ 추후 검토 (TP=2 stress validation) |
+
+> **현재 결정 (2026-05-12):** 1차 실험은 **A1 (TP=1) 만** 돌리기로 함.
+> A2 / TP=2 행은 simulator 와 measurement script 모두에서 hook 만 살려
+> 두고 (코드 패치는 이미 들어가 있음), 결과 채택은 A1 가 paper-ready 가
+> 된 뒤로 미룬다. 본 문서에서 A2 / TP=2 관련 명령은 *참고용*이며 1차
+> 실험 흐름에서는 실행하지 않아도 된다.
 
 PIM aggregate는 H100 시나리오와 동일 (PIM은 hypothetical HBM3 모듈이므로
 host GPU와 무관). GPU baseline의 BW/FLOPS가 약해지는 만큼 **PIM relative
@@ -185,7 +192,7 @@ python -c "import vllm; print('vllm OK')"
 test -x ramulator2/ramulator2 && echo "ramulator OK"
 ```
 
-NCCL TP=2 sanity check (A6000 x 2 NVLink Bridge 정상 동작 확인):
+Future-only NCCL TP=2 sanity check (A6000 x 2 NVLink Bridge 정상 동작 확인):
 ```bash
 python -c "
 import torch
@@ -241,7 +248,10 @@ python tier2_simulator/w4a16_pim_sim.py
 python tier2_simulator/sensitivity_sweep.py       # 240 configs, 가장 김
 ```
 
-### 5-3. Tier 2 measurement (A6000 x 2, vLLM 0.7.3)
+### 5-3. Tier 2 measurement (A6000, **TP=1 only — 현재 스코프**)
+
+기본 흐름은 모두 `--tp 1` (A1) 로만 돌린다. 명시적으로 인자 안 넘기면
+default 가 1 이라 그대로 진행하면 됨.
 
 ```bash
 HF_HOME=/your/cache python tier2_measurement/w4a16_awq_measure.py \
@@ -260,15 +270,11 @@ HF_HOME=/your/cache python tier2_measurement/prompt_pattern_matrix.py \
 
 HF_HOME=/your/cache python tier2_measurement/vllm_bf16_baseline_aligned.py \
     --repeats 3
-
-# A6000 x 2 TP=2 BF16 baseline (driver 535 + NVLink Bridge 조합에서
-# H100 stack이 못 했던 측정. --tp 2 를 명시적으로 넘겨 줘야 한다.
-# 기본값은 --tp 1; A2 시나리오는 항상 --tp 2 로 명시.)
-HF_HOME=/your/cache python tier2_measurement/vllm_bf16_baseline_aligned.py \
-    --models Qwen/Qwen2.5-VL-7B-Instruct \
-    --tp 2 \
-    --repeats 3
 ```
+
+> **TP=2 (A2) 는 현재 스코프 밖**. 코드에는 `--tp 2` hook 이 살아 있지만
+> 1차 paper 실험에서는 돌리지 않는다. 추후 NCCL stress + 분산 capture
+> validation 이 끝난 뒤 재검토.
 
 ---
 
@@ -289,10 +295,13 @@ A100a / H100 에서 돌리고 싶을 때는 `sr.run(..., gpu="H100", interface="
 
 ### 6-2. Measurement scripts (`tier2_measurement/`)
 
-6개 스크립트 모두 `--tp` argparse 인자를 가진다 (기본 `1`). A6000 x 2
-실측 시에는 다음과 같이 호출:
+6개 스크립트 모두 `--tp` argparse 인자를 가진다 (기본 `1`). 1차 실험은
+모두 default (TP=1) 로 돌린다.
+
+추후 TP=2 검토 시 참고용 호출 패턴 (현재 스코프 밖):
 
 ```bash
+# NOT in scope for first paper pass — keep for future TP=2 validation only.
 python tier2_measurement/vllm_bf16_baseline_aligned.py --tp 2 --repeats 3
 python tier2_measurement/w4a16_awq_measure.py            --tp 2 --repeats 4
 python tier2_measurement/w8a16_gptq_measure.py           --tp 2 --repeats 4
@@ -300,10 +309,6 @@ python tier2_measurement/image_size_sweep.py             --tp 2
 python tier2_measurement/prompt_pattern_matrix.py        --tp 2
 python tier2_measurement/quant_stability_test.py         --tp 2
 ```
-
-> `--tp 2` 는 현재 시점에서는 *test / validation* 용도이며, 기본 측정
-> 흐름은 `--tp 1` 로 잡혀 있다. TP=2 결과의 paper 채택 여부는 NCCL
-> 안정성 + 분산 capture 일치 여부 확인 후 결정.
 
 ---
 
@@ -324,16 +329,16 @@ A6000 baseline일 때 simulator 결과는 더 큰 speedup 예상 (GPU가 느리�
 권장 절차:
 1. A6000 deployment 적용한 simulator로 corrected E2 측정
 2. 측정된 simulator gain을 paper target으로 documented (예: "A1 baseline:
-   1.8-2.5x ±20%, A2: 1.7-2.4x ±20%" — 실측 후 narrow)
+   1.8-2.5x ±20%" — 실측 후 narrow)
 
 ### 7-3. eff_lat 표
 
 `paper sec.6.1` eff_lat은 model의 n_kv 와 num_hbm만 사용. GPU type 무관.
 sec.0.4 표 그대로 유효:
 ```
-Qwen3-VL-4B (n_kv=8): A1 0.80 / A2 0.57
-Qwen2.5-VL-7B (n_kv=4): A1 0.57 / A2 0.29
-LLaVA-1.5-7B (n_kv=32): A1 0.91 / A2 0.80
+Qwen3-VL-4B (n_kv=8): A1 0.80
+Qwen2.5-VL-7B (n_kv=4): A1 0.57
+LLaVA-1.5-7B (n_kv=32): A1 0.91
 ```
 
 ### 7-4. Capacity regime (변경 거의 없음)
@@ -344,7 +349,6 @@ LLaVA-1.5-7B (n_kv=32): A1 0.91 / A2 0.80
 | 모델 | H100 80GB max_batch | A6000 48GB max_batch (대략) |
 |---|---|---|
 | Qwen3-VL-4B S1 | ~875 | ~520 |
-| Qwen3-VL-4B S2 | ~1850 | ~1100 |
 | LLaVA-1.5-7B S1 | ~184 | ~110 |
 | LLaVA-Next S1 | ~170 | ~100 |
 
@@ -373,14 +377,7 @@ bash run_all_h100x1.sh --tier 2sim  # 모든 simulator 분석
 # 4. Tier 2 measurement (TP=1)
 HF_HOME=/your/cache bash run_all_h100x1.sh --tier meas
 
-# 5. TP=2 measurement (A6000 x 2, 신규)
-# - vllm_bf16_baseline_aligned.py에 --tp 인자 추가 후
-HF_HOME=/your/cache python tier2_measurement/vllm_bf16_baseline_aligned.py \
-    --tp 2 --repeats 3
-HF_HOME=/your/cache python tier2_measurement/w4a16_awq_measure.py \
-    --tp 2 --repeats 4   # 동일 패턴으로 인자 추가 후
-
-# 6. 결과 종합
+# 5. 결과 종합
 ls results/*.json | head -30
 cat results/r2_paper_repro.json | python -m json.tool | head -50
 ```
@@ -395,9 +392,9 @@ cat results/r2_paper_repro.json | python -m json.tool | head -50
 - **AttAcc PIM aggregate BW는 변하지 않음** (18.1 TB/s for 1 AttAcc),
   단 GPU baseline이 약해 **relative gain은 H100보다 큼** -- paper에서
   "lower-tier GPU에서 AttAcc 이득이 더 큼" 식 narrative 가능.
-- **NVLink Bridge 112 GB/s vs NVLink4 900 GB/s** -- TP=2 comm 비중이
-  훨씬 큼. eff_lat S2 0.29 (Qwen2.5-VL) 같은 시나리오에서 NVLink Bridge
-  bottleneck 추가 영향 있음. nvlink_compare.py 결과로 quantify.
+- **NVLink Bridge 112 GB/s vs NVLink4 900 GB/s** -- 현재 TP=1 pass에서는
+  inter-GPU traffic이 없으므로 paper 결과에는 반영하지 않음. TP=2 재검토
+  시 `nvlink_compare.py` future hook으로 quantify.
 - **DGX_Large baseline R2 skip** 그대로 (CLI 미모델링) -- A6000 환경 영향 없음.
 - **FP8 out of scope** (이미 결정) -- Ampere는 FP8 transformer engine
   없으므로 자연스럽게 제외.
@@ -450,20 +447,22 @@ python 260511_additional_exp/tier2_simulator/capacity_regime.py
 
 ---
 
-## 12. Minimum Paper-grade Set (A6000 x 2 기준)
+## 12. Minimum Paper-grade Set (A1, TP=1 기준)
 
-reviewer 대응에 충분한 최소 결과:
+reviewer 대응에 충분한 최소 결과 — **1차 실험은 모두 A1 (A6000 x 1, TP=1)**:
 
 - [ ] R2 paper repro PASS (simulator-only, hardware 무관)
-- [ ] Multi-VLM simulator matrix (5 VLM x dgx vs dgx-attacc, A6000 baseline)
+- [ ] Multi-VLM simulator matrix (5 VLM x dgx vs dgx-attacc, A1 baseline)
 - [ ] Ablation contribution
 - [ ] Roofline per VLM
 - [ ] Capacity regime (A6000 48GB)
-- [ ] vLLM TP=1 measurement (5 measurement scripts)
-- [ ] **vLLM TP=2 measurement (A6000 x 2 신규!)** -- driver 535 H100에서 못 했던 측정
+- [ ] vLLM TP=1 measurement (6 measurement scripts, 전부 default `--tp 1`)
 - [ ] eff_lat caveat (paper sec.6.1)
 - [ ] W4A16 + W8A16 quant measurement
 
-위 9 항목으로 paper의 main figure / table 데이터 다 확보 가능.
+위 8 항목으로 paper의 main figure / table 데이터 1차 set 확보 가능.
+
+> **A2 / TP=2 는 1차 paper-grade set 에서 제외**. 코드 hook 은 유지하되,
+> 실험 / 채택은 1차 결과가 stable 한 뒤 별도로 검토.
 
 H100 측 결과와 비교용으로 prior `results/r6_*` `r9_*` 그대로 reuse 가능.

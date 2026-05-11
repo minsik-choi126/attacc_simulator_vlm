@@ -2,6 +2,10 @@
   "experiment": "capacity_regime",
   "config": {
     "platform": "A6000 48 GB simulator capacity breakdown",
+    "deployment_scope": "A1 TP=1 only",
+    "future_hooks": [
+      "A2 (TP=2)"
+    ],
     "note": "max_batch_estimate from get_capacity_breakdown()"
   },
   "results": {
@@ -16,15 +20,6 @@
         "max_batch_estimate": 431
       },
       {
-        "model": "Qwen3-VL-4B",
-        "deployment": "A2 (TP=2)",
-        "lin": 569,
-        "weight_per_gpu_mib": 3465.0,
-        "kv_per_gpu_mib": 48.94,
-        "available_kv_mib": 45686.9,
-        "max_batch_estimate": 933
-      },
-      {
         "model": "Qwen2.5-VL-7B",
         "deployment": "A1 (TP=1)",
         "lin": 704,
@@ -32,15 +27,6 @@
         "kv_per_gpu_mib": 45.45,
         "available_kv_mib": 36705.9,
         "max_batch_estimate": 807
-      },
-      {
-        "model": "Qwen2.5-VL-7B",
-        "deployment": "A2 (TP=2)",
-        "lin": 704,
-        "weight_per_gpu_mib": 6223.0,
-        "kv_per_gpu_mib": 22.72,
-        "available_kv_mib": 42928.9,
-        "max_batch_estimate": 1889
       },
       {
         "model": "InternVL3-8B-hf",
@@ -52,15 +38,6 @@
         "max_batch_estimate": 1313
       },
       {
-        "model": "InternVL3-8B-hf",
-        "deployment": "A2 (TP=2)",
-        "lin": 384,
-        "weight_per_gpu_mib": 6223.0,
-        "kv_per_gpu_mib": 13.97,
-        "available_kv_mib": 42928.9,
-        "max_batch_estimate": 3072
-      },
-      {
         "model": "LLaVA-1.5-7B",
         "deployment": "A1 (TP=1)",
         "lin": 704,
@@ -70,15 +47,6 @@
         "max_batch_estimate": 88
       },
       {
-        "model": "LLaVA-1.5-7B",
-        "deployment": "A2 (TP=2)",
-        "lin": 704,
-        "weight_per_gpu_mib": 6176.0,
-        "kv_per_gpu_mib": 207.75,
-        "available_kv_mib": 42975.8,
-        "max_batch_estimate": 206
-      },
-      {
         "model": "LLaVA-Next-Mistral-7B",
         "deployment": "A1 (TP=1)",
         "lin": 3008,
@@ -86,15 +54,6 @@
         "kv_per_gpu_mib": 391.88,
         "available_kv_mib": 35839.4,
         "max_batch_estimate": 91
-      },
-      {
-        "model": "LLaVA-Next-Mistral-7B",
-        "deployment": "A2 (TP=2)",
-        "lin": 3008,
-        "weight_per_gpu_mib": 6656.0,
-        "kv_per_gpu_mib": 195.94,
-        "available_kv_mib": 42495.4,
-        "max_batch_estimate": 216
       }
     ],
     "interpretation": {
@@ -110,8 +69,8 @@
     }
   },
   "metadata": {
-    "timestamp": "2026-05-11T12:41:24.063743Z",
-    "git_commit": "89a9aba",
+    "timestamp": "2026-05-11T15:22:18.665399Z",
+    "git_commit": "84eac38",
     "platform": "A6000 48 GB simulator capacity breakdown"
   }
 }

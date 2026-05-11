@@ -1,6 +1,6 @@
 """Ablation: contribution of each modification component.
 
-For Qwen3-VL-4B S1, sequentially disable each modification group and
+For Qwen3-VL-4B A1 (A6000 x1, TP=1), sequentially disable each modification group and
 measure E2E gain change. Baseline = full proposal.
 
 Variants (only those toggleable via CLI without code patches):
@@ -53,7 +53,7 @@ def run_variant(label, **overrides):
 
 
 def main():
-    print("Ablation contribution decomposition -- Qwen3-VL-4B S1")
+    print("Ablation contribution decomposition -- Qwen3-VL-4B A1 (A6000 x1, TP=1)")
     variants = [
         run_variant("A_no_pim",      system="dgx"),
         run_variant("A_no_chunked",  prefill_chunk=LIN),

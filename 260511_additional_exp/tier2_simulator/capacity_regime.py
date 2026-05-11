@@ -29,6 +29,9 @@ MODELS = [
     ("LLaVA-1.5-7B",           336,  704),
     ("LLaVA-Next-Mistral-7B",  672, 3008),
 ]
+DEPLOYMENTS = [("A1 (TP=1)", 1)]
+# Future hook, intentionally not used in the first paper pass.
+FUTURE_DEPLOYMENTS = [("A2 (TP=2)", 2)]
 
 
 def make_system(tp):
@@ -57,7 +60,7 @@ def main():
     print("Capacity regime validation -- per-GPU max batch")
     rows = []
     for model, img, lin in MODELS:
-        for tp_label, tp in [("A1 (TP=1)", 1), ("A2 (TP=2)", 2)]:
+        for tp_label, tp in DEPLOYMENTS:
             bd = estimate_max_batch(model, lin, tp)
             weight_mib = bd["weight_per_gpu"] / 1024 / 1024
             kv_mib = bd["kv_per_gpu"] / 1024 / 1024
@@ -76,6 +79,8 @@ def main():
 
     save("capacity_regime",
          {"platform": "A6000 48 GB simulator capacity breakdown",
+          "deployment_scope": "A1 TP=1 only",
+          "future_hooks": [label for label, _ in FUTURE_DEPLOYMENTS],
           "note": "max_batch_estimate from get_capacity_breakdown()"},
          {"rows": rows,
           "interpretation": {
