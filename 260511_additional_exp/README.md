@@ -86,14 +86,16 @@ run the Python scripts directly from PowerShell.
 │   ├── roofline_per_vlm.py
 │   ├── slo_throughput.py
 │   ├── capacity_regime.py
-│   └── pim_mode_compare.py
+│   ├── pim_mode_compare.py
+│   └── w4a16_pim_sim.py
 │
 ├── tier2_measurement/
 │   ├── w4a16_awq_measure.py
 │   ├── w8a16_gptq_measure.py
 │   ├── quant_stability_test.py
 │   ├── image_size_sweep.py
-│   └── prompt_pattern_matrix.py
+│   ├── prompt_pattern_matrix.py
+│   └── vllm_bf16_baseline_aligned.py
 │
 ├── results/
 └── run_all_h100x1.sh
@@ -133,6 +135,7 @@ HF_HOME=/your/cache python tier2_measurement/w8a16_gptq_measure.py
 HF_HOME=/your/cache python tier2_measurement/image_size_sweep.py
 HF_HOME=/your/cache python tier2_measurement/prompt_pattern_matrix.py
 HF_HOME=/your/cache python tier2_measurement/quant_stability_test.py --n_runs 50
+HF_HOME=/your/cache python tier2_measurement/vllm_bf16_baseline_aligned.py
 ```
 
 Everything:
@@ -220,6 +223,7 @@ This is the exact set currently run by `run_all_h100x1.sh`.
 | `tier2_simulator/pim_mode_compare.py` | `results/pim_mode_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; bank/bg/buffer | PIM organization sensitivity. |
 | `tier2_simulator/slo_throughput.py` | `results/slo_throughput.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; batches 1/2/4/8/16/32/64; SLO 30/50/70/100/150/200 ms/token | SLO-throughput curve. |
 | `tier2_simulator/sensitivity_sweep.py` | `results/sensitivity_sweep.json` | Qwen3-VL-4B; batch 1/4/8/16/32 x `L` 569/1024/2048 x chunk 16/64/256/512 x PIM layer count 0/11/22/36 | Long heatmap grid, 240 simulator runs. |
+| `tier2_simulator/w4a16_pim_sim.py` | `results/w4a16_pim_sim.json` | Five VLMs; batches 1/4/8; analytical projection of FC weight-byte ratio for BF16 / W8A16 / W4A16 over `dgx` and `dgx-attacc` | Sim panel of paper Fig.8 (quant x PIM compound gain); validate against measured w4a16/w8a16 runs. |
 
 ### Tier 2: real H100 measurement
 
@@ -230,6 +234,7 @@ This is the exact set currently run by `run_all_h100x1.sh`.
 | `tier2_measurement/quant_stability_test.py` | `results/quant_stability_test.json` | BF16, FP16, W4A16, W8A16; `--n_runs 50` in `run_all`; default script value is 100 | Numerical stability / empty output check. |
 | `tier2_measurement/image_size_sweep.py` | `results/image_size_sweep.json` | Qwen2.5-VL-7B BF16; sizes 336/448/672/1008; `lout=128`; repeats 4 + warmup 1 | Visual token / image-size TTFT sensitivity. |
 | `tier2_measurement/prompt_pattern_matrix.py` | `results/prompt_pattern_matrix.json` | Qwen2.5-VL-7B BF16; short/medium/long prompt x `lout` 32/128/512; repeats 3 + warmup 1 | Prompt and output-length sensitivity. |
+| `tier2_measurement/vllm_bf16_baseline_aligned.py` | `results/vllm_bf16_baseline_aligned.json` | Qwen2.5-VL-7B, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B BF16; batches 1/4/8; same (lin, lout, image_size) as `multi_vlm_full_sim.py`; repeats 3 + warmup 1 | Real-measured side of paper Fig.3 overlay (sim vs measured); Qwen3-VL / InternVL3 deferred to driver 545+ node. |
 
 ---
 
@@ -293,11 +298,13 @@ results/capacity_regime.json
 results/pim_mode_compare.json
 results/slo_throughput.json
 results/sensitivity_sweep.json
+results/w4a16_pim_sim.json
 results/w4a16_awq_measure.json
 results/w8a16_gptq_measure.json
 results/quant_stability_test.json
 results/image_size_sweep.json
 results/prompt_pattern_matrix.json
+results/vllm_bf16_baseline_aligned.json
 ```
 
 Do this before using the results in paper tables:
@@ -327,8 +334,10 @@ Do this before using the results in paper tables:
 | SLO throughput | `tier2_simulator/slo_throughput.py` | Uses per-token ITL SLO. |
 | Roofline | `tier2_simulator/roofline_per_vlm.py` | Does not require Ramulator2. |
 | Capacity regime | `tier2_simulator/capacity_regime.py` | Does not require Ramulator2. |
-| Quantization | `tier2_measurement/w4a16_awq_measure.py`, `tier2_measurement/w8a16_gptq_measure.py` | Real H100/vLLM required. |
+| Quantization (measured) | `tier2_measurement/w4a16_awq_measure.py`, `tier2_measurement/w8a16_gptq_measure.py` | Real H100/vLLM required. |
+| Quantization x PIM (sim panel) | `tier2_simulator/w4a16_pim_sim.py` | Analytical projection; validate against measured AWQ/GPTQ JSONs. |
 | Image/prompt sensitivity | `tier2_measurement/image_size_sweep.py`, `tier2_measurement/prompt_pattern_matrix.py` | Real H100/vLLM required. |
+| Sim vs measured overlay | `tier2_measurement/vllm_bf16_baseline_aligned.py` paired with `tier1_simulator/multi_vlm_full_sim.py` | Matches `lin/lout/image_size/batch` 1-to-1. Qwen3-VL / InternVL3 deferred to driver 545+. |
 
 ---
 
@@ -421,6 +430,8 @@ Tier 2 measurement scripts accept the following:
 | `image_size_sweep.py` | `--sizes` | 336 448 672 1008 | space-separated image sizes |
 | `image_size_sweep.py` | `--model`, `--lout`, `--repeats`, `--warmup` | Qwen2.5-VL-7B / 128 / 4 / 1 | |
 | `prompt_pattern_matrix.py` | `--model`, `--image_size`, `--repeats`, `--warmup` | Qwen2.5-VL-7B / 672 / 3 / 1 | matrix `short/medium/long × lout {32,128,512}` fixed inside script |
+| `vllm_bf16_baseline_aligned.py` | `--models` | ALIGNED_CONFIGS (Qwen2.5-VL-7B, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B) | HF paths filter; only entries matching are run |
+| `vllm_bf16_baseline_aligned.py` | `--batches`, `--lout`, `--repeats`, `--warmup`, `--prompt` | 1 4 8 / 128 / 3 / 1 / "Describe this image with 100 specific words." | aligned to `multi_vlm_full_sim.py` defaults |
 
 To change a Tier 1 / Tier 2 simulator matrix without editing the source,
 copy the script to a sandbox name and adjust the constant lists at the top

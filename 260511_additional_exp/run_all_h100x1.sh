@@ -71,7 +71,8 @@ if [[ "$TIER" == "all" || "$TIER" == "2" || "$TIER" == "2sim" ]]; then
     run_step capacity_regime         python "$SCRIPT_DIR/tier2_simulator/capacity_regime.py"
     run_step pim_mode_compare        python "$SCRIPT_DIR/tier2_simulator/pim_mode_compare.py"
     run_step slo_throughput          python "$SCRIPT_DIR/tier2_simulator/slo_throughput.py"
-    # sensitivity_sweep is the long one — run last
+    run_step w4a16_pim_sim           python "$SCRIPT_DIR/tier2_simulator/w4a16_pim_sim.py"
+    # sensitivity_sweep is the long one - run last
     run_step sensitivity_sweep       python "$SCRIPT_DIR/tier2_simulator/sensitivity_sweep.py"
 fi
 
@@ -87,6 +88,7 @@ if [[ "$TIER" == "all" || "$TIER" == "2" || "$TIER" == "meas" ]]; then
         run_step quant_stability_test    python "$SCRIPT_DIR/tier2_measurement/quant_stability_test.py" --n_runs 50
         run_step image_size_sweep        python "$SCRIPT_DIR/tier2_measurement/image_size_sweep.py"
         run_step prompt_pattern_matrix   python "$SCRIPT_DIR/tier2_measurement/prompt_pattern_matrix.py"
+        run_step vllm_bf16_baseline      python "$SCRIPT_DIR/tier2_measurement/vllm_bf16_baseline_aligned.py"
     else
         echo
         echo "###############  Tier 2 measurement skipped (no GPU)  ###############"
