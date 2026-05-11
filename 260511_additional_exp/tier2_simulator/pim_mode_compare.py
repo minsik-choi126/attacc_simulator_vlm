@@ -32,8 +32,8 @@ def main():
                      "modes": []}
         for pim_mode in PIM_MODES:
             m = sr.run(
-                model=model, system="dgx-attacc", gpu="H100",
-                ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK4",
+                model=model, system="dgx-attacc", gpu="A6000",
+                ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK_BRIDGE",
                 pim=pim_mode, lin=lin, lout=128, batch=1,
                 image_size=img,
                 prefill_chunk=512, prefill_samples=8, max_L=2048,
@@ -53,7 +53,7 @@ def main():
 
     save("pim_mode_compare",
          {"pim_modes": PIM_MODES,
-          "platform": "H100 x 1 S1 dgx-attacc",
+          "platform": "A6000 x 1 A1 dgx-attacc",
           "note": "Expected ordering: bank fastest > bg > buffer (per AttAcc sec.5.4)"},
          {"models": results})
     print("Done")

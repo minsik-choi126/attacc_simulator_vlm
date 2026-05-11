@@ -31,12 +31,12 @@ ENERGY_TABLE = {
 }
 ENERGY_TABLE['GPU']['reg'] = 0.0675
 #4-way cache, ref: https://arxiv.org/pdf/1509.02308v1.pdf
-ENERGY_TABLE['GPU'][ 'l1'] = 0.16 * 8  
+ENERGY_TABLE['GPU'][ 'l1'] = 0.16 * 8
 ENERGY_TABLE['GPU']['l2'] = 0.3 * 8
 ENERGY_TABLE['GPU']['alu'] = 0.32
 ENERGY_TABLE['GPU']['mem'] = (0.11 + 0.44 + 1.01 + 1.23 + 0.5 + 0.3) * 8
 # ref: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10067395
-ENERGY_TABLE['GPU'][ 'comm'] = 1.3 * 8  
+ENERGY_TABLE['GPU'][ 'comm'] = 1.3 * 8
 
 ## TODO: Add energy of CPU (pJ per byte)
 ENERGY_TABLE['CPU']['reg'] = 0
@@ -160,6 +160,34 @@ def make_xpu_config(gpu_type: GPUType,
         config['CPU']["INTERFACE_BW"] = 4 * 128 * 1000 * 1000 * 1000
         config['CPU']["ENERGY_TABLE"] = ENERGY_TABLE['CPU']
 
+    elif gpu_type == GPUType.A6000:
+        # Ref: NVIDIA RTX A6000 datasheet (Ampere GA102, GDDR6 48 GB)
+        config['GPU']["NUM_CORE"] = 84
+        config['GPU']["FLOPS_PER_DEVICE"] = 309.7 * 1000 * 1000 * 1000 * 1000 \
+                                            if flops is None else flops
+        config['GPU']["MEM_CAPACITY_PER_DEVICE"] = 48 * 1024 * 1024 * 1024 \
+                                                    if mem_cap is None else mem_cap
+        config['GPU']["OFF_MEM_BW_PER_DEVICE"] = 768 * 1000 * 1000 * 1000 \
+                                                  if mem_bw is None else mem_bw
+        config['GPU']["L2_MEM_BW_PER_DEVICE"] = float('inf')
+        config['GPU']["L1_CAP_PER_CORE"] = 128 * 1024
+        config['GPU']["L2_CAP_PER_DEVICE"] = 6 * 1024 * 1024
+        # NVLink Bridge (A6000): 112 GB/s aggregate, ~56 GB/s per direction
+        config['GPU']["INTERFACE_BW"] = 112 * 1000 * 1000 * 1000
+        config['GPU']["ENERGY_TABLE"] = ENERGY_TABLE['GPU']
+
+        # Workstation CPU placeholder (Sapphire-Rapids analog)
+        config['CPU']["NUM_DEVICE"] = 2
+        config['CPU']["NUM_CORE"] = 32
+        config['CPU']["FLOPS_PER_DEVICE"] = 4 * 1000 * 1000 * 1000 * 1000
+        config['CPU']["MEM_CAPACITY_PER_DEVICE"] = 512 * 1024 * 1024 * 1024
+        config['CPU']["OFF_MEM_BW_PER_DEVICE"] = 200 * 1000 * 1000 * 1000
+        config['CPU']["L2_MEM_BW_PER_DEVICE"] = float('inf')
+        config['CPU']["L1_CAP_PER_CORE"] = 64 * 1024
+        config['CPU']["L2_CAP_PER_DEVICE"] = 64 * 1024 * 1024
+        config['CPU']["INTERFACE_BW"] = 4 * 64 * 1000 * 1000 * 1000
+        config['CPU']["ENERGY_TABLE"] = ENERGY_TABLE['CPU']
+
     return config
 
 
@@ -209,6 +237,9 @@ def make_pim_config(pim_type: PIMType,
         config["INTERFACE_BW"] = 64 * 1000 * 1000 * 1000
     elif interface_type == InterfaceType.PCIE5:
         config["INTERFACE_BW"] = 128 * 1000 * 1000 * 1000
+    elif interface_type == InterfaceType.NVLINK_BRIDGE:
+        # RTX A6000 NVLink Bridge: 112 GB/s aggregate
+        config["INTERFACE_BW"] = 112 * 1000 * 1000 * 1000
     else:
         assert 0, "Invalid interface type"
 

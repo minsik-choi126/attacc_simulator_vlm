@@ -1,4 +1,4 @@
-"""Multi-VLM full simulation matrix on H100 x 1 (S1 deployment).
+"""Multi-VLM full simulation matrix on A6000 x 1 (A1 deployment).
 
 5 in-framework VLMs x 4 (lin, lout, batch) configs x {dgx GPU-only, dgx-attacc}.
 Captures s_time / g_time / energy / capacity, computes per-model PIM speedup.
@@ -12,7 +12,7 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 import sim_runner as sr
 from result_aggregator import save
 
-# 5 in-framework VLM configs (H100 x 1, S1 deployment)
+# 5 in-framework VLM configs (A6000 x 1, A1 deployment)
 VLM_CONFIGS = [
     {"model": "Qwen3-VL-4B",            "image_size": 672, "lin": 569},
     {"model": "Qwen2.5-VL-7B",          "image_size": 672, "lin": 704},
@@ -37,9 +37,9 @@ def run_one(cfg, batch, system):
     return sr.run(
         model=cfg["model"],
         system=system,
-        gpu="H100",
+        gpu="A6000",
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK4",
+        interface="NVLINK_BRIDGE",
         pim="bank",
         lin=cfg["lin"], lout=LOUT, batch=batch,
         image_size=cfg["image_size"],
@@ -55,7 +55,7 @@ def total_ms(m):
 
 
 def main():
-    print("Multi-VLM full simulation -- H100 x 1 (S1), dgx vs dgx-attacc")
+    print("Multi-VLM full simulation -- A6000 x 1 (A1), dgx vs dgx-attacc")
     matrix = []
     for cfg in VLM_CONFIGS:
         per_model = {"model": cfg["model"], "image_size": cfg["image_size"],
@@ -84,7 +84,7 @@ def main():
         matrix.append(per_model)
 
     save("multi_vlm_full_sim",
-         {"platform": "H100 x 1 S1", "lout": LOUT, "batches": BATCHES,
+         {"platform": "A6000 x 1 A1", "lout": LOUT, "batches": BATCHES,
           "system": "dgx vs dgx-attacc"},
          {"models": matrix})
     print("\nDone -- see results/multi_vlm_full_sim.json")

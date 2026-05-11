@@ -26,10 +26,13 @@ def save(name, config, results, results_dir=None, metadata_extra=None):
         results_dir = pathlib.Path(__file__).resolve().parents[1] / "results"
     results_dir = pathlib.Path(results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
+    platform = "unspecified"
+    if isinstance(config, dict) and config.get("platform"):
+        platform = config["platform"]
     meta = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "git_commit": _git_commit(),
-        "platform": "H100x1 driver 535-compatible",
+        "platform": platform,
     }
     if metadata_extra:
         meta.update(metadata_extra)

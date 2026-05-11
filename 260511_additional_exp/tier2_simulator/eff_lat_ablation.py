@@ -44,8 +44,8 @@ def main():
             cfg["n_kv"] // 2, num_hbm=5, batch_size=1)
         # Run S1 with full eff_lat applied
         m = sr.run(
-            model=cfg["model"], system="dgx-attacc", gpu="H100",
-            ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK4",
+            model=cfg["model"], system="dgx-attacc", gpu="A6000",
+            ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK_BRIDGE",
             pim="bank", lin=cfg["lin"], lout=128, batch=1,
             image_size=cfg["img"],
             prefill_chunk=512, prefill_samples=8, max_L=4096,
@@ -69,7 +69,7 @@ def main():
                   cfg["model"], cfg["n_kv"], eff_s1, eff_s2, s or -1, g or -1))
 
     save("eff_lat_ablation",
-         {"platform": "H100 x 1 S1 dgx-attacc",
+         {"platform": "A6000 x 1 A1 dgx-attacc",
           "method": "paper sec.6.1 latency-mode caveat quantification"},
          {"models": rows})
     print("Done")

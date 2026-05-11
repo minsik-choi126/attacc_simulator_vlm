@@ -33,8 +33,8 @@ MODELS = [
 
 def make_system(tp):
     model_cfg = make_model_config("Qwen3-VL-4B", DataType.W16A16)
-    xpu_cfg = make_xpu_config(GPUType.H100, num_gpu=tp)
-    pim_cfg = make_pim_config(PIMType.BA, InterfaceType.NVLINK4,
+    xpu_cfg = make_xpu_config(GPUType.A6000, num_gpu=tp)
+    pim_cfg = make_pim_config(PIMType.BA, InterfaceType.NVLINK_BRIDGE,
                                num_attacc=tp, num_hbm=5)
     system = System(xpu_cfg["GPU"], model_cfg, max_L=2048)
     system.set_accelerator(model_cfg, DeviceType.PIM, pim_cfg)
@@ -44,8 +44,8 @@ def make_system(tp):
 def estimate_max_batch(model_name, lin, tp):
     """Use get_capacity_breakdown() with batch=1 -> derive max."""
     model_cfg = make_model_config(model_name, DataType.W16A16)
-    xpu_cfg = make_xpu_config(GPUType.H100, num_gpu=tp)
-    pim_cfg = make_pim_config(PIMType.BA, InterfaceType.NVLINK4,
+    xpu_cfg = make_xpu_config(GPUType.A6000, num_gpu=tp)
+    pim_cfg = make_pim_config(PIMType.BA, InterfaceType.NVLINK_BRIDGE,
                                num_attacc=tp, num_hbm=5)
     system = System(xpu_cfg["GPU"], model_cfg, max_L=2048)
     system.set_accelerator(model_cfg, DeviceType.PIM, pim_cfg)
@@ -57,7 +57,7 @@ def main():
     print("Capacity regime validation -- per-GPU max batch")
     rows = []
     for model, img, lin in MODELS:
-        for tp_label, tp in [("S1 (TP=1)", 1), ("S2 (TP=2)", 2)]:
+        for tp_label, tp in [("A1 (TP=1)", 1), ("A2 (TP=2)", 2)]:
             bd = estimate_max_batch(model, lin, tp)
             weight_mib = bd["weight_per_gpu"] / 1024 / 1024
             kv_mib = bd["kv_per_gpu"] / 1024 / 1024
@@ -75,7 +75,7 @@ def main():
                       model, tp_label, weight_mib, kv_mib, max_batch))
 
     save("capacity_regime",
-         {"platform": "H100 80 GB simulator capacity breakdown",
+         {"platform": "A6000 48 GB simulator capacity breakdown",
           "note": "max_batch_estimate from get_capacity_breakdown()"},
          {"rows": rows,
           "interpretation": {

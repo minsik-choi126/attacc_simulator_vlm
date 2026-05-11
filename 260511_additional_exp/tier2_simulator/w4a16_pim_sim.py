@@ -88,8 +88,8 @@ def project(metrics, w_ratio):
 def run_pair(cfg, batch):
     """Return (BF16 baseline metrics dgx, dgx-attacc)."""
     common = dict(
-        gpu="H100", ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK4", pim="bank",
+        gpu="A6000", ngpu=1, tp=1, num_attacc=1, num_hbm=5,
+        interface="NVLINK_BRIDGE", pim="bank",
         lin=cfg["lin"], lout=LOUT, batch=batch,
         image_size=cfg["image_size"],
         prefill_chunk=512, prefill_samples=8,
@@ -140,7 +140,7 @@ def main():
         matrix.append(per_model)
 
     save("w4a16_pim_sim",
-         {"platform": "H100 x 1 S1 simulator", "lout": LOUT,
+         {"platform": "A6000 x 1 A1 simulator", "lout": LOUT,
           "batches": BATCHES,
           "method": "analytical projection: s_time + s_fc*(w_ratio-1)",
           "caveats": [

@@ -22,14 +22,14 @@ MODES = ["conservative", "optimistic", "list"]
 
 
 def main():
-    print("Routing mode comparison -- H100 x 1 S1 dgx-attacc")
+    print("Routing mode comparison -- A6000 x 1 A1 dgx-attacc")
     all_results = []
     for cfg in MODELS:
         per_model = {**cfg, "modes": []}
         for mode in MODES:
             m = sr.run(
-                model=cfg["model"], system="dgx-attacc", gpu="H100",
-                ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK4",
+                model=cfg["model"], system="dgx-attacc", gpu="A6000",
+                ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK_BRIDGE",
                 pim="bank", lin=cfg["lin"], lout=128, batch=1,
                 image_size=cfg["image_size"],
                 prefill_chunk=512, prefill_samples=8, max_L=4096,
@@ -47,7 +47,7 @@ def main():
         all_results.append(per_model)
 
     save("routing_mode_compare",
-         {"modes": MODES, "platform": "H100 x 1 S1 dgx-attacc"},
+         {"modes": MODES, "platform": "A6000 x 1 A1 dgx-attacc"},
          {"models": all_results,
           "note": "list mode for DeepStack model auto-forced (M7)"})
     print("Done")

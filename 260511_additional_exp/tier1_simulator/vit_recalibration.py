@@ -49,9 +49,9 @@ def simulate_one(model, image_size, lin, lout):
     m = sr.run(
         model=model,
         system="dgx",                     # GPU only -- matches vLLM
-        gpu="H100",
+        gpu="A6000",
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK4",
+        interface="NVLINK_BRIDGE",
         pim="bank",
         lin=lin, lout=lout, batch=1,
         image_size=image_size,
@@ -114,7 +114,9 @@ def main():
 
     save("vit_recalibration",
          {"purpose": "Derive per-model s_corr to identify _build_vit() fix path",
-          "method": "compare simulated TTFT vs vLLM measured TTFT p50 (MMMU-Pro)"},
+          "method": "compare simulated TTFT vs vLLM measured TTFT p50 (MMMU-Pro)",
+          "platform": "A6000 simulator vs prior H100x1 vLLM measurement "
+                       "(measured numbers re-used from earlier campaign)"},
          {"per_model": rows, "architecture_diag": diag,
           "decode_g_corr_universal_est": 1.46})
     print("\nDone -- Paper figure source for prefill correction breakdown")

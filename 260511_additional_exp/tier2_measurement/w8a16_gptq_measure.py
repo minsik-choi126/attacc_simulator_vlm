@@ -1,4 +1,6 @@
-"""W8A16 (GPTQ Int8) vLLM measurement on H100 x 1.
+"""W8A16 (GPTQ Int8) vLLM measurement.
+
+TP configurable via --tp (1 = A6000 x 1, 2 = A6000 x 2).
 
 Public checkpoints:
   - Qwen/Qwen2.5-VL-7B-Instruct-GPTQ-Int8
@@ -47,7 +49,7 @@ def get_gpu_power_w():
         return None
 
 
-def measure_one(model_path, image_size, lout, repeats, warmup):
+def measure_one(model_path, image_size, lout, repeats, warmup, tp=1):
     if not HAVE_VLLM:
         return {"error": "vllm not installed"}
     img = make_dummy_image(image_size)
@@ -57,7 +59,7 @@ def measure_one(model_path, image_size, lout, repeats, warmup):
     prompt = "Describe this image with 100 specific words."
     print("    loading {} ...".format(model_path))
     t0 = time.time()
-    llm = LLM(model=model_path, tensor_parallel_size=1,
+    llm = LLM(model=model_path, tensor_parallel_size=tp,
                trust_remote_code=True, max_model_len=4096,
                quantization="gptq",
                dtype="float16", enforce_eager=True,
@@ -108,18 +110,20 @@ def main():
     ap.add_argument("--lout", type=int, default=128)
     ap.add_argument("--repeats", type=int, default=4)
     ap.add_argument("--warmup", type=int, default=1)
+    ap.add_argument("--tp", type=int, default=1,
+                     help="vLLM tensor_parallel_size (1 = TP=1, 2 = TP=2 on A6000 x 2)")
     args = ap.parse_args()
 
     if not HAVE_VLLM:
         print("FATAL: vllm not installed", file=sys.stderr)
         sys.exit(1)
 
-    print("W8A16 (GPTQ Int8) vLLM measurement -- H100 x 1")
+    print("W8A16 (GPTQ Int8) vLLM measurement -- TP={}".format(args.tp))
     all_results = []
     for model in args.models:
         try:
             r = measure_one(model, args.image_size, args.lout,
-                             args.repeats, args.warmup)
+                             args.repeats, args.warmup, tp=args.tp)
             stats = r.get("stats", {})
             print("    TTFT p50: {:.2f} ms  ITL p50: {:.3f} ms/tok".format(
                 (stats.get("ttft_ms") or {}).get("p50") or 0,
@@ -131,7 +135,7 @@ def main():
     save("w8a16_gptq_measure",
          {"image_size": args.image_size, "lout": args.lout,
           "repeats": args.repeats, "warmup": args.warmup,
-          "platform": "H100 x 1 vLLM 0.7.3 W8A16 (GPTQ Int8)"},
+          "platform": "vLLM 0.7.3 W8A16 (GPTQ Int8) TP={}".format(args.tp)},
          {"per_model": all_results})
     print("Done")
 

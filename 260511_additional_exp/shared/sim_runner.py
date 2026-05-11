@@ -24,12 +24,12 @@ def run(
     model,
     *,
     system="dgx-attacc",
-    gpu="H100",
+    gpu="A6000",            # Deployment default. Use gpu="A100a" for R2 paper repro.
     ngpu=1,
     tp=1,
     num_attacc=1,
     num_hbm=5,
-    interface="NVLINK4",
+    interface="NVLINK_BRIDGE",  # A6000 NVLink Bridge 112 GB/s.
     pim="bank",
     lin=569,
     lout=128,

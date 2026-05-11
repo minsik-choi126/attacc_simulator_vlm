@@ -36,8 +36,8 @@ def total(m):
 
 def run_variant(label, **overrides):
     base = dict(
-        model=MODEL, system="dgx-attacc", gpu="H100",
-        ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK4",
+        model=MODEL, system="dgx-attacc", gpu="A6000",
+        ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK_BRIDGE",
         pim="bank", lin=LIN, lout=LOUT, batch=BATCH, image_size=IMG,
         prefill_chunk=512, prefill_samples=8, max_L=2048,
         powerlimit=True, ffopt=True, pipeopt=True, word=2,
@@ -88,7 +88,7 @@ def main():
 
     save("ablation_contribution",
          {"model": MODEL, "lin": LIN, "lout": LOUT, "batch": BATCH,
-          "platform": "H100 x 1 S1", "image_size": IMG,
+          "platform": "A6000 x 1 A1", "image_size": IMG,
           "deepstack_indices": [5, 11, 17]},
          {"variants": variants, "future_ablations": future,
           "baseline_gpu_ms": base, "full_proposal_ms": full})

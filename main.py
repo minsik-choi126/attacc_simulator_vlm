@@ -81,7 +81,8 @@ def main():
         "--gpu",
         type=str,
         default='A100a',
-        help="GPU type (A100a and H100), A100a is A100 with HBM3")
+        help="GPU type (A100a, H100, A6000). A100a is A100 with HBM3. "
+             "A6000 is RTX A6000 (Ampere GA102, GDDR6 48 GB, NVLink Bridge 112 GB/s)")
     parser.add_argument("--ngpu",
                         type=int,
                         default=8,
@@ -92,8 +93,9 @@ def main():
                         help="tensor parallel degree. default=ngpu")
     parser.add_argument("--gmemcap",
                         type=int,
-                        default=80,
-                        help="memory capacity per GPU (GB). default=80")
+                        default=None,
+                        help="memory capacity per GPU (GB). default=per-GPU spec "
+                             "(A100a=80, H100=80, A6000=48). Set to override.")
 
 
 
@@ -113,8 +115,10 @@ def main():
     parser.add_argument("--interface",
                         type=str,
                         default='NVLINK3',
-                        choices=['NVLINK3', 'NVLINK4', 'PCIE4', 'PCIE5'],
-                        help="GPU-accelerator interface")
+                        choices=['NVLINK3', 'NVLINK4', 'PCIE4', 'PCIE5',
+                                  'NVLINK_BRIDGE'],
+                        help="GPU-accelerator interface. NVLINK_BRIDGE = "
+                             "RTX A6000 workstation NVLink (112 GB/s).")
     parser.add_argument("--powerlimit",
                         action='store_true',
                         help="power constraint for PIM ")
@@ -210,8 +214,10 @@ def main():
         gpu_device = GPUType.H100
     elif args.gpu == 'A100a':
         gpu_device = GPUType.A100a
+    elif args.gpu == 'A6000':
+        gpu_device = GPUType.A6000
     else:
-        assert 0
+        assert 0, "Unsupported --gpu: {}".format(args.gpu)
 
     num_gpu = args.ngpu
     tp = args.tp if args.tp is not None else num_gpu
@@ -228,7 +234,7 @@ def main():
         print("{}: ({} x {}), [Lin, Lout, batch]: {}".format(
             args.system, args.gpu, args.ngpu,
             [args.lin, args.lout, args.batch]))
-    gmem_cap = args.gmemcap * 1024 * 1024 * 1024
+    gmem_cap = (args.gmemcap * 1024 * 1024 * 1024) if args.gmemcap is not None else None
     output_path = "output.csv"
     if os.path.exists(output_path):
         os.remove(output_path)

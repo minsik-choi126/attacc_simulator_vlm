@@ -52,8 +52,8 @@ def main():
         i += 1
         layer_arg = pim_layers_for_count(count)
         m = sr.run(
-            model=MODEL, system="dgx-attacc", gpu="H100",
-            ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK4",
+            model=MODEL, system="dgx-attacc", gpu="A6000",
+            ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK_BRIDGE",
             pim="bank", lin=L, lout=LOUT, batch=batch,
             image_size=IMG,
             prefill_chunk=chunk, prefill_samples=8,
@@ -77,7 +77,7 @@ def main():
          {"model": MODEL, "image_size": IMG, "lout": LOUT,
           "batches": BATCHES, "Ls": LS, "chunks": CHUNKS,
           "pim_layer_counts": PIM_LAYER_COUNTS,
-          "platform": "H100 x 1 S1 dgx-attacc"},
+          "platform": "A6000 x 1 A1 dgx-attacc"},
          {"grid": grid})
     print("\nDone -- {} configs in results/sensitivity_sweep.json".format(total))
 

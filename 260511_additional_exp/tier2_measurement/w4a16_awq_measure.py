@@ -1,4 +1,4 @@
-"""W4A16 (AWQ) vLLM measurement on H100 x 1.
+"""W4A16 (AWQ) vLLM measurement.
 
 Public quantized checkpoints (vLLM 0.7.3 compatible):
   - Qwen/Qwen2.5-VL-7B-Instruct-AWQ
@@ -7,6 +7,7 @@ Public quantized checkpoints (vLLM 0.7.3 compatible):
 Compares against BF16 baseline (already measured in r6/r7).
 
 Reports: weight memory, TTFT, ITL, J/token (via nvidia-smi).
+TP configurable via --tp (1 = A6000 x 1, 2 = A6000 x 2).
 """
 import argparse
 import json
@@ -55,7 +56,7 @@ def get_gpu_power_w():
 
 
 def measure_one(model_path, image_size, lout, repeats, warmup,
-                 prompt="Describe this image with 100 specific words."):
+                 prompt="Describe this image with 100 specific words.", tp=1):
     if not HAVE_VLLM:
         return {"error": "vllm not installed"}
     img = make_dummy_image(image_size)
@@ -65,7 +66,7 @@ def measure_one(model_path, image_size, lout, repeats, warmup,
     print("    loading {} ...".format(model_path))
     t0 = time.time()
     llm = LLM(model=model_path,
-              tensor_parallel_size=1,
+              tensor_parallel_size=tp,
               trust_remote_code=True,
               max_model_len=4096,
               quantization="awq",
@@ -126,6 +127,8 @@ def main():
     ap.add_argument("--lout", type=int, default=128)
     ap.add_argument("--repeats", type=int, default=4)
     ap.add_argument("--warmup", type=int, default=1)
+    ap.add_argument("--tp", type=int, default=1,
+                     help="vLLM tensor_parallel_size (1 = TP=1, 2 = TP=2 on A6000 x 2)")
     args = ap.parse_args()
 
     if not HAVE_VLLM:
@@ -133,13 +136,13 @@ def main():
         print("       Install with: pip install vllm==0.7.3", file=sys.stderr)
         sys.exit(1)
 
-    print("W4A16 (AWQ) vLLM measurement -- H100 x 1")
+    print("W4A16 (AWQ) vLLM measurement -- TP={}".format(args.tp))
     all_results = []
     for model in args.models:
         print("  Model: {}".format(model))
         try:
             r = measure_one(model, args.image_size, args.lout,
-                             args.repeats, args.warmup)
+                             args.repeats, args.warmup, tp=args.tp)
             stats = r.get("stats", {})
             print("    TTFT p50: {:.2f} ms  ITL p50: {:.3f} ms/tok".format(
                 (stats.get("ttft_ms") or {}).get("p50") or 0,
@@ -152,7 +155,7 @@ def main():
     save("w4a16_awq_measure",
          {"image_size": args.image_size, "lout": args.lout,
           "repeats": args.repeats, "warmup": args.warmup,
-          "platform": "H100 x 1 vLLM 0.7.3 W4A16 (AWQ)"},
+          "platform": "vLLM 0.7.3 W4A16 (AWQ) TP={}".format(args.tp)},
          {"per_model": all_results})
     print("Done")
 

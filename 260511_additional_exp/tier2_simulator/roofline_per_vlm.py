@@ -1,10 +1,17 @@
 """Roofline analysis per VLM -- identify which layers benefit from PIM.
 
 For each VLM x each sub-layer (qkv / score / softmax / context / proj / ff),
-compute arithmetic intensity (FLOPs/byte) and compare against H100 ridge
-(989 TFLOPS / 3352 GB/s = 295 ops/byte) and AttAcc PIM ridge (per-AttAcc).
+compute arithmetic intensity (FLOPs/byte) and compare against host-GPU ridges
+and AttAcc PIM ridge (per-AttAcc).
 
-Layer below ridge = memory-bound = PIM benefit candidate.
+Ridges reported:
+  - A6000 ridge: 309.7 TFLOPS / 768 GB/s  = 403 ops/byte (deployment default)
+  - H100  ridge: 989.4 TFLOPS / 3352 GB/s = 295 ops/byte (paper reference)
+
+Layer below ridge = memory-bound = PIM benefit candidate. A6000 has the
+higher ridge (more compute-rich relative to BW), so more layers fall into
+the PIM-target band, which is consistent with the paper claim that PIM
+gain is *larger* on weaker GPUs.
 """
 import sys
 import pathlib
@@ -19,11 +26,13 @@ from result_aggregator import save
 
 
 # Hardware ridges (ops/byte at FP16)
-H100_RIDGE = 989.4e12 / 3352e9         # ~295
+A6000_RIDGE = 309.7e12 / 768e9         # ~403 (deployment default)
+H100_RIDGE  = 989.4e12 / 3352e9        # ~295 (paper reference)
+HOST_RIDGE  = A6000_RIDGE              # primary ridge for verdict labelling
 ATTACC_RIDGE_PER = 670.4e9 * 9         # internal scale 9
 # Effective PIM ridge per AttAcc (no compute saturation in AttAcc)
 # AttAcc has GEMV+softmax dedicated, so ridge is roughly 1 op/byte (BW-bound).
-# We mark layers as PIM-target if AI(GPU) < H100 ridge (i.e., GPU memory-bound).
+# We mark layers as PIM-target if AI(GPU) < HOST_RIDGE (i.e., host memory-bound).
 
 
 MODELS = {
@@ -86,15 +95,16 @@ def ai_ffn(cfg, L, gated=True, dbyte=2):
 
 
 def classify(ai):
-    if ai < H100_RIDGE / 3:
+    if ai < HOST_RIDGE / 3:
         return "memory-bound (PIM target)"
-    if ai < H100_RIDGE:
+    if ai < HOST_RIDGE:
         return "marginal (PIM may help)"
     return "compute-bound (no PIM benefit)"
 
 
 def main():
-    print("Roofline per VLM (H100 ridge ~ {:.1f} ops/byte)".format(H100_RIDGE))
+    print("Roofline per VLM (A6000 ridge ~ {:.1f} ops/byte, "
+          "H100 ridge ~ {:.1f} ops/byte)".format(A6000_RIDGE, H100_RIDGE))
     results = []
     for L_label, L in [("prefill_L569", 569), ("decode_L1", 1)]:
         for model, cfg in MODELS.items():
@@ -117,9 +127,12 @@ def main():
                     r["layer"], r["ai"], r["verdict"]))
 
     save("roofline_per_vlm",
-         {"H100_ridge_ops_per_byte": round(H100_RIDGE, 2),
+         {"A6000_ridge_ops_per_byte": round(A6000_RIDGE, 2),
+          "H100_ridge_ops_per_byte": round(H100_RIDGE, 2),
+          "host_ridge_used": "A6000",
           "regimes": ["prefill_L569", "decode_L1"],
-          "models": list(MODELS.keys())},
+          "models": list(MODELS.keys()),
+          "platform": "A6000 roofline (A6000 ridge primary, H100 paper ref)"},
          {"matrix": results})
     print("Done")
 

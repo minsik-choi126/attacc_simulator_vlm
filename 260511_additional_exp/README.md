@@ -2,13 +2,22 @@
 
 This directory collects the additional experiments needed before writing the
 VLM + PIM paper results section.  The scripts are split into simulator-only
-experiments and real H100 measurement experiments.
+experiments and real measurement experiments.
 
 Target stack:
 
 - Simulator: repo-root `main.py` + Ramulator2-backed AttAcc PIM path.
-- Measurement: H100 x 1, driver 535-compatible vLLM 0.7.3 stack.
+  Default deployment is **A6000 / NVLink Bridge**; A1 (TP=1) / A2 (TP=2)
+  scenarios are both produced from the same matrix. Override via
+  `--gpu` / `--interface` / `--ngpu` / `--tp` for other devices.
+- Measurement: vLLM 0.7.3 stack (CUDA 12.x, driver 535-compatible).
+  All scripts default to **`--tp 1`** (single GPU). For A2 measurements on
+  A6000 x 2, pass `--tp 2` explicitly — currently treated as the test /
+  validation path, not the default.
 - Output: JSON files under `260511_additional_exp/results/`.
+
+See [`RUNNING_ON_A6000x2.md`](RUNNING_ON_A6000x2.md) for the full A6000 x 2
+deployment guide (hardware comparison, A1/A2 scenarios, pass criteria).
 
 The scripts are intended to fail loudly.  If a simulator subprocess fails,
 `shared/sim_runner.py` raises by default and the top-level script exits
@@ -46,7 +55,8 @@ Notes:
 
 Required:
 
-- H100 node with `nvidia-smi`.
+- GPU node with `nvidia-smi` (default deployment: A6000 x 1 or A6000 x 2;
+  H100 / A100 also works — only the platform metadata label changes).
 - `vllm==0.7.3`, `torch==2.5.1`, `transformers==4.49.0`, `pillow`.
 - Hugging Face cache/access for the selected model checkpoints.
 
@@ -127,7 +137,8 @@ Tier 2 simulator sweep:
 bash run_all_h100x1.sh --tier 2sim
 ```
 
-Real H100 measurements:
+Real-GPU measurements (default A6000 x 1 with `--tp 1`; add `--tp 2`
+for A6000 x 2 / TP=2 runs):
 
 ```bash
 HF_HOME=/your/cache python tier2_measurement/w4a16_awq_measure.py
@@ -153,7 +164,7 @@ Tier selection:
 bash run_all_h100x1.sh --tier 1      # Tier 1 simulator foundation only
 bash run_all_h100x1.sh --tier 1sim   # Same as --tier 1
 bash run_all_h100x1.sh --tier 2sim   # Tier 2 simulator only
-bash run_all_h100x1.sh --tier meas   # Real H100 measurement only
+bash run_all_h100x1.sh --tier meas   # Real-GPU measurement only (A6000 default)
 bash run_all_h100x1.sh --tier 2      # Tier 2 simulator + measurement
 ```
 
@@ -177,7 +188,7 @@ Standard shape:
   "metadata": {
     "timestamp": "2026-05-11T...",
     "git_commit": "...",
-    "platform": "H100x1 driver 535-compatible"
+    "platform": "copied from config.platform"
   }
 }
 ```
@@ -198,7 +209,9 @@ Use `shared/sim_runner.py::e2e_ms()` for this calculation.
 
 ## Exact Experiment List
 
-This is the exact set currently run by `run_all_h100x1.sh`.
+This is the exact set currently run by `run_all_h100x1.sh` (legacy filename;
+current simulator defaults are A6000 / NVLink Bridge unless a script overrides
+them for A100a paper reproduction).
 
 ### Tier 1: simulator foundation
 
@@ -206,8 +219,8 @@ This is the exact set currently run by `run_all_h100x1.sh`.
 |---|---|---|---|
 | `tier1_simulator/r2_paper_repro.py` | `results/r2_paper_repro.json` | GPT-175B, A100a x8, `lin=2048`, `lout=128`, `batch=64`, FP16 and W8A8, `dgx` vs `dgx-attacc` | Must-pass gate for trusting AttAcc path. Current CLI does not model `DGX_Large`; those targets are skipped. |
 | `tier1_simulator/upstream_baseline.py` | `results/upstream_baseline.json` | GPT-175B, GPT-89B, GPT-13B, LLAMA-65B, LLAMA-7B, MT-530B, OPT-66B on A100a x8 `dgx-attacc`, `batch=8` | Regression check that legacy LLM path still runs. |
-| `tier1_simulator/multi_vlm_full_sim.py` | `results/multi_vlm_full_sim.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, InternVL3-8B-hf, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B; batches 1/4/8; H100 x1 `dgx` vs `dgx-attacc` | Main VLM GPU-only vs PIM speedup table. |
-| `tier1_simulator/ablation_contribution.py` | `results/ablation_contribution.json` | Qwen3-VL-4B S1; `A_no_pim`, `A_no_chunked`, `A_no_routing`, `A_full` | Main ablation table. `A_no_efflat` and `A_no_deepstack` require code-patch reruns. |
+| `tier1_simulator/multi_vlm_full_sim.py` | `results/multi_vlm_full_sim.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, InternVL3-8B-hf, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B; batches 1/4/8; A6000 x1 A1 `dgx` vs `dgx-attacc` | Main VLM GPU-only vs PIM speedup table. |
+| `tier1_simulator/ablation_contribution.py` | `results/ablation_contribution.json` | Qwen3-VL-4B A1 (A6000 x1); `A_no_pim`, `A_no_chunked`, `A_no_routing`, `A_full` | Main ablation table. `A_no_efflat` and `A_no_deepstack` require code-patch reruns. |
 | `tier1_simulator/vit_recalibration.py` | `results/vit_recalibration.json` | Qwen2.5-VL-7B, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B measured TTFT/ITL vs simulator | Calibration scatter / prefill correction evidence. |
 
 ### Tier 2: simulator sensitivity and architecture
@@ -216,16 +229,16 @@ This is the exact set currently run by `run_all_h100x1.sh`.
 |---|---|---|---|
 | `tier2_simulator/chunk_size_sweep.py` | `results/chunk_size_sweep.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B; chunks 4/16/64/128/256/512/1024/full | Chunked prefill sensitivity. |
 | `tier2_simulator/routing_mode_compare.py` | `results/routing_mode_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B, LLaVA-Next-Mistral-7B; conservative/optimistic/list routing | Routing policy sensitivity. |
-| `tier2_simulator/eff_lat_ablation.py` | `results/eff_lat_ablation.json` | Five VLMs; reports S1/S2 effective latency factors and S1 simulator latency | Documents §6.1 caveat. Full on/off ablation still needs code patch. |
-| `tier2_simulator/nvlink_compare.py` | `results/nvlink_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; NVLink3/4; ngpu 1/2 | Simulator-only S2/NVLink comparison. |
+| `tier2_simulator/eff_lat_ablation.py` | `results/eff_lat_ablation.json` | Five VLMs; reports A1/A2 effective latency factors and A1 simulator latency | Documents §6.1 caveat. Full on/off ablation still needs code patch. |
+| `tier2_simulator/nvlink_compare.py` | `results/nvlink_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; NVLINK_BRIDGE plus NVLink3/4 references; ngpu 1/2 | Simulator-only A2/NVLink comparison. |
 | `tier2_simulator/roofline_per_vlm.py` | `results/roofline_per_vlm.json` | Five VLMs; prefill `L=569` and decode `L=1`; qkv/score/context/ffn AI | PIM target justification. Does not require Ramulator2. |
-| `tier2_simulator/capacity_regime.py` | `results/capacity_regime.json` | Five VLMs; S1/S2 capacity breakdown | Capacity-bound vs throughput-bound argument. Does not require Ramulator2. |
+| `tier2_simulator/capacity_regime.py` | `results/capacity_regime.json` | Five VLMs; A1/A2 capacity breakdown (A6000 48 GB) | Capacity-bound vs throughput-bound argument. Does not require Ramulator2. |
 | `tier2_simulator/pim_mode_compare.py` | `results/pim_mode_compare.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; bank/bg/buffer | PIM organization sensitivity. |
 | `tier2_simulator/slo_throughput.py` | `results/slo_throughput.json` | Qwen3-VL-4B, Qwen2.5-VL-7B, LLaVA-1.5-7B; batches 1/2/4/8/16/32/64; SLO 30/50/70/100/150/200 ms/token | SLO-throughput curve. |
 | `tier2_simulator/sensitivity_sweep.py` | `results/sensitivity_sweep.json` | Qwen3-VL-4B; batch 1/4/8/16/32 x `L` 569/1024/2048 x chunk 16/64/256/512 x PIM layer count 0/11/22/36 | Long heatmap grid, 240 simulator runs. |
 | `tier2_simulator/w4a16_pim_sim.py` | `results/w4a16_pim_sim.json` | Five VLMs; batches 1/4/8; analytical projection of FC weight-byte ratio for BF16 / W8A16 / W4A16 over `dgx` and `dgx-attacc` | Sim panel of paper Fig.8 (quant x PIM compound gain); validate against measured w4a16/w8a16 runs. |
 
-### Tier 2: real H100 measurement
+### Tier 2: real-GPU measurement (A6000 default; --tp 1 single GPU, --tp 2 A6000 x 2)
 
 | Step / script | Output JSON | Default run | Success / use |
 |---|---|---|---|
@@ -250,7 +263,7 @@ python -c "import pandas, numpy; print('sim deps ok')"
 test -x ramulator2/ramulator2 || test -x ramulator2/ramulator2.exe || test -x ramulator2/build/ramulator2 || test -x ramulator2/build/ramulator2.exe
 ```
 
-For H100 measurement:
+For real-GPU measurement (any of A6000 / A100 / H100):
 
 ```bash
 nvidia-smi
@@ -273,7 +286,8 @@ bash run_all_h100x1.sh --tier 1
 bash run_all_h100x1.sh --tier 2sim
 ```
 
-Finally run measurement on the H100 node:
+Finally run measurement on the GPU node (A6000 by default; pass `--tp 2`
+to the individual scripts for A6000 x 2 / TP=2 runs):
 
 ```bash
 bash run_all_h100x1.sh --tier meas

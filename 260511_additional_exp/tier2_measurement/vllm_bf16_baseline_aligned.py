@@ -1,5 +1,8 @@
 """vLLM BF16 baseline aligned to multi_vlm_full_sim simulator matrix.
 
+Runs the simulator-matched VLM matrix on actual GPU(s) via vLLM 0.7.3,
+TP configurable (--tp 1 = A6000 x 1, --tp 2 = A6000 x 2).
+
 Runs the EXACT same (model, image_size, lin, lout, batch) configurations
 as tier1_simulator/multi_vlm_full_sim.py to produce measured TTFT / ITL /
 E2E. Lets paper Fig.3 overlay simulator-predicted vs measured speedup on
@@ -68,7 +71,7 @@ def get_gpu_power_w():
         return None
 
 
-def measure_batch(llm, sp, model_id, prompt, image, batch_size):
+def measure_batch(llm, sp, model_id, prompt, image, batch_size, tp=1):
     """Run a single batched request, return TTFT / E2E / ITL."""
     inputs = [make_image_input(model_id, prompt, image) for _ in range(batch_size)]
     outs = llm.generate(inputs, sp, use_tqdm=False)
@@ -104,7 +107,7 @@ def measure_batch(llm, sp, model_id, prompt, image, batch_size):
     }
 
 
-def measure_one_model(cfg, lout, batches, repeats, warmup, prompt):
+def measure_one_model(cfg, lout, batches, repeats, warmup, prompt, tp=1):
     if not HAVE_VLLM:
         return {"error": "vllm not installed"}
     img = make_dummy_image(cfg["image_size"])
@@ -113,7 +116,7 @@ def measure_one_model(cfg, lout, batches, repeats, warmup, prompt):
 
     print("    loading {} ...".format(cfg["model"]))
     t0 = time.time()
-    llm = LLM(model=cfg["model"], tensor_parallel_size=1,
+    llm = LLM(model=cfg["model"], tensor_parallel_size=tp,
                trust_remote_code=True, max_model_len=8192,
                dtype="bfloat16", enforce_eager=True,
                disable_log_stats=True,
@@ -166,6 +169,8 @@ def main():
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--warmup", type=int, default=1)
     ap.add_argument("--prompt", default="Describe this image with 100 specific words.")
+    ap.add_argument("--tp", type=int, default=1,
+                     help="vLLM tensor_parallel_size (1 = TP=1, 2 = TP=2 on A6000 x 2)")
     args = ap.parse_args()
 
     if not HAVE_VLLM:
@@ -176,13 +181,13 @@ def main():
     if args.models:
         configs = [c for c in ALIGNED_CONFIGS if c["model"] in args.models]
 
-    print("vLLM BF16 baseline aligned to multi_vlm_full_sim -- H100 x 1")
+    print("vLLM BF16 baseline aligned to multi_vlm_full_sim -- TP={}".format(args.tp))
     results = []
     for cfg in configs:
         print("  Model: {} (label {})".format(cfg["model"], cfg["label"]))
         try:
             r = measure_one_model(cfg, args.lout, args.batches,
-                                    args.repeats, args.warmup, args.prompt)
+                                    args.repeats, args.warmup, args.prompt, tp=args.tp)
             results.append(r)
         except Exception as exc:
             print("    FAILED: {}".format(exc))
@@ -192,7 +197,7 @@ def main():
     save("vllm_bf16_baseline_aligned",
          {"batches": args.batches, "lout": args.lout,
           "repeats": args.repeats, "warmup": args.warmup,
-          "platform": "H100 x 1 vLLM 0.7.3 bf16",
+          "platform": "vLLM 0.7.3 bf16 TP={}".format(args.tp),
           "note": "Skips Qwen3-VL / InternVL3 (vLLM 0.7.3 incompatible)"},
          {"per_model": results})
     print("Done -- pair with tier1_simulator/multi_vlm_full_sim.py for Fig.3 overlay")

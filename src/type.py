@@ -36,8 +36,10 @@ class InterfaceType(Enum):
     NVLINK3 = 1
     PCIE4 = 2
     PCIE5 = 3
+    NVLINK_BRIDGE = 4   # RTX A6000 / workstation NVLink Bridge (112 GB/s)
 
 
 class GPUType(Enum):
     A100a = 0
     H100 = 1
+    A6000 = 2           # RTX A6000 (Ampere, GDDR6 48 GB)

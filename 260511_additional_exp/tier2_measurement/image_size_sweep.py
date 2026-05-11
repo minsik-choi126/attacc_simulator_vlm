@@ -1,4 +1,4 @@
-"""Image size sweep -- vLLM TTFT vs image_size on H100 x 1.
+"""Image size sweep -- vLLM TTFT vs image_size.
 
 Image sizes: {336, 448, 672, 1008}. Each -> number of visual tokens varies.
 Measures TTFT scaling vs visual token count for Qwen2.5-VL-7B baseline.
@@ -43,14 +43,16 @@ def main():
     ap.add_argument("--lout", type=int, default=128)
     ap.add_argument("--repeats", type=int, default=4)
     ap.add_argument("--warmup", type=int, default=1)
+    ap.add_argument("--tp", type=int, default=1,
+                     help="vLLM tensor_parallel_size (1 = TP=1, 2 = TP=2 on A6000 x 2)")
     args = ap.parse_args()
 
     if not HAVE_VLLM:
         print("FATAL: vllm not installed", file=sys.stderr)
         sys.exit(1)
 
-    print("Image size sweep -- {}".format(args.model))
-    llm = LLM(model=args.model, tensor_parallel_size=1,
+    print("Image size sweep -- {} (TP={})".format(args.model, args.tp))
+    llm = LLM(model=args.model, tensor_parallel_size=args.tp,
                trust_remote_code=True, max_model_len=8192,
                dtype="bfloat16", enforce_eager=True,
                disable_log_stats=True,
@@ -96,7 +98,7 @@ def main():
     save("image_size_sweep",
          {"model": args.model, "sizes": args.sizes, "lout": args.lout,
           "repeats": args.repeats, "warmup": args.warmup,
-          "platform": "H100 x 1 vLLM 0.7.3 bf16"},
+          "platform": "vLLM 0.7.3 bf16 TP={}".format(args.tp)},
          {"rows": rows})
     print("Done")
 

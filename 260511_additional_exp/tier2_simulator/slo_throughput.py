@@ -29,8 +29,8 @@ SLO_LIST_MS = [30, 50, 70, 100, 150, 200]
 
 def measure(model, img, lin, batch, system, ngpu=1):
     m = sr.run(
-        model=model, system=system, gpu="H100",
-        ngpu=ngpu, tp=ngpu, num_attacc=ngpu, num_hbm=5, interface="NVLINK4",
+        model=model, system=system, gpu="A6000",
+        ngpu=ngpu, tp=ngpu, num_attacc=ngpu, num_hbm=5, interface="NVLINK_BRIDGE",
         pim="bank", lin=lin, lout=LOUT, batch=batch,
         image_size=img,
         prefill_chunk=512, prefill_samples=8, max_L=4096,
@@ -91,7 +91,7 @@ def main():
     save("slo_throughput",
          {"batches": BATCHES, "lout": LOUT,
           "slo_per_token_ms": SLO_LIST_MS,
-          "platform": "H100 simulator S1 + S2"},
+          "platform": "A6000 simulator A1 + A2"},
          {"models": results})
     print("Done")
 

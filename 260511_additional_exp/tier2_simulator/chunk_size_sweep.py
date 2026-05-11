@@ -23,7 +23,7 @@ CHUNKS = [4, 16, 64, 128, 256, 512, 1024]
 
 
 def main():
-    print("Chunk size sweep -- H100 x 1 S1 dgx-attacc")
+    print("Chunk size sweep -- A6000 x 1 A1 dgx-attacc")
     all_results = []
     for model, image_size, lin in MODELS:
         full_chunk = max(CHUNKS + [lin])
@@ -32,8 +32,8 @@ def main():
                      "points": []}
         for c in chunks:
             m = sr.run(
-                model=model, system="dgx-attacc", gpu="H100",
-                ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK4",
+                model=model, system="dgx-attacc", gpu="A6000",
+                ngpu=1, tp=1, num_attacc=1, num_hbm=5, interface="NVLINK_BRIDGE",
                 pim="bank", lin=lin, lout=128, batch=1,
                 image_size=image_size,
                 prefill_chunk=c, prefill_samples=8, max_L=4096,
@@ -58,7 +58,7 @@ def main():
         all_results.append(per_model)
 
     save("chunk_size_sweep",
-         {"chunks": CHUNKS, "platform": "H100 x 1 S1 dgx-attacc"},
+         {"chunks": CHUNKS, "platform": "A6000 x 1 A1 dgx-attacc"},
          {"models": all_results})
     print("Done")
 

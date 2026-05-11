@@ -1,7 +1,9 @@
 {
   "experiment": "roofline_per_vlm",
   "config": {
+    "A6000_ridge_ops_per_byte": 403.26,
     "H100_ridge_ops_per_byte": 295.17,
+    "host_ridge_used": "A6000",
     "regimes": [
       "prefill_L569",
       "decode_L1"
@@ -12,7 +14,8 @@
       "InternVL3-8B-hf",
       "LLaVA-1.5-7B",
       "LLaVA-Next-Mistral-7B"
-    ]
+    ],
+    "platform": "A6000 roofline (A6000 ridge primary, H100 paper ref)"
   },
   "results": {
     "matrix": [
@@ -33,14 +36,14 @@
             "ai": 99.91,
             "flops": 2652250112,
             "bytes": 26547264,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "context",
             "ai": 99.91,
             "flops": 2652250112,
             "bytes": 26547264,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "ffn",
@@ -68,14 +71,14 @@
             "ai": 101.82,
             "flops": 2320718848,
             "bytes": 22791864,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "context",
             "ai": 101.82,
             "flops": 2320718848,
             "bytes": 22791864,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "ffn",
@@ -103,14 +106,14 @@
             "ai": 101.82,
             "flops": 2320718848,
             "bytes": 22791864,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "context",
             "ai": 101.82,
             "flops": 2320718848,
             "bytes": 22791864,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "ffn",
@@ -173,14 +176,14 @@
             "ai": 99.91,
             "flops": 2652250112,
             "bytes": 26547264,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "context",
             "ai": 99.91,
             "flops": 2652250112,
             "bytes": 26547264,
-            "verdict": "marginal (PIM may help)"
+            "verdict": "memory-bound (PIM target)"
           },
           {
             "layer": "ffn",
@@ -369,8 +372,8 @@
     ]
   },
   "metadata": {
-    "timestamp": "2026-05-11T08:54:55.592960Z",
-    "git_commit": "44f8caa",
-    "platform": "H100x1 driver 535-compatible"
+    "timestamp": "2026-05-11T12:43:22.092415Z",
+    "git_commit": "89a9aba",
+    "platform": "A6000 roofline (A6000 ridge primary, H100 paper ref)"
   }
 }

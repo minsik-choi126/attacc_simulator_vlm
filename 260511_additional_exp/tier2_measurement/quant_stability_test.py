@@ -58,11 +58,11 @@ def make_dummy_image(size=672, seed=0):
         return None
 
 
-def measure_variant(variant, n_runs, lout, image_size):
+def measure_variant(variant, n_runs, lout, image_size, tp=1):
     if not HAVE_VLLM:
         return {"error": "vllm not installed"}
     print("  Loading {} ({})".format(variant["label"], variant["model"]))
-    kwargs = dict(model=variant["model"], tensor_parallel_size=1,
+    kwargs = dict(model=variant["model"], tensor_parallel_size=tp,
                   trust_remote_code=True, max_model_len=4096,
                   dtype=variant["dtype"], enforce_eager=True,
                   disable_log_stats=True,
@@ -124,6 +124,8 @@ def main():
     ap.add_argument("--image_size", type=int, default=672)
     ap.add_argument("--variants", nargs="+", default=None,
                      help="Filter by label: BF16/FP16/W4A16/W8A16")
+    ap.add_argument("--tp", type=int, default=1,
+                     help="vLLM tensor_parallel_size (1 = TP=1, 2 = TP=2 on A6000 x 2)")
     args = ap.parse_args()
 
     if not HAVE_VLLM:
@@ -138,7 +140,7 @@ def main():
     results = []
     for v in variants:
         try:
-            r = measure_variant(v, args.n_runs, args.lout, args.image_size)
+            r = measure_variant(v, args.n_runs, args.lout, args.image_size, tp=args.tp)
             print("  {:6s}: nan_count={}/{}, empty={}, short={}".format(
                 v["label"], r.get("nan_count", "?"), args.n_runs,
                 r.get("empty_count", "?"), r.get("short_count", "?")))
@@ -150,7 +152,7 @@ def main():
     save("quant_stability_test",
          {"n_runs": args.n_runs, "lout": args.lout,
           "image_size": args.image_size,
-          "platform": "H100 x 1 vLLM 0.7.3"},
+          "platform": "vLLM 0.7.3 TP={}".format(args.tp)},
          {"variants": results,
           "interpretation": "BF16/W4A16/W8A16 expected nan_count=0; "
                              "FP16 may produce nan on long VLM sequences"})

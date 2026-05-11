@@ -51,14 +51,16 @@ def main():
     ap.add_argument("--image_size", type=int, default=672)
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--warmup", type=int, default=1)
+    ap.add_argument("--tp", type=int, default=1,
+                     help="vLLM tensor_parallel_size (1 = TP=1, 2 = TP=2 on A6000 x 2)")
     args = ap.parse_args()
 
     if not HAVE_VLLM:
         print("FATAL: vllm not installed", file=sys.stderr)
         sys.exit(1)
 
-    print("Prompt pattern matrix -- {}".format(args.model))
-    llm = LLM(model=args.model, tensor_parallel_size=1,
+    print("Prompt pattern matrix -- {} (TP={})".format(args.model, args.tp))
+    llm = LLM(model=args.model, tensor_parallel_size=args.tp,
                trust_remote_code=True, max_model_len=8192,
                dtype="bfloat16", enforce_eager=True,
                disable_log_stats=True,
@@ -100,7 +102,7 @@ def main():
          {"model": args.model, "lin_patterns": [p[0] for p in LIN_PATTERNS],
           "lout_values": LOUT_VALUES, "image_size": args.image_size,
           "repeats": args.repeats, "warmup": args.warmup,
-          "platform": "H100 x 1 vLLM 0.7.3 bf16"},
+          "platform": "vLLM 0.7.3 bf16 TP={}".format(args.tp)},
          {"rows": rows})
     print("Done")
 
