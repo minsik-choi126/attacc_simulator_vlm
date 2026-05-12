@@ -1,0 +1,766 @@
+{
+  "experiment": "slo_throughput",
+  "config": {
+    "batches": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "lout": 128,
+    "slo_per_token_ms": [
+      30,
+      50,
+      70,
+      100,
+      150,
+      200
+    ],
+    "deployment_scope": "A1 TP=1 only",
+    "future_hooks": [
+      "AttAcc A2"
+    ],
+    "platform": "A6000 simulator A1"
+  },
+  "results": {
+    "models": [
+      {
+        "model": "Qwen3-VL-4B",
+        "image_size": 672,
+        "lin": 569,
+        "systems": [
+          {
+            "system": "dgx",
+            "ngpu": 1,
+            "label": "GPU only",
+            "curve": [
+              {
+                "s_ms": 44.53318204499817,
+                "g_ms_per_tok": 13.56427384717299,
+                "e2e_ms": 1767.1959606359678,
+                "throughput_tok_per_sec": 73.72307661043101,
+                "batch": 1
+              },
+              {
+                "s_ms": 71.59539360837061,
+                "g_ms_per_tok": 13.955489830568837,
+                "e2e_ms": 1843.9426020906128,
+                "throughput_tok_per_sec": 143.31277685567835,
+                "batch": 2
+              },
+              {
+                "s_ms": 143.17660648092576,
+                "g_ms_per_tok": 15.505739661137856,
+                "e2e_ms": 2112.4055434454335,
+                "throughput_tok_per_sec": 257.9689900266563,
+                "batch": 4
+              },
+              {
+                "s_ms": 275.9364192272584,
+                "g_ms_per_tok": 18.60623932227555,
+                "e2e_ms": 2638.928813156253,
+                "throughput_tok_per_sec": 429.9632967970229,
+                "batch": 8
+              },
+              {
+                "s_ms": 536.1350220793402,
+                "g_ms_per_tok": 23.28008158572805,
+                "e2e_ms": 3492.7053834668022,
+                "throughput_tok_per_sec": 687.2828147564941,
+                "batch": 16
+              },
+              {
+                "s_ms": 1054.822054013064,
+                "g_ms_per_tok": 33.0139684655733,
+                "e2e_ms": 5247.596049140873,
+                "throughput_tok_per_sec": 969.2866834040065,
+                "batch": 32
+              },
+              {
+                "s_ms": 2097.6358101450855,
+                "g_ms_per_tok": 51.71605751938231,
+                "e2e_ms": 8665.57511510664,
+                "throughput_tok_per_sec": 1237.5266613471817,
+                "batch": 64
+              }
+            ],
+            "slo_points": [
+              {
+                "slo_per_token_ms": 30,
+                "best": {
+                  "s_ms": 536.1350220793402,
+                  "g_ms_per_tok": 23.28008158572805,
+                  "e2e_ms": 3492.7053834668022,
+                  "throughput_tok_per_sec": 687.2828147564941,
+                  "batch": 16
+                }
+              },
+              {
+                "slo_per_token_ms": 50,
+                "best": {
+                  "s_ms": 1054.822054013064,
+                  "g_ms_per_tok": 33.0139684655733,
+                  "e2e_ms": 5247.596049140873,
+                  "throughput_tok_per_sec": 969.2866834040065,
+                  "batch": 32
+                }
+              },
+              {
+                "slo_per_token_ms": 70,
+                "best": {
+                  "s_ms": 2097.6358101450855,
+                  "g_ms_per_tok": 51.71605751938231,
+                  "e2e_ms": 8665.57511510664,
+                  "throughput_tok_per_sec": 1237.5266613471817,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 100,
+                "best": {
+                  "s_ms": 2097.6358101450855,
+                  "g_ms_per_tok": 51.71605751938231,
+                  "e2e_ms": 8665.57511510664,
+                  "throughput_tok_per_sec": 1237.5266613471817,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 150,
+                "best": {
+                  "s_ms": 2097.6358101450855,
+                  "g_ms_per_tok": 51.71605751938231,
+                  "e2e_ms": 8665.57511510664,
+                  "throughput_tok_per_sec": 1237.5266613471817,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 200,
+                "best": {
+                  "s_ms": 2097.6358101450855,
+                  "g_ms_per_tok": 51.71605751938231,
+                  "e2e_ms": 8665.57511510664,
+                  "throughput_tok_per_sec": 1237.5266613471817,
+                  "batch": 64
+                }
+              }
+            ]
+          },
+          {
+            "system": "dgx-attacc",
+            "ngpu": 1,
+            "label": "AttAcc A1",
+            "curve": [
+              {
+                "s_ms": 56.017848443569655,
+                "g_ms_per_tok": 3.6765170365899005,
+                "e2e_ms": 522.935512090487,
+                "throughput_tok_per_sec": 271.996563608348,
+                "batch": 1
+              },
+              {
+                "s_ms": 86.83322244151351,
+                "g_ms_per_tok": 3.9055395155585697,
+                "e2e_ms": 582.8367409174518,
+                "throughput_tok_per_sec": 512.0931415576678,
+                "batch": 2
+              },
+              {
+                "s_ms": 158.6997481712114,
+                "g_ms_per_tok": 4.318082592541076,
+                "e2e_ms": 707.0962374239282,
+                "throughput_tok_per_sec": 926.337075374491,
+                "batch": 4
+              },
+              {
+                "s_ms": 292.03018663182996,
+                "g_ms_per_tok": 5.0451614704718954,
+                "e2e_ms": 932.7656933817607,
+                "throughput_tok_per_sec": 1585.6776927402734,
+                "batch": 8
+              },
+              {
+                "s_ms": 582.8905702924826,
+                "g_ms_per_tok": 6.210661125338625,
+                "e2e_ms": 1371.644533210488,
+                "throughput_tok_per_sec": 2576.215265508892,
+                "batch": 16
+              },
+              {
+                "s_ms": 1163.0461726353492,
+                "g_ms_per_tok": 8.21698090565661,
+                "e2e_ms": 2206.602747653739,
+                "throughput_tok_per_sec": 3894.3743897434447,
+                "batch": 32
+              },
+              {
+                "s_ms": 2320.8732720536573,
+                "g_ms_per_tok": 10.159381860355557,
+                "e2e_ms": 3611.114768318813,
+                "throughput_tok_per_sec": 6299.595869089631,
+                "batch": 64
+              }
+            ],
+            "slo_points": [
+              {
+                "slo_per_token_ms": 30,
+                "best": {
+                  "s_ms": 2320.8732720536573,
+                  "g_ms_per_tok": 10.159381860355557,
+                  "e2e_ms": 3611.114768318813,
+                  "throughput_tok_per_sec": 6299.595869089631,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 50,
+                "best": {
+                  "s_ms": 2320.8732720536573,
+                  "g_ms_per_tok": 10.159381860355557,
+                  "e2e_ms": 3611.114768318813,
+                  "throughput_tok_per_sec": 6299.595869089631,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 70,
+                "best": {
+                  "s_ms": 2320.8732720536573,
+                  "g_ms_per_tok": 10.159381860355557,
+                  "e2e_ms": 3611.114768318813,
+                  "throughput_tok_per_sec": 6299.595869089631,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 100,
+                "best": {
+                  "s_ms": 2320.8732720536573,
+                  "g_ms_per_tok": 10.159381860355557,
+                  "e2e_ms": 3611.114768318813,
+                  "throughput_tok_per_sec": 6299.595869089631,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 150,
+                "best": {
+                  "s_ms": 2320.8732720536573,
+                  "g_ms_per_tok": 10.159381860355557,
+                  "e2e_ms": 3611.114768318813,
+                  "throughput_tok_per_sec": 6299.595869089631,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 200,
+                "best": {
+                  "s_ms": 2320.8732720536573,
+                  "g_ms_per_tok": 10.159381860355557,
+                  "e2e_ms": 3611.114768318813,
+                  "throughput_tok_per_sec": 6299.595869089631,
+                  "batch": 64
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "model": "Qwen2.5-VL-7B",
+        "image_size": 672,
+        "lin": 704,
+        "systems": [
+          {
+            "system": "dgx",
+            "ngpu": 1,
+            "label": "GPU only",
+            "curve": [
+              {
+                "s_ms": 79.28285859632852,
+                "g_ms_per_tok": 23.293392737950107,
+                "e2e_ms": 3037.543736315992,
+                "throughput_tok_per_sec": 42.93062892340187,
+                "batch": 1
+              },
+              {
+                "s_ms": 134.9775213338349,
+                "g_ms_per_tok": 23.721222041877745,
+                "e2e_ms": 3147.5727206523084,
+                "throughput_tok_per_sec": 84.31268829528153,
+                "batch": 2
+              },
+              {
+                "s_ms": 267.50069703050764,
+                "g_ms_per_tok": 26.22543557642458,
+                "e2e_ms": 3598.1310152364294,
+                "throughput_tok_per_sec": 152.5236821460388,
+                "batch": 4
+              },
+              {
+                "s_ms": 518.3697031283252,
+                "g_ms_per_tok": 27.72556997637813,
+                "e2e_ms": 4039.5170901283473,
+                "throughput_tok_per_sec": 288.54230974569356,
+                "batch": 8
+              },
+              {
+                "s_ms": 1033.732059632554,
+                "g_ms_per_tok": 32.16655407040325,
+                "e2e_ms": 5118.884426573766,
+                "throughput_tok_per_sec": 497.411067563552,
+                "batch": 16
+              },
+              {
+                "s_ms": 2049.8493337627815,
+                "g_ms_per_tok": 42.23572225845381,
+                "e2e_ms": 7413.786060586415,
+                "throughput_tok_per_sec": 757.6524867784153,
+                "batch": 32
+              },
+              {
+                "s_ms": 4099.035340668916,
+                "g_ms_per_tok": 58.5895127522017,
+                "e2e_ms": 11539.903460198533,
+                "throughput_tok_per_sec": 1092.3456604031066,
+                "batch": 64
+              }
+            ],
+            "slo_points": [
+              {
+                "slo_per_token_ms": 30,
+                "best": {
+                  "s_ms": 518.3697031283252,
+                  "g_ms_per_tok": 27.72556997637813,
+                  "e2e_ms": 4039.5170901283473,
+                  "throughput_tok_per_sec": 288.54230974569356,
+                  "batch": 8
+                }
+              },
+              {
+                "slo_per_token_ms": 50,
+                "best": {
+                  "s_ms": 2049.8493337627815,
+                  "g_ms_per_tok": 42.23572225845381,
+                  "e2e_ms": 7413.786060586415,
+                  "throughput_tok_per_sec": 757.6524867784153,
+                  "batch": 32
+                }
+              },
+              {
+                "slo_per_token_ms": 70,
+                "best": {
+                  "s_ms": 4099.035340668916,
+                  "g_ms_per_tok": 58.5895127522017,
+                  "e2e_ms": 11539.903460198533,
+                  "throughput_tok_per_sec": 1092.3456604031066,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 100,
+                "best": {
+                  "s_ms": 4099.035340668916,
+                  "g_ms_per_tok": 58.5895127522017,
+                  "e2e_ms": 11539.903460198533,
+                  "throughput_tok_per_sec": 1092.3456604031066,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 150,
+                "best": {
+                  "s_ms": 4099.035340668916,
+                  "g_ms_per_tok": 58.5895127522017,
+                  "e2e_ms": 11539.903460198533,
+                  "throughput_tok_per_sec": 1092.3456604031066,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 200,
+                "best": {
+                  "s_ms": 4099.035340668916,
+                  "g_ms_per_tok": 58.5895127522017,
+                  "e2e_ms": 11539.903460198533,
+                  "throughput_tok_per_sec": 1092.3456604031066,
+                  "batch": 64
+                }
+              }
+            ]
+          },
+          {
+            "system": "dgx-attacc",
+            "ngpu": 1,
+            "label": "AttAcc A1",
+            "curve": [
+              {
+                "s_ms": 95.61592744903443,
+                "g_ms_per_tok": 3.7871158444984534,
+                "e2e_ms": 576.579639700338,
+                "throughput_tok_per_sec": 264.0531848141643,
+                "batch": 1
+              },
+              {
+                "s_ms": 145.31405143454077,
+                "g_ms_per_tok": 4.2497610587051255,
+                "e2e_ms": 685.0337058900918,
+                "throughput_tok_per_sec": 470.614693949261,
+                "batch": 2
+              },
+              {
+                "s_ms": 272.4888148959194,
+                "g_ms_per_tok": 5.388640932620018,
+                "e2e_ms": 956.8462133386618,
+                "throughput_tok_per_sec": 742.3021964195256,
+                "batch": 4
+              },
+              {
+                "s_ms": 529.5437447584428,
+                "g_ms_per_tok": 6.954834966643157,
+                "e2e_ms": 1412.8077855221236,
+                "throughput_tok_per_sec": 1150.2789122056345,
+                "batch": 8
+              },
+              {
+                "s_ms": 1040.3952005567892,
+                "g_ms_per_tok": 9.436622871406511,
+                "e2e_ms": 2238.846305225416,
+                "throughput_tok_per_sec": 1695.521821528005,
+                "batch": 16
+              },
+              {
+                "s_ms": 2079.850278598546,
+                "g_ms_per_tok": 14.239211818237386,
+                "e2e_ms": 3888.230179514694,
+                "throughput_tok_per_sec": 2247.3153997902355,
+                "batch": 32
+              },
+              {
+                "s_ms": 4159.052388868446,
+                "g_ms_per_tok": 18.52909976224577,
+                "e2e_ms": 6512.248058673658,
+                "throughput_tok_per_sec": 3454.0264136525457,
+                "batch": 64
+              }
+            ],
+            "slo_points": [
+              {
+                "slo_per_token_ms": 30,
+                "best": {
+                  "s_ms": 4159.052388868446,
+                  "g_ms_per_tok": 18.52909976224577,
+                  "e2e_ms": 6512.248058673658,
+                  "throughput_tok_per_sec": 3454.0264136525457,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 50,
+                "best": {
+                  "s_ms": 4159.052388868446,
+                  "g_ms_per_tok": 18.52909976224577,
+                  "e2e_ms": 6512.248058673658,
+                  "throughput_tok_per_sec": 3454.0264136525457,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 70,
+                "best": {
+                  "s_ms": 4159.052388868446,
+                  "g_ms_per_tok": 18.52909976224577,
+                  "e2e_ms": 6512.248058673658,
+                  "throughput_tok_per_sec": 3454.0264136525457,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 100,
+                "best": {
+                  "s_ms": 4159.052388868446,
+                  "g_ms_per_tok": 18.52909976224577,
+                  "e2e_ms": 6512.248058673658,
+                  "throughput_tok_per_sec": 3454.0264136525457,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 150,
+                "best": {
+                  "s_ms": 4159.052388868446,
+                  "g_ms_per_tok": 18.52909976224577,
+                  "e2e_ms": 6512.248058673658,
+                  "throughput_tok_per_sec": 3454.0264136525457,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 200,
+                "best": {
+                  "s_ms": 4159.052388868446,
+                  "g_ms_per_tok": 18.52909976224577,
+                  "e2e_ms": 6512.248058673658,
+                  "throughput_tok_per_sec": 3454.0264136525457,
+                  "batch": 64
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "image_size": 336,
+        "lin": 704,
+        "systems": [
+          {
+            "system": "dgx",
+            "ngpu": 1,
+            "label": "GPU only",
+            "curve": [
+              {
+                "s_ms": 69.28868344175427,
+                "g_ms_per_tok": 23.633743158840872,
+                "e2e_ms": 3070.774064614545,
+                "throughput_tok_per_sec": 42.31238332747649,
+                "batch": 1
+              },
+              {
+                "s_ms": 116.50283729913703,
+                "g_ms_per_tok": 23.918146709839082,
+                "e2e_ms": 3154.1074694487,
+                "throughput_tok_per_sec": 83.61851878671145,
+                "batch": 2
+              },
+              {
+                "s_ms": 229.09136438542015,
+                "g_ms_per_tok": 27.130618946353977,
+                "e2e_ms": 3674.679970572375,
+                "throughput_tok_per_sec": 147.43489663502686,
+                "batch": 4
+              },
+              {
+                "s_ms": 454.40002801244844,
+                "g_ms_per_tok": 30.48375083388467,
+                "e2e_ms": 4325.836383915802,
+                "throughput_tok_per_sec": 262.43489666328986,
+                "batch": 8
+              },
+              {
+                "s_ms": 882.0891283096784,
+                "g_ms_per_tok": 36.62868470470449,
+                "e2e_ms": 5533.932085807148,
+                "throughput_tok_per_sec": 436.8161218179096,
+                "batch": 16
+              },
+              {
+                "s_ms": 1728.4462975897886,
+                "g_ms_per_tok": 49.8760880080849,
+                "e2e_ms": 8062.709474616571,
+                "throughput_tok_per_sec": 641.590013932384,
+                "batch": 32
+              },
+              {
+                "s_ms": 3423.6914027989396,
+                "g_ms_per_tok": 70.1593763407136,
+                "e2e_ms": 12333.932198069568,
+                "throughput_tok_per_sec": 912.208792866089,
+                "batch": 64
+              }
+            ],
+            "slo_points": [
+              {
+                "slo_per_token_ms": 30,
+                "best": {
+                  "s_ms": 229.09136438542015,
+                  "g_ms_per_tok": 27.130618946353977,
+                  "e2e_ms": 3674.679970572375,
+                  "throughput_tok_per_sec": 147.43489663502686,
+                  "batch": 4
+                }
+              },
+              {
+                "slo_per_token_ms": 50,
+                "best": {
+                  "s_ms": 1728.4462975897886,
+                  "g_ms_per_tok": 49.8760880080849,
+                  "e2e_ms": 8062.709474616571,
+                  "throughput_tok_per_sec": 641.590013932384,
+                  "batch": 32
+                }
+              },
+              {
+                "slo_per_token_ms": 70,
+                "best": {
+                  "s_ms": 1728.4462975897886,
+                  "g_ms_per_tok": 49.8760880080849,
+                  "e2e_ms": 8062.709474616571,
+                  "throughput_tok_per_sec": 641.590013932384,
+                  "batch": 32
+                }
+              },
+              {
+                "slo_per_token_ms": 100,
+                "best": {
+                  "s_ms": 3423.6914027989396,
+                  "g_ms_per_tok": 70.1593763407136,
+                  "e2e_ms": 12333.932198069568,
+                  "throughput_tok_per_sec": 912.208792866089,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 150,
+                "best": {
+                  "s_ms": 3423.6914027989396,
+                  "g_ms_per_tok": 70.1593763407136,
+                  "e2e_ms": 12333.932198069568,
+                  "throughput_tok_per_sec": 912.208792866089,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 200,
+                "best": {
+                  "s_ms": 3423.6914027989396,
+                  "g_ms_per_tok": 70.1593763407136,
+                  "e2e_ms": 12333.932198069568,
+                  "throughput_tok_per_sec": 912.208792866089,
+                  "batch": 64
+                }
+              }
+            ]
+          },
+          {
+            "system": "dgx-attacc",
+            "ngpu": 1,
+            "label": "AttAcc A1",
+            "curve": [
+              {
+                "s_ms": 82.78239023570386,
+                "g_ms_per_tok": 8.08651000410594,
+                "e2e_ms": 1109.769160757158,
+                "throughput_tok_per_sec": 123.66274196065402,
+                "batch": 1
+              },
+              {
+                "s_ms": 141.49811284280094,
+                "g_ms_per_tok": 8.703625718496468,
+                "e2e_ms": 1246.8585790918526,
+                "throughput_tok_per_sec": 229.78929295520024,
+                "batch": 2
+              },
+              {
+                "s_ms": 278.8441037607479,
+                "g_ms_per_tok": 9.74066278283801,
+                "e2e_ms": 1515.9082771811752,
+                "throughput_tok_per_sec": 410.64967437817126,
+                "batch": 4
+              },
+              {
+                "s_ms": 553.922830795104,
+                "g_ms_per_tok": 10.981344176268605,
+                "e2e_ms": 1948.553541181217,
+                "throughput_tok_per_sec": 728.5082656172927,
+                "batch": 8
+              },
+              {
+                "s_ms": 1090.346716662754,
+                "g_ms_per_tok": 13.264769238784986,
+                "e2e_ms": 2774.972409988447,
+                "throughput_tok_per_sec": 1206.202664515071,
+                "batch": 16
+              },
+              {
+                "s_ms": 2148.3998296917052,
+                "g_ms_per_tok": 18.14236588866759,
+                "e2e_ms": 4452.480297552489,
+                "throughput_tok_per_sec": 1763.8272867150372,
+                "batch": 32
+              },
+              {
+                "s_ms": 4290.266774398536,
+                "g_ms_per_tok": 21.836801215028967,
+                "e2e_ms": 7063.540528707214,
+                "throughput_tok_per_sec": 2930.8321933137636,
+                "batch": 64
+              }
+            ],
+            "slo_points": [
+              {
+                "slo_per_token_ms": 30,
+                "best": {
+                  "s_ms": 4290.266774398536,
+                  "g_ms_per_tok": 21.836801215028967,
+                  "e2e_ms": 7063.540528707214,
+                  "throughput_tok_per_sec": 2930.8321933137636,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 50,
+                "best": {
+                  "s_ms": 4290.266774398536,
+                  "g_ms_per_tok": 21.836801215028967,
+                  "e2e_ms": 7063.540528707214,
+                  "throughput_tok_per_sec": 2930.8321933137636,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 70,
+                "best": {
+                  "s_ms": 4290.266774398536,
+                  "g_ms_per_tok": 21.836801215028967,
+                  "e2e_ms": 7063.540528707214,
+                  "throughput_tok_per_sec": 2930.8321933137636,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 100,
+                "best": {
+                  "s_ms": 4290.266774398536,
+                  "g_ms_per_tok": 21.836801215028967,
+                  "e2e_ms": 7063.540528707214,
+                  "throughput_tok_per_sec": 2930.8321933137636,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 150,
+                "best": {
+                  "s_ms": 4290.266774398536,
+                  "g_ms_per_tok": 21.836801215028967,
+                  "e2e_ms": 7063.540528707214,
+                  "throughput_tok_per_sec": 2930.8321933137636,
+                  "batch": 64
+                }
+              },
+              {
+                "slo_per_token_ms": 200,
+                "best": {
+                  "s_ms": 4290.266774398536,
+                  "g_ms_per_tok": 21.836801215028967,
+                  "e2e_ms": 7063.540528707214,
+                  "throughput_tok_per_sec": 2930.8321933137636,
+                  "batch": 64
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-05-11T19:13:58.086227Z",
+    "git_commit": "117f717",
+    "platform": "A6000 simulator A1"
+  }
+}

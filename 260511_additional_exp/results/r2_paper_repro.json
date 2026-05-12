@@ -4,7 +4,7 @@
     "model": "GPT-175B",
     "lin": 2048,
     "lout": 128,
-    "batch": 64,
+    "batch": 8,
     "platform": "simulated DGX-A100 x8"
   },
   "results": {
@@ -13,33 +13,33 @@
         "label": "DGX_Base_FP16",
         "system": "dgx",
         "word": 2,
-        "total_ms": 38759.75219214528,
-        "s_time": 30595.651223918507,
-        "g_time": 64.28425959233677
+        "total_ms": 7939.053125419874,
+        "s_time": 3893.521793224856,
+        "g_time": 31.85457741885841
       },
       {
         "label": "DGX_AttAcc_FP16",
         "system": "dgx-attacc",
         "word": 2,
-        "total_ms": 37637.11641445503,
-        "s_time": 33681.39531505357,
-        "g_time": 31.147410231507585
+        "total_ms": 7315.55548254188,
+        "s_time": 4542.180812488739,
+        "g_time": 21.83759582719009
       },
       {
         "label": "DGX_Base_W8A8",
         "system": "dgx",
         "word": 1,
-        "total_ms": 20103.20167446802,
-        "s_time": 15369.671670354637,
-        "g_time": 37.27188979616835
+        "total_ms": 4627.935587941392,
+        "s_time": 1953.690401843884,
+        "g_time": 21.057048709429196
       },
       {
         "label": "DGX_AttAcc_W8A8",
         "system": "dgx-attacc",
         "word": 1,
-        "total_ms": 19500.739950938903,
-        "s_time": 16871.192826450173,
-        "g_time": 20.7050954684152
+        "total_ms": 4297.3038392343815,
+        "s_time": 2259.2721590278256,
+        "g_time": 16.047493544933513
       }
     ],
     "targets": [
@@ -47,7 +47,7 @@
         "tag": "FP16_base",
         "kind": "must",
         "target_x": 4.84,
-        "speedup_x": 1.03,
+        "speedup_x": 1.085,
         "tolerance": 0.2,
         "status": "FAIL"
       },
@@ -64,7 +64,7 @@
         "tag": "INT8_base",
         "kind": "should",
         "target_x": 3.47,
-        "speedup_x": 1.031,
+        "speedup_x": 1.077,
         "tolerance": 0.2,
         "status": "FAIL"
       },
@@ -80,8 +80,8 @@
     ]
   },
   "metadata": {
-    "timestamp": "2026-05-11T16:32:31.042777Z",
-    "git_commit": "f4d1525",
+    "timestamp": "2026-05-12T01:10:27.626719Z",
+    "git_commit": "117f717",
     "platform": "simulated DGX-A100 x8"
   }
 }
