@@ -1,0 +1,61 @@
+{
+  "experiment": "r2_paper_repro_v3",
+  "config": {
+    "model": "GPT-175B",
+    "lin": 2048,
+    "lout": 128,
+    "batch_dgx": 54,
+    "batch_dgx_attacc": 854,
+    "targets": {
+      "fp16_base": 4.84,
+      "int8_base": 3.47
+    },
+    "method": "decode-only throughput (paper §3.2: generated tok/s)",
+    "tolerance": 0.15
+  },
+  "results": {
+    "fp16": {
+      "label": "FP16 (W16A16)",
+      "word": 2,
+      "base": {
+        "batch": 54,
+        "g_time_ms": 55.75066933919072,
+        "decode_total_ms": 7080.335006077222,
+        "decode_throughput_tok_per_sec": 976.22499416585,
+        "s_time_ms": 25676.139608910664
+      },
+      "attacc": {
+        "batch": 854,
+        "g_time_ms": 206.42854891067725,
+        "decode_total_ms": 26216.42571165601,
+        "decode_throughput_tok_per_sec": 4169.5996701563745,
+        "s_time_ms": 448114.6203219215
+      },
+      "ratio": 4.271146195881976
+    },
+    "int8": {
+      "label": "INT8 (W8A8)",
+      "word": 1,
+      "base": {
+        "batch": 54,
+        "g_time_ms": 33.00509466959524,
+        "decode_total_ms": 4191.647023038595,
+        "decode_throughput_tok_per_sec": 1648.9938112654763,
+        "s_time_ms": 12862.524309973092
+      },
+      "attacc": {
+        "batch": 854,
+        "g_time_ms": 104.09062993759346,
+        "decode_total_ms": 13219.51000207437,
+        "decode_throughput_tok_per_sec": 8268.990301671322,
+        "s_time_ms": 224008.97201628884
+      },
+      "ratio": 5.014567213763832
+    }
+  },
+  "metadata": {
+    "timestamp": "2026-05-29T19:57:52.702249Z",
+    "git_commit": "34fee4e",
+    "platform": "unspecified"
+  }
+}
