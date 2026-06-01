@@ -297,6 +297,12 @@ def make_model_config(name, dtype):
         'use_image_newline_parameter': False,
         'is_concat_style': True,
         'is_cross_attn': False,
+        # Fix B: VLM-side floor overhead -- preprocessing, RoPE,
+        # CUDA kernel launches, vLLM scheduler.  Calibrated from
+        # LLaVA-1.5 (measured 41.2 - simulated 18.7 = 22.5 ms).
+        # Treat as HW-independent first-order constant; tune per-model
+        # after Fix A baseline if cross-HW calibration shows drift.
+        'vlm_floor_overhead_ms': 22.0,
     }
     model_table['Qwen2.5-VL-7B'] = {
         'ndec': 28,
@@ -325,6 +331,12 @@ def make_model_config(name, dtype):
         'use_image_newline_parameter': False,
         'is_concat_style': True,
         'is_cross_attn': False,
+        # Fix B: VLM-side floor overhead -- preprocessing, RoPE,
+        # CUDA kernel launches, vLLM scheduler.  Calibrated from
+        # LLaVA-1.5 (measured 41.2 - simulated 18.7 = 22.5 ms).
+        # Treat as HW-independent first-order constant; tune per-model
+        # after Fix A baseline if cross-HW calibration shows drift.
+        'vlm_floor_overhead_ms': 22.0,
     }
     model_table['InternVL3-8B-hf'] = {
         'ndec': 28,
@@ -353,6 +365,12 @@ def make_model_config(name, dtype):
         'use_image_newline_parameter': False,
         'is_concat_style': True,
         'is_cross_attn': False,
+        # Fix B: VLM-side floor overhead -- preprocessing, RoPE,
+        # CUDA kernel launches, vLLM scheduler.  Calibrated from
+        # LLaVA-1.5 (measured 41.2 - simulated 18.7 = 22.5 ms).
+        # Treat as HW-independent first-order constant; tune per-model
+        # after Fix A baseline if cross-HW calibration shows drift.
+        'vlm_floor_overhead_ms': 22.0,
     }
     model_table['Vicuna-7B'] = {
         'ndec': 32,
@@ -384,6 +402,12 @@ def make_model_config(name, dtype):
         'use_image_newline_parameter': False,
         'is_concat_style': True,
         'is_cross_attn': False,
+        # Fix B: VLM-side floor overhead -- preprocessing, RoPE,
+        # CUDA kernel launches, vLLM scheduler.  Calibrated from
+        # LLaVA-1.5 (measured 41.2 - simulated 18.7 = 22.5 ms).
+        # Treat as HW-independent first-order constant; tune per-model
+        # after Fix A baseline if cross-HW calibration shows drift.
+        'vlm_floor_overhead_ms': 22.0,
     }
     model_table['Mistral-7B'] = {
         'ndec': 32,
@@ -416,6 +440,12 @@ def make_model_config(name, dtype):
         'use_image_newline_parameter': True,
         'is_concat_style': True,
         'is_cross_attn': False,
+        # Fix B: VLM-side floor overhead -- preprocessing, RoPE,
+        # CUDA kernel launches, vLLM scheduler.  Calibrated from
+        # LLaVA-1.5 (measured 41.2 - simulated 18.7 = 22.5 ms).
+        # Treat as HW-independent first-order constant; tune per-model
+        # after Fix A baseline if cross-HW calibration shows drift.
+        'vlm_floor_overhead_ms': 22.0,
     }
 
     entry = model_table[name]

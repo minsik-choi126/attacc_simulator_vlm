@@ -139,12 +139,15 @@ def _load_llm(hf_id, tp=1):
 
 
 def _measure_vllm(llm, sp, hf_id, image_size, batch, repeats=3):
-    """Run vLLM batch=batch with dummy image, return per-request statistics."""
+    """Run vLLM batch=batch with dummy image, return per-request statistics.
+
+    Catches CUDA OOM and other RuntimeErrors to mark cell rather than crash
+    the whole sweep -- higher batch sizes can fail on capacity-bound VLMs.
+    """
     img = _dummy_image(image_size)
     prompt = _make_prompt(hf_id)
     if img is None:
         return {"status": "no_pil"}
-    # Build inputs (vLLM 0.7.x multimodal format).
     inputs = []
     for _ in range(batch):
         inputs.append({"prompt": prompt,
@@ -152,9 +155,21 @@ def _measure_vllm(llm, sp, hf_id, image_size, batch, repeats=3):
     ttfts, e2es, itls = [], [], []
     powers = []
     for _ in range(repeats):
-        p0 = get_gpu_power_w()
-        outs = llm.generate(inputs, sp, use_tqdm=False)
-        p1 = get_gpu_power_w()
+        try:
+            p0 = get_gpu_power_w()
+            outs = llm.generate(inputs, sp, use_tqdm=False)
+            p1 = get_gpu_power_w()
+        except (RuntimeError, ValueError) as e:
+            msg = str(e)[:200]
+            err = "oom" if ("out of memory" in msg.lower() or
+                            "cuda" in msg.lower()) else "runtime_error"
+            # Try to free residual state so the next config can proceed.
+            try:
+                import torch
+                torch.cuda.empty_cache()
+            except Exception:
+                pass
+            return {"status": err, "error": msg}
         if p0 is not None and p1 is not None:
             powers.append((p0 + p1) / 2.0)
         for out in outs:

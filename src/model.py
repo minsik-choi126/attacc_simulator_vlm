@@ -200,6 +200,13 @@ class Transformer:
         self.image_grid_pinpoints = modelinfos.get('image_grid_pinpoints', [])
         self.use_image_newline_parameter = modelinfos.get(
             'use_image_newline_parameter', False)
+        # VLM-side floor overhead absorbing image preprocessing, RoPE,
+        # CUDA kernel launches, vLLM scheduler overhead.  Calibrated
+        # from LLaVA-1.5 (measured 41.2ms - simulated 18.7ms = 22.5ms);
+        # treat as HW-independent first-order constant.  LLM-only models
+        # leave this 0 (default), so LLM path is bit-identical.
+        self.vlm_floor_overhead_ms = modelinfos.get(
+            'vlm_floor_overhead_ms', 0.0)
         self.modelinfos = modelinfos
 
     @staticmethod
@@ -332,15 +339,14 @@ class Transformer:
         return (width // self.patch_size) * (height // self.patch_size)
 
     def compute_vit_attention_tokens(self, image_size=None):
-        tokens = self.compute_vit_tokens(image_size)
-        if tokens == 0:
-            return 0
-        if self.is_anyres and self.image_grid_pinpoints:
-            return tokens
-        merge = max(1, self.spatial_merge_size * self.spatial_merge_size)
-        if merge > 1:
-            return max(1, int(tokens / merge))
-        return tokens
+        # ViT runs attention at full patch-token count. Spatial merging
+        # (2x2 -> 1, etc.) happens at the projector boundary, modeled by
+        # the merger FC in _build_projector (in_dim = vit_hidden * merge^2).
+        # Dividing here by spatial_merge^2 was a bug that under-counted
+        # attention compute by spatial_merge^4 (e.g. 16x for Qwen2.5-VL,
+        # which has spatial_merge_size=2). See calibration/ for s_corr
+        # before/after this fix.
+        return self.compute_vit_tokens(image_size)
 
     def compute_vit_num_images(self, image_size=None):
         if self.num_vis_tokens_per_image == 0:

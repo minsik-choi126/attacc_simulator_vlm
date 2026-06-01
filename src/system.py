@@ -568,6 +568,14 @@ class System:
                 vision_perf = _collect_s_perf(self.model.vision_decoder)
                 _accumulate_dict(s_perf_total, vision_perf, 1)
                 s_flops_total += vision_flops
+                # Fix B: VLM floor overhead absorbing image preprocessing,
+                # RoPE, CUDA kernel launches, scheduler -- added once per
+                # prefill, only when a vision graph exists.  Default 0.0
+                # for LLMs leaves LLM path bit-identical.
+                floor_ms = getattr(self.model,
+                                    'vlm_floor_overhead_ms', 0.0)
+                if floor_ms > 0:
+                    s_perf_total['all'] += floor_ms / 1000.0
 
             for group_name, group in self.model.sum_decoder_groups.items():
                 s_decoder, count, group_device, _ = group

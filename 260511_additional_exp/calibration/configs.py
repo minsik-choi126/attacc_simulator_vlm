@@ -6,7 +6,11 @@ Each entry produces one (simulator, vLLM measurement) pair per batch.
 """
 
 LOUT = 128
-BATCHES = [1, 4, 8]
+BATCHES = [1, 2, 4, 8, 16, 32, 64, 128]
+# Capacity-bound models (LLaVA-1.5 MHA, LLaVA-Next anyres) will OOM on
+# A6000 48GB above ~80 batch; vLLM side catches CUDA OOM and marks the
+# cell. Simulator side has no OOM enforcement so it runs all configs
+# (which is informative anyway -- shows scaling beyond physical limit).
 
 # (sim_model, hf_model_id, label, image_size, lin)
 VLM_CONFIGS = [
