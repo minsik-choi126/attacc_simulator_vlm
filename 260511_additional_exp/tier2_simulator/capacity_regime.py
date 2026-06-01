@@ -57,31 +57,61 @@ def estimate_max_batch(model_name, lin, tp):
 
 
 def main():
-    print("Capacity regime validation -- per-GPU max batch")
+    print("Capacity regime validation -- per-system max batch")
+    print("(Post-Fix-C: dgx-attacc moves KV to AttAcc HBM -- both sides "
+          "reported)")
     rows = []
     for model, img, lin in MODELS:
         for tp_label, tp in DEPLOYMENTS:
             bd = estimate_max_batch(model, lin, tp)
             weight_mib = bd["weight_per_gpu"] / 1024 / 1024
-            kv_mib = bd["kv_per_gpu"] / 1024 / 1024
-            avail_mib = bd["available_kv"] / 1024 / 1024
+            kv_gpu_mib = bd["kv_per_gpu"] / 1024 / 1024
+            avail_gpu_mib = bd["available_kv"] / 1024 / 1024
+            # Fix C exposes the AttAcc-side breakdown when KV moves there.
+            kv_attacc_mib = bd.get("kv_per_attacc", 0) / 1024 / 1024
+            avail_attacc_mib = (
+                bd.get("available_kv_attacc", 0) / 1024 / 1024)
+            attacc_cap_mib = (
+                bd.get("attacc_capacity_total", 0) / 1024 / 1024)
             max_batch = bd["max_batch_at_default_L"]
+            max_batch_attacc = bd.get("max_batch_at_default_L_attacc")
+            kv_side = "AttAcc" if attacc_cap_mib > 0 else "GPU"
+
             rows.append({
                 "model": model, "deployment": tp_label, "lin": lin,
+                "kv_resident_side": kv_side,
                 "weight_per_gpu_mib": round(weight_mib, 1),
-                "kv_per_gpu_mib": round(kv_mib, 2),
-                "available_kv_mib": round(avail_mib, 1),
+                "kv_per_gpu_mib": round(kv_gpu_mib, 2),
+                "available_kv_gpu_mib": round(avail_gpu_mib, 1),
+                "kv_per_attacc_mib": round(kv_attacc_mib, 2),
+                "available_kv_attacc_mib": round(avail_attacc_mib, 1),
+                "attacc_capacity_total_mib": round(attacc_cap_mib, 1),
                 "max_batch_estimate": max_batch,
+                "max_batch_attacc_side": max_batch_attacc,
             })
-            print("  {:25s} {:12s}  weight={:>7.0f} MiB  kv/req={:>6.2f} MiB  "
-                  "max_batch={:>5d}".format(
-                      model, tp_label, weight_mib, kv_mib, max_batch))
+            if kv_side == "AttAcc":
+                print(("  {:25s} {:12s}  weight={:>7.0f} MiB  "
+                       "kv_side=AttAcc  kv/req(AttAcc)={:>6.2f} MiB  "
+                       "max_batch={:>5d}").format(
+                          model, tp_label, weight_mib,
+                          kv_attacc_mib, max_batch))
+            else:
+                print(("  {:25s} {:12s}  weight={:>7.0f} MiB  "
+                       "kv_side=GPU     kv/req(GPU)={:>6.2f} MiB  "
+                       "max_batch={:>5d}").format(
+                          model, tp_label, weight_mib,
+                          kv_gpu_mib, max_batch))
 
     save("capacity_regime",
-         {"platform": "A6000 48 GB simulator capacity breakdown",
+         {"platform": "A6000 48 GB GPU + AttAcc HBM (post-Fix-C)",
           "deployment_scope": "A1 TP=1 only",
           "future_hooks": [label for label, _ in FUTURE_DEPLOYMENTS],
-          "note": "max_batch_estimate from get_capacity_breakdown()"},
+          "note": ("max_batch_estimate = system limiting batch; "
+                   "kv_resident_side tells which device holds KV "
+                   "(GPU under dgx, AttAcc under dgx-attacc).  After "
+                   "Fix C the AttAcc-side fields are populated for "
+                   "dgx-attacc, replacing the prior buggy GPU-only "
+                   "accounting (LLaVA 88/91 -> 197/209 corrected)")},
          {"rows": rows,
           "interpretation": {
               "capacity_bound": ["LLaVA-1.5-7B", "LLaVA-Next-Mistral-7B"],

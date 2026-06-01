@@ -34,6 +34,7 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
+from vllm_helpers import make_image_input
 
 from configs import VLM_CONFIGS, BATCHES as DEFAULT_BATCHES, LOUT, HW_TO_SIM
 
@@ -187,11 +188,16 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
     if img is None:
         return {"status": "no_pil"}
     vis_tok = _approx_visual_tokens(sim_model, image_size)
+    # R9 guard: lin must leave room for the image placeholder + at least
+    # one text token, otherwise the calibration cell is meaningless.
+    if vis_tok and lin <= vis_tok:
+        return {"status": "lin_below_visual_tokens",
+                "visual_tokens": vis_tok, "lin": lin}
     prompt = _make_prompt_for_lin(lin, vis_tok)
-    inputs = []
-    for _ in range(batch):
-        inputs.append({"prompt": prompt,
-                       "multi_modal_data": {"image": img}})
+    # R8: use per-model chat template with image placeholder so vLLM
+    # routes multi_modal_data into the prompt correctly.  Without this,
+    # some models (Qwen-VL, InternVL) silently drop the image.
+    inputs = [make_image_input(hf_id, prompt, img) for _ in range(batch)]
     ttfts, e2es, itls = [], [], []
     powers = []
     for _ in range(repeats):

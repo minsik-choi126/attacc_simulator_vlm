@@ -734,14 +734,22 @@ class System:
         return kv_memory
 
     def get_capacity_breakdown(self, batch_size, lin, lout):
-        """Per-device capacity breakdown.  When KV is on AttAcc, GPU avail
-        is computed against weight+temp only and AttAcc avail is computed
-        against the aggregate AttAcc memory capacity.
+        """Per-device capacity breakdown.
 
-        Backward-compat keys: weight_per_gpu, kv_per_gpu, temp_per_gpu,
-        available_kv, max_batch_at_default_L.  These now reflect the *GPU*
-        side; new keys (kv_per_attacc, available_kv_attacc,
-        max_batch_at_default_L_attacc) expose the AttAcc side.
+        Key semantics:
+          weight_per_gpu, kv_per_gpu, temp_per_gpu, available_kv
+            -- always GPU-side bytes.  Under dgx-attacc, kv_per_gpu = 0
+               and available_kv reflects gpu_cap - weight - temp.
+          kv_per_attacc, available_kv_attacc, attacc_capacity_total,
+          max_batch_at_default_L_attacc
+            -- AttAcc-side bytes, populated only when kv_on_attacc().
+          max_batch_at_default_L
+            -- SYSTEM limiting batch (not GPU-only).  Under dgx this is
+               the GPU-side ceiling (same as before Fix C).  Under
+               dgx-attacc this is overwritten to the AttAcc-side ceiling
+               because the GPU side has 0 KV bytes residing on it.
+               Callers like capacity_regime.py rely on this for
+               unchanged interpretation across systems.
         """
         weight_memory, kv_per_gpu, temp_memory = self.get_required_mem_capacity(
             batch_size, lin, lout)
@@ -757,13 +765,19 @@ class System:
         kv_per_req_gpu = (kv_per_gpu / max(1, batch_size)
                           if kv_per_gpu > 0 else 0)
 
+        # Backward-compat: max_batch_at_default_L is the SYSTEM limiting
+        # max batch -- whichever device holds the KV cache.  Pre-Fix-C
+        # callers (e.g. capacity_regime.py) read this key directly; they
+        # expect a system-wide ceiling, not GPU-only zero.
+        gpu_max_batch = (int(available_kv_gpu / kv_per_req_gpu)
+                          if kv_per_req_gpu > 0 else 0)
+
         result = {
             'weight_per_gpu': weight_memory,
             'kv_per_gpu': kv_per_gpu,
             'temp_per_gpu': temp_memory,
             'available_kv': available_kv_gpu,
-            'max_batch_at_default_L': (int(available_kv_gpu / kv_per_req_gpu)
-                                        if kv_per_req_gpu > 0 else 0),
+            'max_batch_at_default_L': gpu_max_batch,  # may be overwritten below
         }
         if self.kv_on_attacc():
             acc_dev = self.devices.get('Acc')
@@ -772,13 +786,18 @@ class System:
             kv_per_req_attacc = (kv_per_attacc / max(1, batch_size)
                                  if kv_per_attacc > 0 else 0)
             available_kv_attacc = acc_cap - kv_per_attacc
+            attacc_max_batch = (int(acc_cap / kv_per_req_attacc)
+                                if kv_per_req_attacc > 0 else 0)
             result.update({
                 'kv_per_attacc': kv_per_attacc,
                 'available_kv_attacc': available_kv_attacc,
                 'attacc_capacity_total': acc_cap,
-                'max_batch_at_default_L_attacc': (
-                    int(acc_cap / kv_per_req_attacc)
-                    if kv_per_req_attacc > 0 else 0),
+                'max_batch_at_default_L_attacc': attacc_max_batch,
+                # Limiting batch = min(GPU side, AttAcc side).  GPU side is
+                # bounded by weight+temp (we model 0 KV bytes on GPU); we
+                # ignore that floor here since it's typically much higher
+                # than the AttAcc-side KV ceiling for VLM workloads.
+                'max_batch_at_default_L': attacc_max_batch,
             })
         return result
 

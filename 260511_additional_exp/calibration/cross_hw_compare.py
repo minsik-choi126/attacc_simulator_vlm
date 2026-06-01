@@ -35,11 +35,18 @@ def load_hw(hw_label):
 
 
 def index_cells(data):
-    """Map (label, image_size, batch) -> cell dict."""
+    """Map (label, image_size, lin, batch) -> cell dict.
+
+    Including `lin` in the key prevents merging cells whose configs.py
+    `lin` differs across HWs (e.g. LLaVA-Next 336 was 704 before R9 and
+    is 1856 now; an old A6000 JSON with lin=704 must NOT match a new
+    H100 JSON with lin=1856 just because (label, image_size, batch)
+    happens to align).
+    """
     if data is None:
         return {}
     return {
-        (c["label"], c["image_size"], c["batch"]): c
+        (c["label"], c["image_size"], c.get("lin"), c["batch"]): c
         for c in data["results"]["cells"]
     }
 
@@ -78,14 +85,14 @@ def main():
     h_cells = index_cells(h100)
     all_keys = sorted(set(a_cells) | set(h_cells))
 
-    print(f"\n{'Model':24s} {'img':>4s} {'b':>2s}  "
+    print(f"\n{'Model':24s} {'img':>4s} {'lin':>5s} {'b':>2s}  "
           f"{'A6000_sim':>9s} {'A6000_meas':>10s} {'A6000_corr':>10s}  "
           f"{'H100_sim':>9s} {'H100_meas':>10s} {'H100_corr':>10s}  "
           f"{'consistency':>11s}")
-    print("-" * 130)
+    print("-" * 138)
     merged = []
     for key in all_keys:
-        label, img, batch = key
+        label, img, lin, batch = key
         a_cell = a_cells.get(key)
         h_cell = h_cells.get(key)
         a_sim, a_meas, a_corr, a_g_sim, a_g_meas, a_g_corr = \
@@ -100,12 +107,13 @@ def main():
             cons = f"Δ {diff*100:>4.1f}%"
         else:
             cons = "—"
-        print(f"{label:24s} {img:>4d} {batch:>2d}  "
+        lin_s = f"{lin:>5d}" if lin is not None else "  —  "
+        print(f"{label:24s} {img:>4d} {lin_s} {batch:>2d}  "
               f"{a_sim:>9s} {a_meas:>10s} {a_corr:>10s}  "
               f"{h_sim:>9s} {h_meas:>10s} {h_corr:>10s}  "
               f"{cons:>11s}")
         merged.append({
-            "label": label, "image_size": img, "batch": batch,
+            "label": label, "image_size": img, "lin": lin, "batch": batch,
             "a6000": a_cell, "h100": h_cell,
             "consistency_delta_pct": (
                 abs(s_a - s_h) / max(s_a, s_h) * 100

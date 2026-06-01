@@ -41,12 +41,15 @@ STEPS = [
         "Step 1  Sim vs vLLM calibration (batch 1-128)", "phase1"),
     ("260511_additional_exp/tier1_simulator/vit_recalibration.py",
         "Step 2  ViT recalibration (legacy comparison)", "phase1"),
-    # --- Phase 3 figure refreshes that Phase 2 depends on ---
-    # slo_throughput must run BEFORE capacity_framing (which reads it).
+    # --- Phase 2 prerequisites ---
+    # slo_throughput is tagged phase2 because Step 8 (capacity_framing /
+    # B4) consumes results/slo_throughput.json.  Running --skip phase3
+    # must still produce a fresh JSON, otherwise B4 reanalyzes 5/11
+    # legacy numbers.  multi_vlm_full_sim has no Phase 2 dependency.
     ("260511_additional_exp/tier1_simulator/multi_vlm_full_sim.py",
         "Step 3  Multi-VLM speedup matrix refresh",      "phase3"),
     ("260511_additional_exp/tier2_simulator/slo_throughput.py",
-        "Step 4  SLO throughput refresh",                "phase3"),
+        "Step 4  SLO throughput refresh (B4 prerequisite)", "phase2"),
     # --- Phase 2: VLM gain (sim-only) ---
     ("260511_additional_exp/tier1_simulator/vlm_vs_llm_pair.py",
         "Step 5  LLM <-> VLM pair speedup (B1)",         "phase2"),

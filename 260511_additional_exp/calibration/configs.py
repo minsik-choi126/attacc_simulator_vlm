@@ -32,10 +32,15 @@ VLM_CONFIGS = [
     ("LLaVA-1.5-7B",
         "llava-hf/llava-1.5-7b-hf",
         "LLaVA-1.5-7B",    336, 704),
-    # LLaVA-Next-Mistral-7B -- anyres path, multi-tile.
+    # LLaVA-Next-Mistral-7B -- anyres path, multi-tile.  Visual tokens
+    # explode under anyres (compute_visual_tokens(336)~=1776) so the
+    # decoder prefill length must be > visual_tokens + a small text
+    # budget.  Calibration runner skips cells where lin <= visual_tokens
+    # (status="lin_below_visual_tokens"); keep these lin values larger
+    # than max measured prefill.
     ("LLaVA-Next-Mistral-7B",
         "llava-hf/llava-v1.6-mistral-7b-hf",
-        "LLaVA-Next-Mistral-7B", 336, 704),
+        "LLaVA-Next-Mistral-7B", 336, 1856),
     ("LLaVA-Next-Mistral-7B",
         "llava-hf/llava-v1.6-mistral-7b-hf",
         "LLaVA-Next-Mistral-7B", 672, 3008),
