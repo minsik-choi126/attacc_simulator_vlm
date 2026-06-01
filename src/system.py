@@ -669,7 +669,12 @@ class System:
         else:
             perfs = [output]
 
-    def get_required_mem_capacity(self, batch_size, lin, lout):
+    def _compute_mem_components(self, batch_size, lin, lout):
+        """Compute weight/temp/kv memory components.  All values are per
+        TP shard, in bytes.  KV is the TOTAL across batch (per-shard).
+        System-aware splitting (which device holds KV) is applied by
+        callers via the kv_on_attacc() helper below.
+        """
         ndec = self.model.ndec
         hdim = self.model.hdim
         nhead = self.model.num_q_heads
@@ -701,18 +706,79 @@ class System:
 
         return weight_memory, kv_memory * batch_size, temp_memory * batch_size
 
-    def get_capacity_breakdown(self, batch_size, lin, lout):
-        weight_memory, kv_memory, temp_memory = self.get_required_mem_capacity(
+    def kv_on_attacc(self):
+        """Fix C: dgx-attacc places KV cache on the AttAcc HBM side, freeing
+        GPU capacity for weights only.  This matches paper Sec.7.1's
+        DGX+AttAcc system assumption.
+        """
+        return self.hetero_name == DeviceType.PIM
+
+    def get_required_mem_capacity(self, batch_size, lin, lout):
+        """Per-GPU memory pressure (bytes).  Backward-compat 3-tuple.
+
+        Returns (weight_per_gpu, kv_on_gpu, temp_per_gpu).  Under dgx-attacc
+        KV is on the AttAcc side, so kv_on_gpu becomes 0.  Use
+        get_attacc_kv_capacity() for the AttAcc-side KV total.
+        """
+        weight_memory, kv_memory, temp_memory = self._compute_mem_components(
             batch_size, lin, lout)
-        available = self.devices['GPU'].aggregate_memory_capacity / max(
-            1, self.devices['GPU'].num_xpu) - weight_memory - temp_memory
-        kv_per_req_per_gpu = kv_memory / max(1, batch_size)
-        return {
+        kv_on_gpu = 0.0 if self.kv_on_attacc() else kv_memory
+        return weight_memory, kv_on_gpu, temp_memory
+
+    def get_attacc_kv_capacity(self, batch_size, lin, lout):
+        """KV cache bytes residing on AttAcc HBM (0 if not dgx-attacc)."""
+        if not self.kv_on_attacc():
+            return 0.0
+        _, kv_memory, _ = self._compute_mem_components(
+            batch_size, lin, lout)
+        return kv_memory
+
+    def get_capacity_breakdown(self, batch_size, lin, lout):
+        """Per-device capacity breakdown.  When KV is on AttAcc, GPU avail
+        is computed against weight+temp only and AttAcc avail is computed
+        against the aggregate AttAcc memory capacity.
+
+        Backward-compat keys: weight_per_gpu, kv_per_gpu, temp_per_gpu,
+        available_kv, max_batch_at_default_L.  These now reflect the *GPU*
+        side; new keys (kv_per_attacc, available_kv_attacc,
+        max_batch_at_default_L_attacc) expose the AttAcc side.
+        """
+        weight_memory, kv_per_gpu, temp_memory = self.get_required_mem_capacity(
+            batch_size, lin, lout)
+        kv_per_attacc = self.get_attacc_kv_capacity(batch_size, lin, lout)
+
+        gpu_cap_per_device = (self.devices['GPU'].aggregate_memory_capacity /
+                              max(1, self.devices['GPU'].num_xpu))
+        available_gpu = gpu_cap_per_device - weight_memory - temp_memory - kv_per_gpu
+        # When KV is on AttAcc, "available_kv" on GPU is essentially
+        # whatever the GPU has left after weight+temp.
+        available_kv_gpu = gpu_cap_per_device - weight_memory - temp_memory
+
+        kv_per_req_gpu = (kv_per_gpu / max(1, batch_size)
+                          if kv_per_gpu > 0 else 0)
+
+        result = {
             'weight_per_gpu': weight_memory,
-            'kv_per_gpu': kv_memory,
+            'kv_per_gpu': kv_per_gpu,
             'temp_per_gpu': temp_memory,
-            'available_kv': available,
-            'max_batch_at_default_L': int(available / kv_per_req_per_gpu)
-            if kv_per_req_per_gpu > 0 else 0,
+            'available_kv': available_kv_gpu,
+            'max_batch_at_default_L': (int(available_kv_gpu / kv_per_req_gpu)
+                                        if kv_per_req_gpu > 0 else 0),
         }
+        if self.kv_on_attacc():
+            acc_dev = self.devices.get('Acc')
+            acc_cap = (acc_dev.aggregate_memory_capacity
+                       if acc_dev is not None else 0)
+            kv_per_req_attacc = (kv_per_attacc / max(1, batch_size)
+                                 if kv_per_attacc > 0 else 0)
+            available_kv_attacc = acc_cap - kv_per_attacc
+            result.update({
+                'kv_per_attacc': kv_per_attacc,
+                'available_kv_attacc': available_kv_attacc,
+                'attacc_capacity_total': acc_cap,
+                'max_batch_at_default_L_attacc': (
+                    int(acc_cap / kv_per_req_attacc)
+                    if kv_per_req_attacc > 0 else 0),
+            })
+        return result
 

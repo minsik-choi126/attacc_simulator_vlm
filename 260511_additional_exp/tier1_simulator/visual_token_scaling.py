@@ -32,16 +32,19 @@ MODELS = [
 ]
 IMAGE_SIZES = [336, 672, 1008, 1344]
 BATCHES = [1, 4]
-LIN = 704
+# Decoder prefill length scales with visual tokens: lin = visual_tokens + TEXT.
+# This lets the speedup-vs-image-size sweep actually reflect the prefill
+# memory-bound regime growing with image resolution.
+TEXT_TOKENS = 64
 LOUT = 128
 
 
-def _run(model, system, batch, image_size):
+def _run(model, system, batch, image_size, lin):
     return sr.run(
         model=model, system=system, gpu="A6000",
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
         interface="NVLINK_BRIDGE", pim="bank",
-        lin=LIN, lout=LOUT, batch=batch,
+        lin=lin, lout=LOUT, batch=batch,
         image_size=image_size,
         prefill_chunk=512, prefill_samples=8,
         max_L=4096,
@@ -68,36 +71,42 @@ def main():
             except Exception as e:
                 print(f"  img={img}: visual token compute failed ({e})")
                 vis_tok = None
+            lin_dyn = max(8, (vis_tok or 0) + TEXT_TOKENS)
             for b in BATCHES:
-                dgx = _run(model, "dgx", b, img)
-                att = _run(model, "dgx-attacc", b, img)
+                dgx = _run(model, "dgx", b, img, lin_dyn)
+                att = _run(model, "dgx-attacc", b, img, lin_dyn)
                 if dgx is None or att is None:
                     print(f"  img={img} b={b}: sim_fail")
                     rows.append({"model": model, "image_size": img,
-                                 "batch": b, "status": "sim_fail"})
+                                 "lin": lin_dyn, "batch": b,
+                                 "status": "sim_fail"})
                     continue
                 s_d, g_d = dgx.get("s_time"), dgx.get("g_time")
                 s_a, g_a = att.get("s_time"), att.get("g_time")
                 if not all(v is not None for v in (s_d, g_d, s_a, g_a)):
                     rows.append({"model": model, "image_size": img,
-                                 "batch": b, "status": "no_output"})
+                                 "lin": lin_dyn, "batch": b,
+                                 "status": "no_output"})
                     continue
+                # sim_runner returns ms; do not multiply by 1000 again.
                 e_d = s_d + g_d * (LOUT - 1)
                 e_a = s_a + g_a * (LOUT - 1)
                 speedup = e_d / e_a if e_a else None
                 pref_speedup = s_d / s_a if s_a else None
                 print(f"  img={img:>4d}  visual_tokens={vis_tok}  "
+                      f"lin={lin_dyn:>4d}  "
                       f"b={b}  e2e {speedup:.2f}x  prefill {pref_speedup:.2f}x")
                 rows.append({
                     "model": model, "image_size": img,
                     "visual_tokens": vis_tok,
+                    "lin": lin_dyn, "text_tokens": TEXT_TOKENS,
                     "batch": b,
-                    "s_dgx_ms": s_d * 1000.0,
-                    "s_attacc_ms": s_a * 1000.0,
-                    "g_dgx_ms_per_tok": g_d * 1000.0,
-                    "g_attacc_ms_per_tok": g_a * 1000.0,
-                    "e2e_dgx_ms": e_d * 1000.0,
-                    "e2e_attacc_ms": e_a * 1000.0,
+                    "s_dgx_ms": s_d,
+                    "s_attacc_ms": s_a,
+                    "g_dgx_ms_per_tok": g_d,
+                    "g_attacc_ms_per_tok": g_a,
+                    "e2e_dgx_ms": e_d,
+                    "e2e_attacc_ms": e_a,
                     "e2e_speedup": speedup,
                     "prefill_speedup": pref_speedup,
                     "status": "ok",
@@ -105,7 +114,9 @@ def main():
 
     save("visual_token_scaling",
          {"models": MODELS, "image_sizes": IMAGE_SIZES,
-          "batches": BATCHES, "lin": LIN, "lout": LOUT},
+          "batches": BATCHES,
+          "lin_policy": "visual_tokens + text_tokens (text_tokens = 64)",
+          "text_tokens": TEXT_TOKENS, "lout": LOUT},
          {"rows": rows})
     print("\nSaved -> results/visual_token_scaling.json")
 

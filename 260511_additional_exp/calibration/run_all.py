@@ -26,33 +26,42 @@ ROOT = HERE.parents[2]
 
 
 # (script_path_relative_to_root, label, phase_tag)
+#
+# Ordering invariant: any step that *consumes* a JSON must run AFTER any step
+# that *produces* it.  In particular capacity_framing.py reads
+# slo_throughput.json, so slo_throughput refresh runs first.  Move ordering
+# changes carefully -- see 260601_experiment.md 'Run summary' for the
+# dependency notes.
 STEPS = [
     # --- env sanity ---
     ("260511_additional_exp/tier1_simulator/upstream_baseline.py",
-        "Step 0  upstream_baseline LLM regression",  "regression"),
+        "Step 0  upstream_baseline LLM regression",      "regression"),
     # --- Phase 1: accuracy ---
     ("260511_additional_exp/calibration/run_calibration.py",
         "Step 1  Sim vs vLLM calibration (batch 1-128)", "phase1"),
     ("260511_additional_exp/tier1_simulator/vit_recalibration.py",
         "Step 2  ViT recalibration (legacy comparison)", "phase1"),
-    # --- Phase 2: VLM gain ---
-    ("260511_additional_exp/tier1_simulator/vlm_vs_llm_pair.py",
-        "Step 3  LLM <-> VLM pair speedup (B1)",        "phase2"),
-    ("260511_additional_exp/tier1_simulator/prefill_decomp_vlm.py",
-        "Step 4  Prefill vs decode decomposition (B2)", "phase2"),
-    ("260511_additional_exp/tier1_simulator/visual_token_scaling.py",
-        "Step 5  Visual token sensitivity (B3)",        "phase2"),
-    ("260511_additional_exp/tier1_simulator/capacity_framing.py",
-        "Step 6  Capacity argument framing (B4)",       "phase2"),
-    # --- Phase 3: figure refresh ---
+    # --- Phase 3 figure refreshes that Phase 2 depends on ---
+    # slo_throughput must run BEFORE capacity_framing (which reads it).
     ("260511_additional_exp/tier1_simulator/multi_vlm_full_sim.py",
-        "Step 7  Multi-VLM speedup matrix refresh",     "phase3"),
+        "Step 3  Multi-VLM speedup matrix refresh",      "phase3"),
     ("260511_additional_exp/tier2_simulator/slo_throughput.py",
-        "Step 8  SLO throughput refresh",               "phase3"),
+        "Step 4  SLO throughput refresh",                "phase3"),
+    # --- Phase 2: VLM gain (sim-only) ---
+    ("260511_additional_exp/tier1_simulator/vlm_vs_llm_pair.py",
+        "Step 5  LLM <-> VLM pair speedup (B1)",         "phase2"),
+    ("260511_additional_exp/tier1_simulator/prefill_decomp_vlm.py",
+        "Step 6  Prefill vs decode decomposition (B2)",  "phase2"),
+    ("260511_additional_exp/tier1_simulator/visual_token_scaling.py",
+        "Step 7  Visual token sensitivity (B3)",         "phase2"),
+    ("260511_additional_exp/tier1_simulator/capacity_framing.py",
+        "Step 8  Capacity argument framing (B4) "
+        "[reads results/slo_throughput.json]",           "phase2"),
+    # --- Remaining Phase 3 refreshes ---
     ("260511_additional_exp/tier2_simulator/roofline_per_vlm.py",
-        "Step 9  Roofline refresh",                     "phase3"),
+        "Step 9  Roofline refresh",                      "phase3"),
     ("260511_additional_exp/tier2_simulator/capacity_regime.py",
-        "Step 10 Capacity regime refresh",              "phase3"),
+        "Step 10 Capacity regime refresh",               "phase3"),
 ]
 
 

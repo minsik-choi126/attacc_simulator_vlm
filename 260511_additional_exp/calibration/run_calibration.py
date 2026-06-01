@@ -118,9 +118,46 @@ def _dummy_image(size):
         return None
 
 
-def _make_prompt(label, lin_text_tokens=64):
-    """Generate a text prompt approximately lin_text_tokens long."""
-    return ("Describe the image in detail. " * max(1, lin_text_tokens // 6))[:lin_text_tokens * 6]
+def _approx_visual_tokens(sim_model, image_size):
+    """Approximate visual token count fed into the LLM decoder.
+
+    Uses Transformer.compute_visual_tokens (the post-projector count),
+    falling back to 0 on failure so the text length defaults to lin.
+    """
+    try:
+        from src.config import make_model_config
+        from src.model import Transformer
+        from src.type import DataType
+        cfg = make_model_config(sim_model, DataType.W16A16)
+        t = Transformer(cfg, tensor_parallel=1)
+        return int(t.compute_visual_tokens(image_size))
+    except Exception:
+        return 0
+
+
+def _make_prompt_for_lin(target_lin, visual_tokens):
+    """Build a text prompt with approximately (target_lin - visual_tokens)
+    text tokens.  vLLM will prepend visual_tokens worth of image embeddings
+    so the LLM decoder sees the simulator's target_lin in total.
+    """
+    text_tokens = max(8, target_lin - max(0, visual_tokens))
+    # ~6 chars per English token rough estimate.
+    return ("Describe the image in detail. " * max(1, text_tokens // 6))[
+        : text_tokens * 6]
+
+
+def _unload_llm():
+    """Drop any in-memory vLLM model + free CUDA cache so the next model
+    can be loaded without OOM."""
+    try:
+        import gc
+        import torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+    except Exception:
+        pass
 
 
 def _load_llm(hf_id, tp=1):
@@ -138,16 +175,19 @@ def _load_llm(hf_id, tp=1):
     return llm, sp
 
 
-def _measure_vllm(llm, sp, hf_id, image_size, batch, repeats=3):
+def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
     """Run vLLM batch=batch with dummy image, return per-request statistics.
 
     Catches CUDA OOM and other RuntimeErrors to mark cell rather than crash
     the whole sweep -- higher batch sizes can fail on capacity-bound VLMs.
+    Prompt length is sized to match the simulator's `lin` (total prefill
+    sequence length = visual_tokens + text_tokens).
     """
     img = _dummy_image(image_size)
-    prompt = _make_prompt(hf_id)
     if img is None:
         return {"status": "no_pil"}
+    vis_tok = _approx_visual_tokens(sim_model, image_size)
+    prompt = _make_prompt_for_lin(lin, vis_tok)
     inputs = []
     for _ in range(batch):
         inputs.append({"prompt": prompt,
@@ -200,21 +240,13 @@ def _measure_vllm(llm, sp, hf_id, image_size, batch, repeats=3):
     }
 
 
-def run_vllm(hf_id, image_size, lin, batch, llm_cache):
-    """Run vLLM measurement, caching the loaded model across configurations."""
+def run_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch):
+    """Run a single vLLM measurement against an already-loaded model."""
     if not HAVE_VLLM:
         return {"status": "no_vllm"}
-    if hf_id not in llm_cache:
-        print(f"  [vllm load] {hf_id} ...", flush=True)
-        t0 = time.time()
-        llm, sp = _load_llm(hf_id)
-        print(f"  [vllm load] {hf_id} done in {time.time()-t0:.1f}s",
-              flush=True)
-        llm_cache[hf_id] = (llm, sp)
-    llm, sp = llm_cache[hf_id]
     if llm is None:
         return {"status": "load_failed"}
-    return _measure_vllm(llm, sp, hf_id, image_size, batch)
+    return _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch)
 
 
 # ---------------------------------------------------------------------
@@ -245,57 +277,85 @@ def main():
     sel_models = _select(args.models, None)
 
     cells = []
-    llm_cache = {}
 
+    # Group configs by hf_id so each vLLM model is loaded once, then unloaded
+    # before the next model -- prevents 5 VLMs accumulating in VRAM.
+    by_hf = {}
     for cfg in VLM_CONFIGS:
         sim_model, hf_id, label, image_size, lin = cfg
         if sel_models and label not in sel_models:
             continue
-        for batch in batches:
-            print(f"\n[{label} img={image_size} lin={lin} batch={batch}]",
+        by_hf.setdefault(hf_id, []).append(cfg)
+
+    for hf_id, cfg_list in by_hf.items():
+        llm = sp = None
+        if args.mode in ("vllm", "both") and HAVE_VLLM:
+            print(f"\n[vllm load] {hf_id} ...", flush=True)
+            t0 = time.time()
+            llm, sp = _load_llm(hf_id)
+            print(f"[vllm load] {hf_id} done in {time.time()-t0:.1f}s",
                   flush=True)
-            entry = {
-                "sim_model": sim_model, "hf_id": hf_id, "label": label,
-                "image_size": image_size, "lin": lin, "batch": batch,
-            }
-            if args.mode in ("sim", "both"):
-                t0 = time.time()
-                entry["sim"] = run_simulator(sim_model, image_size, lin,
-                                              batch, hw)
-                entry["sim_walltime_s"] = time.time() - t0
-                if entry["sim"].get("status") == "ok":
-                    print(f"  sim    s={entry['sim']['s_ms']:>7.2f}ms  "
-                          f"g={entry['sim']['g_ms_per_tok']:>6.3f}ms/tok  "
-                          f"({entry['sim_walltime_s']:.1f}s)")
-                else:
-                    print(f"  sim    {entry['sim'].get('status')}")
-            if args.mode in ("vllm", "both"):
-                t0 = time.time()
-                entry["vllm"] = run_vllm(hf_id, image_size, lin, batch,
-                                          llm_cache)
-                entry["vllm_walltime_s"] = time.time() - t0
-                if entry["vllm"].get("status") == "ok":
-                    print(f"  vllm   TTFT_p50={entry['vllm']['ttft_ms_p50']:>7.2f}ms  "
-                          f"ITL_p50={entry['vllm']['itl_ms_p50']:>6.3f}ms/tok  "
-                          f"({entry['vllm_walltime_s']:.1f}s)")
-                else:
-                    print(f"  vllm   {entry['vllm'].get('status')}")
-            # Correction factors
-            sim_ok = entry.get("sim", {}).get("status") == "ok"
-            vllm_ok = entry.get("vllm", {}).get("status") == "ok"
-            if sim_ok and vllm_ok:
-                s_sim = entry["sim"]["s_ms"]
-                g_sim = entry["sim"]["g_ms_per_tok"]
-                s_meas = entry["vllm"]["ttft_ms_p50"]
-                g_meas = entry["vllm"]["itl_ms_p50"]
-                entry["s_corr"] = s_meas / s_sim if s_sim else None
-                entry["g_corr"] = (g_meas / g_sim) if (g_sim and g_meas) else None
-                if entry["s_corr"]:
-                    print(f"  →  s_corr = {entry['s_corr']:.2f}x  "
-                          f"g_corr = {entry['g_corr']:.2f}x"
-                          if entry["g_corr"] else
-                          f"  →  s_corr = {entry['s_corr']:.2f}x")
-            cells.append(entry)
+
+        try:
+            for cfg in cfg_list:
+                sim_model, _, label, image_size, lin = cfg
+                for batch in batches:
+                    print(f"\n[{label} img={image_size} lin={lin} batch={batch}]",
+                          flush=True)
+                    entry = {
+                        "sim_model": sim_model, "hf_id": hf_id,
+                        "label": label, "image_size": image_size,
+                        "lin": lin, "batch": batch,
+                    }
+                    if args.mode in ("sim", "both"):
+                        t0 = time.time()
+                        entry["sim"] = run_simulator(sim_model, image_size,
+                                                      lin, batch, hw)
+                        entry["sim_walltime_s"] = time.time() - t0
+                        if entry["sim"].get("status") == "ok":
+                            print(f"  sim    s={entry['sim']['s_ms']:>7.2f}ms  "
+                                  f"g={entry['sim']['g_ms_per_tok']:>6.3f}ms/tok  "
+                                  f"({entry['sim_walltime_s']:.1f}s)")
+                        else:
+                            print(f"  sim    {entry['sim'].get('status')}")
+                    if args.mode in ("vllm", "both"):
+                        t0 = time.time()
+                        entry["vllm"] = run_vllm(llm, sp, hf_id, sim_model,
+                                                  image_size, lin, batch)
+                        entry["vllm_walltime_s"] = time.time() - t0
+                        if entry["vllm"].get("status") == "ok":
+                            print(f"  vllm   TTFT_p50={entry['vllm']['ttft_ms_p50']:>7.2f}ms  "
+                                  f"ITL_p50={entry['vllm']['itl_ms_p50']:>6.3f}ms/tok  "
+                                  f"({entry['vllm_walltime_s']:.1f}s)")
+                        else:
+                            print(f"  vllm   {entry['vllm'].get('status')}")
+                    # Correction factors.
+                    sim_ok = entry.get("sim", {}).get("status") == "ok"
+                    vllm_ok = entry.get("vllm", {}).get("status") == "ok"
+                    if sim_ok and vllm_ok:
+                        s_sim = entry["sim"]["s_ms"]
+                        g_sim = entry["sim"]["g_ms_per_tok"]
+                        s_meas = entry["vllm"]["ttft_ms_p50"]
+                        g_meas = entry["vllm"]["itl_ms_p50"]
+                        entry["s_corr"] = s_meas / s_sim if s_sim else None
+                        entry["g_corr"] = ((g_meas / g_sim)
+                                            if (g_sim and g_meas) else None)
+                        if entry["s_corr"]:
+                            if entry.get("g_corr"):
+                                print(f"  ->  s_corr = {entry['s_corr']:.2f}x  "
+                                      f"g_corr = {entry['g_corr']:.2f}x")
+                            else:
+                                print(f"  ->  s_corr = {entry['s_corr']:.2f}x")
+                    cells.append(entry)
+        finally:
+            # Unload before moving to the next HF model.
+            if llm is not None:
+                try:
+                    del llm
+                except Exception:
+                    pass
+            llm = sp = None
+            _unload_llm()
 
     # Summary
     print("\n=== Summary ===")

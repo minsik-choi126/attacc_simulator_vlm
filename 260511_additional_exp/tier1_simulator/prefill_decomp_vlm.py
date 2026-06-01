@@ -51,6 +51,8 @@ def _run(model, system, batch, lin, image_size):
 
 
 def decompose(dgx, att):
+    # sim_runner returns s_time / g_time already in milliseconds
+    # (column alias "g_time (ms)"); do NOT multiply by 1000 again.
     s_d = dgx.get("s_time")
     g_d = dgx.get("g_time")
     s_a = att.get("s_time")
@@ -60,12 +62,12 @@ def decompose(dgx, att):
     e_d = s_d + g_d * (LOUT - 1)
     e_a = s_a + g_a * (LOUT - 1)
     return {
-        "s_dgx_ms":         s_d * 1000.0,
-        "s_attacc_ms":      s_a * 1000.0,
-        "g_dgx_ms_per_tok": g_d * 1000.0,
-        "g_attacc_ms_per_tok": g_a * 1000.0,
-        "e2e_dgx_ms":       e_d * 1000.0,
-        "e2e_attacc_ms":    e_a * 1000.0,
+        "s_dgx_ms":            s_d,
+        "s_attacc_ms":         s_a,
+        "g_dgx_ms_per_tok":    g_d,
+        "g_attacc_ms_per_tok": g_a,
+        "e2e_dgx_ms":          e_d,
+        "e2e_attacc_ms":       e_a,
         "prefill_speedup": s_d / s_a if s_a else None,
         "decode_speedup":  g_d / g_a if g_a else None,
         "e2e_speedup":     e_d / e_a if e_a else None,
