@@ -34,9 +34,19 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
-from vllm_helpers import make_image_input
+from vllm_helpers import make_image_input, detect_template_text
 
 from configs import VLM_CONFIGS, BATCHES as DEFAULT_BATCHES, LOUT, HW_TO_SIM
+
+try:
+    from transformers import AutoTokenizer
+    HAVE_TOKENIZER = True
+except ImportError:
+    HAVE_TOKENIZER = False
+
+# Cache one tokenizer per HF repo so iterative prompt sizing doesn't
+# re-load the tokenizer for every cell.
+_TOKENIZER_CACHE = {}
 
 try:
     from vllm import LLM, SamplingParams
@@ -136,15 +146,78 @@ def _approx_visual_tokens(sim_model, image_size):
         return 0
 
 
-def _make_prompt_for_lin(target_lin, visual_tokens):
-    """Build a text prompt with approximately (target_lin - visual_tokens)
-    text tokens.  vLLM will prepend visual_tokens worth of image embeddings
-    so the LLM decoder sees the simulator's target_lin in total.
+def _get_tokenizer(hf_id):
+    if not HAVE_TOKENIZER:
+        return None
+    if hf_id in _TOKENIZER_CACHE:
+        return _TOKENIZER_CACHE[hf_id]
+    try:
+        tok = AutoTokenizer.from_pretrained(hf_id, trust_remote_code=True)
+    except Exception as e:
+        print(f"  [tokenizer] {hf_id} load failed: {e}")
+        tok = None
+    _TOKENIZER_CACHE[hf_id] = tok
+    return tok
+
+
+def _count_template_tokens(tok, hf_id, text):
+    """Token count of (chat-template + image placeholder + user text).
+
+    vLLM later expands the image placeholder token into `visual_tokens`
+    worth of multimodal embeddings, so the LLM decoder ultimately sees
+    `count - 1 + visual_tokens` tokens (1 placeholder slot displaced).
     """
-    text_tokens = max(8, target_lin - max(0, visual_tokens))
-    # ~6 chars per English token rough estimate.
-    return ("Describe the image in detail. " * max(1, text_tokens // 6))[
-        : text_tokens * 6]
+    full = detect_template_text(hf_id, text)
+    return len(tok.encode(full, add_special_tokens=True))
+
+
+def _make_prompt_for_lin(target_lin, visual_tokens, hf_id=None):
+    """Build a prompt sized so that the LLM decoder sees ~target_lin tokens.
+
+    If a HuggingFace tokenizer is available for `hf_id`, iteratively grow
+    or trim the prompt until tokenize(template + text) + visual_tokens - 1
+    is within 2 tokens of target_lin.  Otherwise fall back to a 6-char /
+    token heuristic.  The fallback was tolerable for OOM avoidance only;
+    paper-grade "Lin = X" claims require the tokenizer path.
+    """
+    text_tokens_target = max(8, target_lin - max(0, visual_tokens))
+    base_phrase = "Describe the image in detail. "
+
+    tok = _get_tokenizer(hf_id) if hf_id else None
+    if tok is None:
+        # Heuristic fallback: ~6 chars per English token.
+        return (base_phrase * max(1, text_tokens_target // 6))[
+            : text_tokens_target * 6]
+
+    # template_tokens after substitution: target_lin == template_tokens - 1 + visual_tokens
+    template_target = max(4, target_lin + 1 - max(0, visual_tokens))
+    n_phrases = max(1, template_target // 5)
+    text = base_phrase * n_phrases
+    last_count = None
+    for _ in range(15):
+        n = _count_template_tokens(tok, hf_id, text)
+        last_count = n
+        delta = template_target - n
+        if abs(delta) <= 2:
+            break
+        if delta > 0:
+            text += base_phrase * max(1, delta // 5)
+        else:
+            words = text.split()
+            cut = max(4, len(words) + delta)
+            if cut >= len(words):
+                break
+            text = " ".join(words[:cut])
+    return text
+
+
+def _actual_lin_from_prompt_ids(prompt_token_ids):
+    """vLLM's reported prompt_token_ids length is the *post-multimodal*
+    decoder input length (includes expanded image tokens).  This is the
+    number that should equal the simulator's `lin`."""
+    if not prompt_token_ids:
+        return None
+    return len(prompt_token_ids)
 
 
 def _unload_llm():
@@ -193,12 +266,14 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
     if vis_tok and lin <= vis_tok:
         return {"status": "lin_below_visual_tokens",
                 "visual_tokens": vis_tok, "lin": lin}
-    prompt = _make_prompt_for_lin(lin, vis_tok)
+    # R15: tokenizer-based prompt sizing (falls back to char heuristic).
+    prompt = _make_prompt_for_lin(lin, vis_tok, hf_id=hf_id)
     # R8: use per-model chat template with image placeholder so vLLM
     # routes multi_modal_data into the prompt correctly.  Without this,
     # some models (Qwen-VL, InternVL) silently drop the image.
     inputs = [make_image_input(hf_id, prompt, img) for _ in range(batch)]
     ttfts, e2es, itls = [], [], []
+    actual_lin_tokens = []  # R15: track what vLLM actually saw
     powers = []
     for _ in range(repeats):
         try:
@@ -231,8 +306,20 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
             e2es.append(e2e_ms)
             if itl_ms is not None:
                 itls.append(itl_ms)
+            # R15: actual decoder input length from vLLM (includes
+            # expanded image placeholder tokens).
+            n = _actual_lin_from_prompt_ids(
+                getattr(out, "prompt_token_ids", None))
+            if n is not None:
+                actual_lin_tokens.append(n)
     if not ttfts:
         return {"status": "no_metrics"}
+    # R15: report actual decoder input length so callers can audit
+    # how close to target_lin the prompt actually landed.
+    actual_lin_median = (statistics.median(actual_lin_tokens)
+                          if actual_lin_tokens else None)
+    actual_lin_delta = ((actual_lin_median - lin)
+                         if actual_lin_median is not None else None)
     return {
         "status": "ok",
         "ttft_ms_p50": statistics.median(ttfts),
@@ -243,6 +330,9 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
         "e2e_ms_p50": statistics.median(e2es),
         "power_w_mean": statistics.fmean(powers) if powers else None,
         "n_requests": len(ttfts),
+        "actual_lin_tokens_p50": actual_lin_median,
+        "actual_lin_delta_vs_target": actual_lin_delta,
+        "visual_tokens_estimated": vis_tok,
     }
 
 
