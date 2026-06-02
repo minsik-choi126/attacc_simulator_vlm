@@ -234,14 +234,26 @@ def _unload_llm():
         pass
 
 
+def _max_model_len_for(hf_id):
+    """Per-model context cap. LLaVA-Next anyres at img=672 expands visual
+    tokens to ~5.9k, exceeding 4096; give it head-room so those cells
+    measure instead of failing with 'prompt longer than max_model_len'."""
+    n = hf_id.lower()
+    if "llava-v1.6" in n or "llava-next" in n or "v1.6" in n:
+        return 8192
+    return 4096
+
+
 def _load_llm(hf_id, tp=1):
     """Try to load a vLLM model. Returns (LLM, SamplingParams) or (None, None)."""
     if not HAVE_VLLM:
         return None, None
     try:
         llm = LLM(model=hf_id, tensor_parallel_size=tp,
-                   max_model_len=4096, gpu_memory_utilization=0.85,
-                   trust_remote_code=True, enforce_eager=False)
+                   max_model_len=_max_model_len_for(hf_id),
+                   gpu_memory_utilization=0.85,
+                   trust_remote_code=True, enforce_eager=False,
+                   limit_mm_per_prompt={"image": 1})
     except Exception as e:
         print(f"  [vllm load failed] {hf_id}: {e}")
         return None, None
@@ -272,19 +284,52 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
     # routes multi_modal_data into the prompt correctly.  Without this,
     # some models (Qwen-VL, InternVL) silently drop the image.
     inputs = [make_image_input(hf_id, prompt, img) for _ in range(batch)]
+
+    # ------------------------------------------------------------------
+    # vLLM 0.17 (V1 engine) removed RequestOutput.metrics, so TTFT/ITL can
+    # no longer be read off the output object (it is always None). The V0
+    # engine is gone (no VLLM_USE_V1 toggle), and the newest VLMs in this
+    # sweep (Qwen3-VL, InternVL3-hf) require this vLLM version, so there is
+    # no single version that both supports the models and exposes native
+    # metrics. We therefore measure TTFT/ITL by wall clock with a two-pass
+    # scheme, which matches the simulator's quantities exactly:
+    #   pass 1: max_tokens=1            -> wall = prefill + 1 decode = TTFT
+    #   pass 2: min=max_tokens=LOUT     -> wall = prefill + LOUT decode = E2E
+    #   ITL = (E2E - TTFT) / (LOUT - 1)         (decode-only per token)
+    # A warmup generate amortizes CUDA-graph capture / allocator warmup.
+    # ------------------------------------------------------------------
+    sp_ttft = SamplingParams(temperature=0.0, max_tokens=1, ignore_eos=True)
+    sp_full = SamplingParams(temperature=0.0, max_tokens=LOUT,
+                             min_tokens=LOUT, ignore_eos=True)
     ttfts, e2es, itls = [], [], []
     actual_lin_tokens = []  # R15: track what vLLM actually saw
     powers = []
+    try:
+        llm.generate(inputs, sp_ttft, use_tqdm=False)  # warmup (discarded)
+    except (RuntimeError, ValueError) as e:
+        msg = str(e)[:200]
+        err = "oom" if ("out of memory" in msg.lower() or
+                        "cuda" in msg.lower()) else "runtime_error"
+        try:
+            import torch
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+        return {"status": err, "error": msg}
     for _ in range(repeats):
         try:
             p0 = get_gpu_power_w()
-            outs = llm.generate(inputs, sp, use_tqdm=False)
+            t_a = time.perf_counter()
+            llm.generate(inputs, sp_ttft, use_tqdm=False)
+            t_b = time.perf_counter()
+            t_c = time.perf_counter()
+            outs = llm.generate(inputs, sp_full, use_tqdm=False)
+            t_d = time.perf_counter()
             p1 = get_gpu_power_w()
         except (RuntimeError, ValueError) as e:
             msg = str(e)[:200]
             err = "oom" if ("out of memory" in msg.lower() or
                             "cuda" in msg.lower()) else "runtime_error"
-            # Try to free residual state so the next config can proceed.
             try:
                 import torch
                 torch.cuda.empty_cache()
@@ -293,25 +338,22 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
             return {"status": err, "error": msg}
         if p0 is not None and p1 is not None:
             powers.append((p0 + p1) / 2.0)
-        for out in outs:
-            mt = getattr(out, "metrics", None)
-            if mt is None or mt.first_token_time is None:
-                continue
-            ttft_ms = (mt.first_token_time - mt.arrival_time) * 1000.0
-            e2e_ms = (mt.finished_time - mt.arrival_time) * 1000.0
-            seq_out = len(out.outputs[0].token_ids) if out.outputs else 0
-            itl_ms = ((e2e_ms - ttft_ms) / max(seq_out - 1, 1)
-                      if seq_out > 1 else None)
-            ttfts.append(ttft_ms)
-            e2es.append(e2e_ms)
-            if itl_ms is not None:
-                itls.append(itl_ms)
-            # R15: actual decoder input length from vLLM (includes
-            # expanded image placeholder tokens).
-            n = _actual_lin_from_prompt_ids(
-                getattr(out, "prompt_token_ids", None))
-            if n is not None:
-                actual_lin_tokens.append(n)
+        ttft_ms = (t_b - t_a) * 1000.0
+        e2e_ms = (t_d - t_c) * 1000.0
+        seq_out = (len(outs[0].outputs[0].token_ids)
+                   if outs and outs[0].outputs else LOUT)
+        itl_ms = ((e2e_ms - ttft_ms) / max(seq_out - 1, 1)
+                  if seq_out > 1 else None)
+        ttfts.append(ttft_ms)
+        e2es.append(e2e_ms)
+        if itl_ms is not None:
+            itls.append(itl_ms)
+        # R15: actual decoder input length from vLLM (includes expanded
+        # image placeholder tokens).
+        n = _actual_lin_from_prompt_ids(
+            getattr(outs[0], "prompt_token_ids", None) if outs else None)
+        if n is not None:
+            actual_lin_tokens.append(n)
     if not ttfts:
         return {"status": "no_metrics"}
     # R15: report actual decoder input length so callers can audit
@@ -322,6 +364,7 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
                          if actual_lin_median is not None else None)
     return {
         "status": "ok",
+        "measurement": "wallclock_2pass",  # batch-level wall clock, vLLM 0.17
         "ttft_ms_p50": statistics.median(ttfts),
         "ttft_ms_mean": statistics.fmean(ttfts),
         "ttft_ms_max": max(ttfts),
@@ -329,7 +372,8 @@ def _measure_vllm(llm, sp, hf_id, sim_model, image_size, lin, batch, repeats=3):
         "itl_ms_mean": statistics.fmean(itls) if itls else None,
         "e2e_ms_p50": statistics.median(e2es),
         "power_w_mean": statistics.fmean(powers) if powers else None,
-        "n_requests": len(ttfts),
+        "n_repeats": len(ttfts),
+        "lout_decoded": LOUT,
         "actual_lin_tokens_p50": actual_lin_median,
         "actual_lin_delta_vs_target": actual_lin_delta,
         "visual_tokens_estimated": vis_tok,
@@ -416,8 +460,19 @@ def main():
                             print(f"  sim    {entry['sim'].get('status')}")
                     if args.mode in ("vllm", "both"):
                         t0 = time.time()
-                        entry["vllm"] = run_vllm(llm, sp, hf_id, sim_model,
-                                                  image_size, lin, batch)
+                        # Guard per-cell: a vLLM failure (e.g. a model whose
+                        # multimodal placeholder is incompatible with the
+                        # installed vLLM, which kills the engine) must not abort
+                        # the whole run and lose every already-computed cell.
+                        try:
+                            entry["vllm"] = run_vllm(llm, sp, hf_id, sim_model,
+                                                      image_size, lin, batch)
+                        except Exception as exc:
+                            entry["vllm"] = {
+                                "status": "error",
+                                "error": "{}: {}".format(
+                                    type(exc).__name__, exc),
+                            }
                         entry["vllm_walltime_s"] = time.time() - t0
                         if entry["vllm"].get("status") == "ok":
                             print(f"  vllm   TTFT_p50={entry['vllm']['ttft_ms_p50']:>7.2f}ms  "

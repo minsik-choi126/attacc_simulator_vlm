@@ -13,7 +13,10 @@ def detect_template_text(model_name, prompt):
     if "llava-v1.6" in name or "llava-1.6" in name or "llava-next" in name:
         return "[INST] <image>\n{} [/INST]".format(prompt)
     if "internvl" in name:
-        return ("<|im_start|>user\n<image>\n{}<|im_end|>"
+        # InternVL*-hf use <IMG_CONTEXT> (not <image>) as the placeholder vLLM
+        # expands; <image> makes vLLM 0.17 raise "Failed to apply prompt
+        # replacement". Matches the HF processor chat template exactly.
+        return ("<|im_start|>user\n<IMG_CONTEXT>\n{}<|im_end|>\n"
                 "<|im_start|>assistant\n").format(prompt)
     return prompt
 

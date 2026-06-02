@@ -20,7 +20,10 @@ import sim_runner as sr
 from result_aggregator import save
 
 # Pull Transformer to call compute_visual_tokens for annotation only.
-sys.path.insert(0, str(HERE.parents[2]))
+# parents[1] is the repo root (.../<repo>/260511_additional_exp/tier1_simulator
+# -> .../<repo>); parents[2] pointed one level above the repo so `src` was not
+# importable.
+sys.path.insert(0, str(HERE.parents[1]))
 from src.model import Transformer
 from src.config import make_model_config
 from src.type import DataType

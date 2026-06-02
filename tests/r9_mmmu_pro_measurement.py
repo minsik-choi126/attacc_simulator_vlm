@@ -103,6 +103,11 @@ def detect_template_text(model_name, prompt):
         return "USER: <image>\n{} ASSISTANT:".format(prompt)
     if "llava-v1.6" in name or "llava-1.6" in name or "llava-next" in name:
         return ("[INST] <image>\n{} [/INST]").format(prompt)
+    if "internvl" in name:
+        # InternVL*-hf image placeholder is <IMG_CONTEXT> (not <image>);
+        # without it vLLM 0.17 raises "Failed to apply prompt replacement".
+        return ("<|im_start|>user\n<IMG_CONTEXT>\n{}<|im_end|>\n"
+                "<|im_start|>assistant\n").format(prompt)
     return prompt
 
 
@@ -215,6 +220,15 @@ def run(args):
         min_tokens=args.lout,
         ignore_eos=True,
     )
+    # vLLM 0.17 (V1 engine) no longer populates RequestOutput.metrics, so
+    # TTFT/ITL cannot be read off the output. Measure by wall clock: a
+    # max_tokens=1 pass gives TTFT, the full pass gives E2E, and
+    # ITL = (E2E - TTFT) / (seq_out - 1).
+    sampling_ttft = SamplingParams(
+        temperature=0.0,
+        max_tokens=1,
+        ignore_eos=True,
+    )
 
     sampler = PowerSampler(list(range(args.tp)), interval_ms=50)
     sampler.start()
@@ -229,6 +243,11 @@ def run(args):
             "multi_modal_data": {"image": item["image"]},
         }]
 
+        # Pass 1: TTFT (prefill + 1 decode step), wall clock.
+        ta = time.time()
+        llm.generate(inputs, sampling_ttft, use_tqdm=False)
+        tb = time.time()
+        # Pass 2: full decode (prefill + lout tokens), wall clock = E2E.
         t0 = time.time()
         outputs = llm.generate(inputs, sampling, use_tqdm=False)
         t1 = time.time()
@@ -237,9 +256,13 @@ def run(args):
         seq_in_len = len(out.prompt_token_ids) if out.prompt_token_ids else -1
         seq_out_len = len(out.outputs[0].token_ids)
 
+        ttft_ms = (tb - ta) * 1000.0
+        e2e_ms = (t1 - t0) * 1000.0
+        itl_ms = ((e2e_ms - ttft_ms) / (seq_out_len - 1)
+                  if seq_out_len > 1 else None)
+
+        # Prefer native engine metrics if a future vLLM repopulates them.
         rm = getattr(out, "metrics", None)
-        ttft_ms = None
-        itl_ms = None
         if rm is not None:
             arrival = getattr(rm, "arrival_time", None)
             first_token = getattr(rm, "first_token_time", None)
@@ -249,8 +272,6 @@ def run(args):
             if (first_token is not None and finished is not None
                     and seq_out_len > 1):
                 itl_ms = (finished - first_token) * 1000.0 / (seq_out_len - 1)
-
-        e2e_ms = (t1 - t0) * 1000.0
 
         if idx >= args.warmup:
             energy_total_j += sampler.energy_joules(t0, t1)

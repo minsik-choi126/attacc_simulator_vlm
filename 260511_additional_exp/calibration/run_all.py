@@ -22,7 +22,11 @@ import sys
 import time
 
 HERE = pathlib.Path(__file__).resolve().parent
-ROOT = HERE.parents[2]
+# parents[1] is the repo root (.../<repo>/260511_additional_exp/calibration ->
+# .../<repo>).  Was parents[2], which pointed one level ABOVE the repo and made
+# every "ROOT / 260511_additional_exp/..." path and the Ramulator2 binary check
+# resolve to a non-existent location.
+ROOT = HERE.parents[1]
 
 
 # (script_path_relative_to_root, label, phase_tag)
