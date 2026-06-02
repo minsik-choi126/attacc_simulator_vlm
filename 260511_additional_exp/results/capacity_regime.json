@@ -94,8 +94,8 @@
     }
   },
   "metadata": {
-    "timestamp": "2026-06-01T11:51:46.653461Z",
-    "git_commit": "1be1997",
+    "timestamp": "2026-06-02T01:12:04.833267Z",
+    "git_commit": "8f598b2",
     "platform": "A6000 48 GB GPU + AttAcc HBM (post-Fix-C)"
   }
 }

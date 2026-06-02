@@ -202,3 +202,168 @@ Cross-HW:
 - **2026-06-01 v1** — 초안
 - **2026-06-01 v2** — risks 부록 추가 (R1-R6)
 - **2026-06-01 v3** — R7-R11 반영. 가이드 명료화 (TL;DR, Step 0 환경 점검, 시뮬레이터 코드 검증 표, capacity_regime 의 88→197 정량 변화 명시)
+
+---
+
+# 실행 결과 & 분석 — 2026-06-02 (RTX A6000, GPU1)
+
+> 본 절은 260601 runbook 을 실제 실행한 결과 정리 + 분석. 실행 환경이 runbook 가정(vLLM 0.7.3, DGX/H100)과 달라 일부 코드 수정이 필요했고, 그 내용/근거를 함께 기록한다.
+
+## 0. 실행 환경
+
+| 항목 | 값 |
+|---|---|
+| 일시 | 2026-06-02 (UTC) |
+| GPU | NVIDIA RTX A6000 49 GB ×2 — **GPU1=calibration, GPU0=r9 (병렬)** |
+| Driver | 595.71.05 |
+| Python / Torch | 3.10.14 / 2.10.0+cu128 (CUDA 12.8) |
+| vLLM | **0.17.0** (runbook 가정 0.7.3) |
+| transformers | 4.57.6 |
+| Repo commit | `8f598b2` (R15) + 본 실행의 수정들 |
+| HF_HOME | `/131_data/geeho/minsik/tmp/run_260601/hf_cache` (모델 5종 + MMMU-Pro 전부 tmp) |
+| Ramulator2 | 로컬 빌드 (`b7c7027` + PIM 패치), `ramulator2/ramulator2` |
+
+## 1. 완결성 점검 (무엇이 돌았고 무엇이 빠졌나)
+
+| Step | 산출물 | 상태 |
+|---|---|---|
+| 0 upstream_baseline (LLM 회귀) | `upstream_baseline.json` | ✅ |
+| 1 calibration (sim vs vLLM, 5 VLM) | `calibration_a6000.json` | ✅ (2-pass 실측) |
+| 2 vit_recalibration (legacy 비교) | `vit_recalibration.json` | ✅ (legacy 측정치 재사용) |
+| 3 multi_vlm_full_sim | `multi_vlm_full_sim.json` | ✅ |
+| 4 slo_throughput | `slo_throughput.json` | ✅ |
+| 5 B1 vlm_vs_llm_pair | `vlm_vs_llm_pair.json` | ✅ |
+| 6 B2 prefill_decomp_vlm | `prefill_decomp_vlm.json` | ✅ |
+| 7 B3 visual_token_scaling | `visual_token_scaling.json` | ✅ (src-path 버그 수정 후) |
+| 8 B4 capacity_framing | `capacity_framing.json` | ✅ |
+| 9 roofline_per_vlm | `roofline_per_vlm.json` | ✅ |
+| 10 capacity_regime | `capacity_regime.json` | ✅ |
+| r9 MMMU-Pro 실측 (5 VLM) | `r9_*_mmmu_tp1.json` | ✅ (TTFT/ITL/E2E/energy) |
+
+**빠진 것 (불가/옵션)**
+- **H100 측 calibration + `cross_hw_compare`** → H100 하드웨어 없음(이 노드 A6000만). cross-HW 비교 불가.
+- **r10 concurrent serving** → run_all 비포함(옵션). 미실행.
+- **InternVL3 calibration vLLM** → 초기엔 placeholder 버그로 실패했으나 **수정 후 정상 측정됨**(아래 §3).
+
+## 2. 실행 중 발견/수정한 문제 (환경 차이 기인)
+
+| # | 문제 | 근본 원인 | 조치 |
+|---|---|---|---|
+| F1 | `run_all.py` 모든 step `No such file` | `ROOT=HERE.parents[2]` 가 repo 한 단계 위를 가리킴 | `parents[1]` 로 수정 |
+| F2 | Ramulator2 "NOT FOUND" | F1 과 동일(엉뚱 경로 조회) | F1 수정으로 해결 |
+| F3 | Step 7 `ModuleNotFoundError: src` | `visual_token_scaling.py` 의 `parents[2]` off-by-one | `parents[1]` 로 수정 |
+| F4 | calibration 한 모델 실패 시 전체 크래시(저장 전) | vLLM 예외가 `main()` 밖으로 전파 | 셀 단위 try/except 가드 |
+| F5 | **calibration/r9 TTFT·ITL 전부 None** | **vLLM 0.17(V1 엔진)이 `RequestOutput.metrics` 제거** (`VLLM_USE_V1` 토글도 없음) | **wall-clock 2-pass 측정으로 전환**(아래) |
+| F6 | InternVL3 vLLM 크래시(`Failed to apply prompt replacement`) | 이미지 placeholder 를 `<image>` 로 줌 — InternVL*-hf 는 `<IMG_CONTEXT>` | placeholder 교체(vllm_helpers + r9) |
+| F7 | LLaVA-Next img=672 8셀 `prompt(5937) > max_model_len(4096)` | calibration `_load_llm` 이 4096 하드코딩 | LLaVA-Next 만 8192 로 |
+
+### F5 상세 — "metrics 뽑는 vLLM 버전" 결론
+- 모델 아키: `Qwen3VLForConditionalGeneration`, `InternVLForConditionalGeneration` → **최신 vLLM(=0.17) 필요**
+- 0.17 = V1 전용, `out.metrics` 제거 → **native TTFT/ITL 불가**
+- ∴ **"native metrics + 5모델 지원"을 동시에 만족하는 vLLM 버전은 없음**(신모델이 0.17 강제 ↔ 0.17은 metrics 없음).
+- 정확 측정법 = 버전 무관 **wall-clock 2-pass**: `max_tokens=1` → TTFT, full(`min=max=LOUT`) → E2E, `ITL=(E2E−TTFT)/(LOUT−1)`. warmup 1회 후 측정. 시뮬레이터의 prefill(`s`)·decode(`g`) 정의와 정확히 대응.
+
+## 3. Step 1 — Calibration (sim vs vLLM 실측, 2-pass)
+
+`calibration_a6000.json` — 5 VLM × image_size × batch(1–128), `s_corr = meas_TTFT / sim_s`, `g_corr = meas_ITL / sim_g`.
+
+**64 셀 전부 측정 성공** (sim ok ×64, vLLM ok ×64). image_size 별 `min..median..max` (batch 1–128 스윕):
+
+| 모델 | img | 셀 | s_corr (min..med..max) | g_corr (min..med..max) |
+|---|---|---|---|---|
+| Qwen3-VL-4B | 336 | 8 | 0.12 .. 0.28 .. 0.62 | 0.25 .. 0.73 .. 1.01 |
+| Qwen3-VL-4B | 672 | 8 | 0.08 .. 0.20 .. 0.42 | 0.26 .. 0.74 .. 1.02 |
+| Qwen2.5-VL-7B | 336 | 8 | 0.07 .. 0.21 .. 0.47 | 0.33 .. 0.78 .. 0.96 |
+| Qwen2.5-VL-7B | 672 | 8 | 0.04 .. 0.12 .. 0.31 | 0.33 .. 0.79 .. 0.96 |
+| LLaVA-1.5-7B | 336 | 8 | 0.07 .. 0.20 .. 0.44 | 0.35 .. 0.70 .. 0.90 |
+| LLaVA-Next-Mistral-7B | 336 | 8 | 0.04 .. 0.07 .. 0.19 | 0.13 .. 0.54 .. 0.84 |
+| LLaVA-Next-Mistral-7B | 672 | 8 | 0.03 .. 0.05 .. 0.11 | 0.09 .. 0.48 .. 0.82 |
+| InternVL3-8B-hf | 448 | 8 | 0.08 .. 0.19 .. 0.45 | 0.33 .. 0.78 .. 0.96 |
+
+**해석**
+- **s_corr < 1 (대부분 0.05–0.45)** — 시뮬레이터가 실측 TTFT 대비 prefill 을 **과대예측**. batch=1 에서 최고(0.4–0.6), batch↑ 일수록 급감(sim prefill 이 실측보다 batch 에 더 가파르게 증가). LLaVA-Next 가 가장 낮음(0.03–0.19, anyres 로 sim prefill 이 특히 큼).
+- **g_corr 중앙값 0.5–0.8, batch=1 에서 ≈1.0** — decode 는 저batch 에서 sim 과 거의 일치, batch↑ 시 실측 ITL 이 sim 보다 천천히 증가해 비율 하락.
+- **runbook 목표 `s_corr∈[0.85,1.20]` 미달** — Fix A/B 이후에도 (vLLM 0.17 / A6000 / wall-clock 2-pass 기준) **prefill 모델이 여전히 과대예측**. 측정 방식이 runbook 가정(native TTFT)과 달라 절대 비교는 주의(§11). 추세상 prefill 항(특히 batch 스케일링·anyres)의 재보정 필요.
+
+## 4. Step 3 — Multi-VLM speedup matrix (AttAcc vs GPU, e2e)
+
+| 모델 | img | e2e speedup (b=1 / 4 / 8) |
+|---|---|---|
+| Qwen3-VL-4B | 672 | 3.22 / 2.78 / 2.60 |
+| Qwen2.5-VL-7B | 672 | 4.87 / 3.38 / 2.55 |
+| InternVL3-8B-hf | 448 | 5.32 / 3.90 / 2.98 |
+| LLaVA-1.5-7B | 336 | 2.73 / 2.40 / 2.21 |
+| LLaVA-Next-Mistral-7B | 672 | 3.34 / 2.93 / 2.83 |
+
+→ AttAcc(dgx-attacc)가 GPU-only 대비 e2e **2.2–5.3×**. batch↑ 일수록 speedup↓ (decode 비중 감소 + prefill 비가속).
+
+## 5. Step 6 (B2) — Prefill vs Decode 분해
+
+| 모델 | decode speedup | prefill speedup | e2e speedup |
+|---|---|---|---|
+| Qwen3-VL-4B | 3.76–4.10× | 0.93–0.97× | 2.77–3.30× |
+| Qwen2.5-VL-7B | 4.88–6.44× | 0.94–1.00× | 2.83–5.10× |
+| InternVL3-8B-hf | 4.88–6.44× | 0.91–1.00× | 3.30–5.42× |
+| LLaVA-1.5-7B | 2.94–3.02× | 0.86–0.92× | 2.36–2.78× |
+| LLaVA-Next-Mistral-7B | 4.17–4.54× | 0.95–1.00× | 2.94–4.03× |
+
+→ **AttAcc 이득은 전적으로 decode 에서 발생**(3.8–6.4×). prefill 은 ≤1.0×(비가속, 약간의 오버헤드). `prefill_contrib_pct < 0`.
+
+## 6. Step 7 (B3) — Visual token 민감도  ⚠️ 가설과 반대
+
+| 모델 | img / visual_tokens | e2e speedup (b=1) |
+|---|---|---|
+| Qwen2.5-VL-7B | 336 / 144 | **5.63** |
+| Qwen2.5-VL-7B | 672 / 576 | 5.15 |
+| Qwen2.5-VL-7B | 1008 / 1296 | 4.01 |
+| Qwen2.5-VL-7B | 1344 / 2304 | **2.89** |
+| LLaVA-Next-Mistral | 336–1344 / 1776→2928 | 3.87 → 3.61 (anyres 상한 2928 에서 평탄) |
+
+→ runbook 가설("visual token↑ → speedup↑")과 **정반대**: visual token 이 늘수록 e2e speedup **감소**. 이유는 §9 분석.
+
+## 7. Step 5 (B1) — LLM↔VLM pair  ⚠️ 가설과 반대
+
+| pair | delta = vlm_speedup − llm_speedup |
+|---|---|
+| Vicuna-7B → LLaVA-1.5-7B | −0.044 … −0.035 |
+| Mistral-7B → LLaVA-Next-Mistral | −0.166 … −0.134 |
+| Qwen3-4B → Qwen3-VL-4B | −0.551 … −0.208 |
+
+→ **모든 pair 에서 delta < 0** — VLM 이 LLM 백본 대비 AttAcc speedup 이 오히려 약간 **작음**. runbook 기대(≥2 pair delta>0)와 반대. 이유는 §9.
+
+## 8. Step 4 / 8 / 9 / 10 — Throughput·Capacity·Roofline
+
+- **B4 capacity_framing**: SLO=30ms/tok 에서 AttAcc 가 batch 4× × ITL 2.3× = **throughput ~9.2×** (분해 오차 ~0%). Qwen3-VL throughput_attacc ≈ 6300 tok/s vs GPU 687 tok/s.
+- **capacity_regime (Fix C, KV on AttAcc)** max_batch (A1 TP=1): Qwen3-VL **836**, Qwen2.5-VL **1802**, InternVL3 **2931**, **LLaVA-1.5 197 / LLaVA-Next 209**. → LLaVA 계열만 capacity-bound(<250), 나머지는 throughput-bound. (runbook 의 88/91→197/209 정정과 일치)
+- **roofline**: prefill 의 `qkv`/`ffn` 은 compute-bound(AI≈430–480, PIM 무이득), `score`/`context`(attention) 만 memory-bound(AI≈100, PIM 타깃). decode 의 attention 이 PIM 핵심 타깃임을 확인.
+
+## 9. MMMU-Pro 실데이터 측정 (r9, 5 VLM, n=32, 실측)
+
+실제 MMMU-Pro "standard(4 options)" 32문항(실이미지+멀티초이스), wall-clock 2-pass, GPU0.
+
+| 모델 | seq_in p50 | TTFT p50/p95 (ms) | ITL p50 (ms/tok) | E2E p50 (ms) | avg W | J/req | J/tok |
+|---|---|---|---|---|---|---|---|
+| Qwen2.5-VL-7B | 334 | 154.6 / 214.6 | 21.4 | 2875.6 | 284 | 815.8 | 6.37 |
+| Qwen3-VL-4B | 270 | 109.4 / 154.9 | 13.0 | 1766.8 | 275 | 487.0 | 3.80 |
+| LLaVA-1.5-7B | 620 | 153.7 / 183.0 | 19.9 | 2678.4 | 281 | 752.7 | 5.88 |
+| LLaVA-Next-Mistral-7B | 1979 | 390.1 / 514.6 | 19.8 | 2901.5 | 277 | 804.6 | 6.29 |
+| InternVL3-8B-hf | 1586 | 369.5 / 749.6 | 19.6 | 2885.8 | 280 | 810.1 | 6.33 |
+
+→ TTFT 는 seq_in(visual+text)에 비례(LLaVA-Next 1979토큰 → TTFT 390ms). ITL 은 모델 크기에 따름(Qwen3-VL 4B 가 13ms 로 최저). Qwen3-VL-4B 가 E2E·에너지 모두 최효율.
+
+## 10. 종합 분석 — corrected 시뮬레이터가 말하는 것
+
+1. **AttAcc 이득의 원천은 decode(KV-attention) 단 하나.** roofline 상 decode 의 score/context 만 memory-bound → PIM 가속(decode 3.8–6.4×). prefill 의 qkv/ffn 은 compute-bound → 비가속(prefill ≤1.0×).
+2. **그래서 visual token 이 많을수록 e2e 이득이 줄어든다(B3 ↓)**, 그리고 **VLM 이 LLM 백본보다 이득이 작다(B1 delta<0)**. 둘 다 같은 메커니즘: 비전 토큰은 *prefill*(비가속부)을 키우므로 e2e 에서 가속부(decode)의 비중을 희석. → runbook 의 두 가설("visual↑→gain↑", "VLM>LLM")은 **본 corrected 시뮬레이터에선 성립하지 않음**(정직한 반증).
+3. **다만 lout=128 같은 디코드-중심 워크로드에선 여전히 e2e 2.2–5.3× 이득** + capacity 측면에서 KV-on-AttAcc 로 max_batch 가 크게 늘어(LLaVA 197/209, 그 외 800–2900) **throughput ~9× (B4)**. 즉 VLM 서빙의 실이득은 "VLM 고유 추가 gain" 보다 **decode/throughput/capacity** 축에서 온다.
+4. **Calibration(§3)**: 절대 prefill 은 sim 이 실측 TTFT 대비 과대예측(s_corr<1) 경향, decode 는 비교적 근접. (상세 수치 §3 표) — runbook 목표 `s_corr∈[0.85,1.20]` 와의 격차는 §3 에서 논의.
+
+## 11. 한계 / 주의
+
+- **TTFT/ITL = wall-clock 2-pass**(vLLM 0.17 native metrics 부재). 스케줄링·파이썬 오버헤드가 batch=1 소형값에 수 ms 포함될 수 있음(추세·비율은 유효).
+- **단일 HW(A6000)**: cross-HW(H100) 일관성 검증 미수행.
+- vit_recalibration 의 measured 값은 **이전 캠페인 재사용**(이번 vLLM 실측 아님) — legacy 비교용.
+- 시뮬레이터 system="dgx"/"dgx-attacc" 는 8×A100 가정 모델, 실측은 A6000×1 → s_corr 는 동일 A6000 sim↔A6000 실측 비율로 해석.
+
+## 갱신 history (이어서)
+- **2026-06-02** — A6000 GPU1/GPU0 병렬 실행 결과 추가. vLLM 0.17 대응(2-pass TTFT/ITL), InternVL3 placeholder·LLaVA-Next max_model_len·ROOT/src-path 버그 수정. r9 5VLM 실측, calibration 5VLM, sim 11 step 전부 갱신.

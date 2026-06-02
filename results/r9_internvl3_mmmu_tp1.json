@@ -1,0 +1,383 @@
+{
+  "config": {
+    "model": "OpenGVLab/InternVL3-8B-hf",
+    "tp": 1,
+    "lout": 128,
+    "num_samples": 32,
+    "warmup": 2,
+    "max_model_len": 4096,
+    "enforce_eager": false,
+    "image_size_max": 672,
+    "dataset": "MMMU/MMMU_Pro standard (4 options) split=test"
+  },
+  "raw_warmup": [
+    {
+      "request_idx": 0,
+      "question_id": "test_History_1",
+      "seq_in_len": 284,
+      "seq_out_len": 128,
+      "e2e_ms": 2904.057741165161,
+      "ttft_ms": 8236.056566238403,
+      "itl_ms": -41.984242717112146
+    },
+    {
+      "request_idx": 1,
+      "question_id": "test_Art_113",
+      "seq_in_len": 3362,
+      "seq_out_len": 128,
+      "e2e_ms": 2904.8702716827393,
+      "ttft_ms": 735.4276180267334,
+      "itl_ms": 17.08222561933863
+    }
+  ],
+  "raw_measured": [
+    {
+      "request_idx": 2,
+      "question_id": "validation_Design_19",
+      "seq_in_len": 3349,
+      "seq_out_len": 128,
+      "e2e_ms": 2904.738426208496,
+      "ttft_ms": 708.8260650634766,
+      "itl_ms": 17.29064851295291
+    },
+    {
+      "request_idx": 3,
+      "question_id": "test_History_134",
+      "seq_in_len": 289,
+      "seq_out_len": 128,
+      "e2e_ms": 2867.4168586730957,
+      "ttft_ms": 117.41352081298828,
+      "itl_ms": 21.653569589449663
+    },
+    {
+      "request_idx": 4,
+      "question_id": "test_Literature_65",
+      "seq_in_len": 3364,
+      "seq_out_len": 128,
+      "e2e_ms": 2909.783363342285,
+      "ttft_ms": 728.7936210632324,
+      "itl_ms": 17.173147577000414
+    },
+    {
+      "request_idx": 5,
+      "question_id": "test_Agriculture_195",
+      "seq_in_len": 3362,
+      "seq_out_len": 128,
+      "e2e_ms": 2904.9673080444336,
+      "ttft_ms": 749.5923042297363,
+      "itl_ms": 16.97145672295037
+    },
+    {
+      "request_idx": 6,
+      "question_id": "test_Finance_304",
+      "seq_in_len": 1080,
+      "seq_out_len": 128,
+      "e2e_ms": 2874.814987182617,
+      "ttft_ms": 262.23278045654297,
+      "itl_ms": 20.571513438787985
+    },
+    {
+      "request_idx": 7,
+      "question_id": "test_Sociology_191",
+      "seq_in_len": 793,
+      "seq_out_len": 128,
+      "e2e_ms": 2871.8700408935547,
+      "ttft_ms": 213.6220932006836,
+      "itl_ms": 20.931086202306073
+    },
+    {
+      "request_idx": 8,
+      "question_id": "test_Accounting_42",
+      "seq_in_len": 850,
+      "seq_out_len": 128,
+      "e2e_ms": 2873.1822967529297,
+      "ttft_ms": 203.37271690368652,
+      "itl_ms": 21.02212267597829
+    },
+    {
+      "request_idx": 9,
+      "question_id": "test_Energy_and_Power_152",
+      "seq_in_len": 314,
+      "seq_out_len": 128,
+      "e2e_ms": 2870.9545135498047,
+      "ttft_ms": 108.66165161132812,
+      "itl_ms": 21.750337495578556
+    },
+    {
+      "request_idx": 10,
+      "question_id": "test_Pharmacy_287",
+      "seq_in_len": 291,
+      "seq_out_len": 128,
+      "e2e_ms": 2870.5291748046875,
+      "ttft_ms": 114.71867561340332,
+      "itl_ms": 21.69929526922271
+    },
+    {
+      "request_idx": 11,
+      "question_id": "validation_Architecture_and_Engineering_17",
+      "seq_in_len": 2649,
+      "seq_out_len": 128,
+      "e2e_ms": 2906.827688217163,
+      "ttft_ms": 600.1970767974854,
+      "itl_ms": 18.162445759210062
+    },
+    {
+      "request_idx": 12,
+      "question_id": "test_Clinical_Medicine_73",
+      "seq_in_len": 1820,
+      "seq_out_len": 128,
+      "e2e_ms": 2886.1513137817383,
+      "ttft_ms": 453.66764068603516,
+      "itl_ms": 19.153414748785064
+    },
+    {
+      "request_idx": 13,
+      "question_id": "validation_Sociology_29",
+      "seq_in_len": 1305,
+      "seq_out_len": 128,
+      "e2e_ms": 2879.5502185821533,
+      "ttft_ms": 323.76575469970703,
+      "itl_ms": 20.124287117184615
+    },
+    {
+      "request_idx": 14,
+      "question_id": "test_Architecture_and_Engineering_206",
+      "seq_in_len": 1355,
+      "seq_out_len": 128,
+      "e2e_ms": 2881.2804222106934,
+      "ttft_ms": 305.9868812561035,
+      "itl_ms": 20.277901897280234
+    },
+    {
+      "request_idx": 15,
+      "question_id": "test_Public_Health_4",
+      "seq_in_len": 1462,
+      "seq_out_len": 128,
+      "e2e_ms": 2883.3510875701904,
+      "ttft_ms": 316.41292572021484,
+      "itl_ms": 20.21211151062973
+    },
+    {
+      "request_idx": 16,
+      "question_id": "test_History_76",
+      "seq_in_len": 1837,
+      "seq_out_len": 128,
+      "e2e_ms": 2888.145685195923,
+      "ttft_ms": 438.8561248779297,
+      "itl_ms": 19.285744569433017
+    },
+    {
+      "request_idx": 17,
+      "question_id": "validation_Physics_7",
+      "seq_in_len": 1832,
+      "seq_out_len": 128,
+      "e2e_ms": 2885.9481811523438,
+      "ttft_ms": 414.55864906311035,
+      "itl_ms": 19.459760095190813
+    },
+    {
+      "request_idx": 18,
+      "question_id": "test_Art_Theory_425",
+      "seq_in_len": 1055,
+      "seq_out_len": 128,
+      "e2e_ms": 2878.0617713928223,
+      "ttft_ms": 284.85870361328125,
+      "itl_ms": 20.418921793539692
+    },
+    {
+      "request_idx": 19,
+      "question_id": "test_Accounting_328",
+      "seq_in_len": 1586,
+      "seq_out_len": 128,
+      "e2e_ms": 2884.850263595581,
+      "ttft_ms": 369.45080757141113,
+      "itl_ms": 19.806294929324174
+    },
+    {
+      "request_idx": 20,
+      "question_id": "validation_Electronics_10",
+      "seq_in_len": 821,
+      "seq_out_len": 128,
+      "e2e_ms": 2878.634452819824,
+      "ttft_ms": 206.66050910949707,
+      "itl_ms": 21.039164911104937
+    },
+    {
+      "request_idx": 21,
+      "question_id": "test_Psychology_35",
+      "seq_in_len": 2366,
+      "seq_out_len": 128,
+      "e2e_ms": 2900.7699489593506,
+      "ttft_ms": 484.7860336303711,
+      "itl_ms": 19.023495396291178
+    },
+    {
+      "request_idx": 22,
+      "question_id": "validation_Clinical_Medicine_3",
+      "seq_in_len": 1305,
+      "seq_out_len": 128,
+      "e2e_ms": 2885.7522010803223,
+      "ttft_ms": 285.4578495025635,
+      "itl_ms": 20.474758673840622
+    },
+    {
+      "request_idx": 23,
+      "question_id": "test_Literature_19",
+      "seq_in_len": 303,
+      "seq_out_len": 128,
+      "e2e_ms": 2879.35733795166,
+      "ttft_ms": 114.57657814025879,
+      "itl_ms": 21.76992724260946
+    },
+    {
+      "request_idx": 24,
+      "question_id": "validation_Art_3",
+      "seq_in_len": 1812,
+      "seq_out_len": 128,
+      "e2e_ms": 2896.0890769958496,
+      "ttft_ms": 411.8835926055908,
+      "itl_ms": 19.560673105435107
+    },
+    {
+      "request_idx": 25,
+      "question_id": "test_Biology_321",
+      "seq_in_len": 1838,
+      "seq_out_len": 128,
+      "e2e_ms": 2895.4200744628906,
+      "ttft_ms": 410.6419086456299,
+      "itl_ms": 19.565182408009928
+    },
+    {
+      "request_idx": 26,
+      "question_id": "validation_Manage_29",
+      "seq_in_len": 2227,
+      "seq_out_len": 128,
+      "e2e_ms": 2904.1504859924316,
+      "ttft_ms": 456.268310546875,
+      "itl_ms": 19.27466279878391
+    },
+    {
+      "request_idx": 27,
+      "question_id": "test_Economics_93",
+      "seq_in_len": 3392,
+      "seq_out_len": 128,
+      "e2e_ms": 2922.2617149353027,
+      "ttft_ms": 758.8131427764893,
+      "itl_ms": 17.035028127234753
+    },
+    {
+      "request_idx": 28,
+      "question_id": "test_History_168",
+      "seq_in_len": 1823,
+      "seq_out_len": 128,
+      "e2e_ms": 2897.522449493408,
+      "ttft_ms": 427.40321159362793,
+      "itl_ms": 19.449757778738427
+    },
+    {
+      "request_idx": 29,
+      "question_id": "test_Electronics_118",
+      "seq_in_len": 2857,
+      "seq_out_len": 128,
+      "e2e_ms": 2915.132761001587,
+      "ttft_ms": 639.1787528991699,
+      "itl_ms": 17.920897701593834
+    },
+    {
+      "request_idx": 30,
+      "question_id": "validation_Mechanical_Engineering_18",
+      "seq_in_len": 368,
+      "seq_out_len": 128,
+      "e2e_ms": 2885.3557109832764,
+      "ttft_ms": 124.04417991638184,
+      "itl_ms": 21.74261048084169
+    },
+    {
+      "request_idx": 31,
+      "question_id": "test_Agriculture_169",
+      "seq_in_len": 3359,
+      "seq_out_len": 128,
+      "e2e_ms": 2924.7984886169434,
+      "ttft_ms": 765.5272483825684,
+      "itl_ms": 17.002135749876967
+    },
+    {
+      "request_idx": 32,
+      "question_id": "test_Diagnostics_and_Laboratory_Medicine_28",
+      "seq_in_len": 280,
+      "seq_out_len": 128,
+      "e2e_ms": 2883.7993144989014,
+      "ttft_ms": 117.20013618469238,
+      "itl_ms": 21.78424549853708
+    },
+    {
+      "request_idx": 33,
+      "question_id": "validation_Economics_12",
+      "seq_in_len": 1832,
+      "seq_out_len": 128,
+      "e2e_ms": 2897.0298767089844,
+      "ttft_ms": 420.3166961669922,
+      "itl_ms": 19.50167858694482
+    }
+  ],
+  "stats": {
+    "e2e_ms": {
+      "n": 32,
+      "mean": 2890.2655467391014,
+      "stdev": 15.380383113750009,
+      "p50": 2885.7522010803223,
+      "p95": 2915.132761001587,
+      "p99": 2922.2617149353027,
+      "min": 2867.4168586730957,
+      "max": 2924.7984886169434
+    },
+    "ttft_ms": {
+      "n": 32,
+      "mean": 385.55456697940826,
+      "stdev": 209.25771275937845,
+      "p50": 369.45080757141113,
+      "p95": 749.5923042297363,
+      "p99": 758.8131427764893,
+      "min": 108.66165161132812,
+      "max": 765.5272483825684
+    },
+    "itl_ms": {
+      "n": 32,
+      "mean": 19.72213369889522,
+      "stdev": 1.538482750749179,
+      "p50": 19.565182408009928,
+      "p95": 21.750337495578556,
+      "p99": 21.76992724260946,
+      "min": 16.97145672295037,
+      "max": 21.78424549853708
+    },
+    "seq_in_len": {
+      "n": 32,
+      "mean": 1661.75,
+      "stdev": 1018.4158793075677,
+      "p50": 1586,
+      "p95": 3362,
+      "p99": 3364,
+      "min": 280,
+      "max": 3392
+    },
+    "seq_out_len": {
+      "n": 32,
+      "mean": 128,
+      "stdev": 0.0,
+      "p50": 128,
+      "p95": 128,
+      "p99": 128,
+      "min": 128,
+      "max": 128
+    }
+  },
+  "energy": {
+    "total_joules": 25923.723339016437,
+    "duration_s": 92.48849749565125,
+    "average_watts": 280.2913231478904,
+    "joules_per_request": 810.1163543442636,
+    "joules_per_token": 6.32903401831456,
+    "samples_collected": 1183
+  }
+}

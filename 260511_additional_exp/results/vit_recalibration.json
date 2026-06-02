@@ -11,33 +11,33 @@
         "model": "Qwen2.5-VL-7B",
         "image_size": 672,
         "lin_text": 334,
-        "sim_s_ms": 48.839,
+        "sim_s_ms": 108.028,
         "sim_g_ms": 22.6002,
         "meas_ttft_ms": 107.43,
         "meas_itl_ms": 8.72,
-        "s_corr": 2.2,
+        "s_corr": 0.994,
         "g_corr": 0.386
       },
       {
         "model": "LLaVA-1.5-7B",
         "image_size": 336,
         "lin_text": 620,
-        "sim_s_ms": 59.451,
+        "sim_s_ms": 81.451,
         "sim_g_ms": 23.4539,
         "meas_ttft_ms": 41.16,
         "meas_itl_ms": 7.27,
-        "s_corr": 0.692,
+        "s_corr": 0.505,
         "g_corr": 0.31
       },
       {
         "model": "LLaVA-Next-Mistral-7B",
         "image_size": 672,
         "lin_text": 1979,
-        "sim_s_ms": 289.658,
+        "sim_s_ms": 311.658,
         "sim_g_ms": 28.1694,
         "meas_ttft_ms": 102.53,
         "meas_itl_ms": 7.63,
-        "s_corr": 0.354,
+        "s_corr": 0.329,
         "g_corr": 0.271
       }
     ],
@@ -48,7 +48,7 @@
         "vit_hidden": 1280,
         "vit_tokens": 2304,
         "flops_est": 4783519825920,
-        "s_corr": 2.2
+        "s_corr": 0.994
       },
       {
         "model": "LLaVA-1.5-7B",
@@ -56,7 +56,7 @@
         "vit_hidden": 1024,
         "vit_tokens": 576,
         "flops_est": 538145980416,
-        "s_corr": 0.692
+        "s_corr": 0.505
       },
       {
         "model": "LLaVA-Next-Mistral-7B",
@@ -64,14 +64,14 @@
         "vit_hidden": 1024,
         "vit_tokens": 2304,
         "flops_est": 2348273369088,
-        "s_corr": 0.354
+        "s_corr": 0.329
       }
     ],
     "decode_g_corr_universal_est": 1.46
   },
   "metadata": {
-    "timestamp": "2026-05-11T17:32:20.258218Z",
-    "git_commit": "47007cb",
+    "timestamp": "2026-06-01T22:30:47.282980Z",
+    "git_commit": "8f598b2",
     "platform": "A6000 simulator vs prior H100x1 vLLM measurement (measured numbers re-used from earlier campaign)"
   }
 }

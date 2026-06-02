@@ -1,0 +1,283 @@
+{
+  "experiment": "capacity_framing",
+  "config": {
+    "source": "slo_throughput.json",
+    "decomposition": "speedup_total = batch_ratio x itl_ratio"
+  },
+  "results": {
+    "models": [
+      {
+        "model": "Qwen3-VL-4B",
+        "rows": [
+          {
+            "slo_per_token_ms": 30,
+            "batch_gpu": 16,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 23.28008158572805,
+            "itl_attacc_ms": 10.159381860355557,
+            "throughput_gpu": 687.2828147564941,
+            "throughput_attacc": 6299.595869089631,
+            "batch_ratio": 4.0,
+            "itl_ratio": 2.291486027961281,
+            "speedup_total": 9.165944111845127,
+            "decomposition_expected": 9.165944111845125,
+            "decomposition_delta_pct": -1.9379965857577823e-14
+          },
+          {
+            "slo_per_token_ms": 50,
+            "batch_gpu": 32,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 33.0139684655733,
+            "itl_attacc_ms": 10.159381860355557,
+            "throughput_gpu": 969.2866834040065,
+            "throughput_attacc": 6299.595869089631,
+            "batch_ratio": 2.0,
+            "itl_ratio": 3.2496040526247016,
+            "speedup_total": 6.499208105249403,
+            "decomposition_expected": 6.499208105249403,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 70,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 51.71605751938231,
+            "itl_attacc_ms": 10.159381860355557,
+            "throughput_gpu": 1237.5266613471817,
+            "throughput_attacc": 6299.595869089631,
+            "batch_ratio": 1.0,
+            "itl_ratio": 5.090472848667227,
+            "speedup_total": 5.090472848667227,
+            "decomposition_expected": 5.090472848667227,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 100,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 51.71605751938231,
+            "itl_attacc_ms": 10.159381860355557,
+            "throughput_gpu": 1237.5266613471817,
+            "throughput_attacc": 6299.595869089631,
+            "batch_ratio": 1.0,
+            "itl_ratio": 5.090472848667227,
+            "speedup_total": 5.090472848667227,
+            "decomposition_expected": 5.090472848667227,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 150,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 51.71605751938231,
+            "itl_attacc_ms": 10.159381860355557,
+            "throughput_gpu": 1237.5266613471817,
+            "throughput_attacc": 6299.595869089631,
+            "batch_ratio": 1.0,
+            "itl_ratio": 5.090472848667227,
+            "speedup_total": 5.090472848667227,
+            "decomposition_expected": 5.090472848667227,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 200,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 51.71605751938231,
+            "itl_attacc_ms": 10.159381860355557,
+            "throughput_gpu": 1237.5266613471817,
+            "throughput_attacc": 6299.595869089631,
+            "batch_ratio": 1.0,
+            "itl_ratio": 5.090472848667227,
+            "speedup_total": 5.090472848667227,
+            "decomposition_expected": 5.090472848667227,
+            "decomposition_delta_pct": 0.0
+          }
+        ]
+      },
+      {
+        "model": "Qwen2.5-VL-7B",
+        "rows": [
+          {
+            "slo_per_token_ms": 30,
+            "batch_gpu": 8,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 27.72556997637813,
+            "itl_attacc_ms": 18.52909976224577,
+            "throughput_gpu": 288.54230974569356,
+            "throughput_attacc": 3454.0264136525457,
+            "batch_ratio": 8.0,
+            "itl_ratio": 1.4963257973747195,
+            "speedup_total": 11.970606378997756,
+            "decomposition_expected": 11.970606378997756,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 50,
+            "batch_gpu": 32,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 42.23572225845381,
+            "itl_attacc_ms": 18.52909976224577,
+            "throughput_gpu": 757.6524867784153,
+            "throughput_attacc": 3454.0264136525457,
+            "batch_ratio": 2.0,
+            "itl_ratio": 2.2794265668811287,
+            "speedup_total": 4.558853133762257,
+            "decomposition_expected": 4.558853133762257,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 70,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 58.5895127522017,
+            "itl_attacc_ms": 18.52909976224577,
+            "throughput_gpu": 1092.3456604031066,
+            "throughput_attacc": 3454.0264136525457,
+            "batch_ratio": 1.0,
+            "itl_ratio": 3.162026947017771,
+            "speedup_total": 3.1620269470177704,
+            "decomposition_expected": 3.162026947017771,
+            "decomposition_delta_pct": 1.4044447352635633e-14
+          },
+          {
+            "slo_per_token_ms": 100,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 58.5895127522017,
+            "itl_attacc_ms": 18.52909976224577,
+            "throughput_gpu": 1092.3456604031066,
+            "throughput_attacc": 3454.0264136525457,
+            "batch_ratio": 1.0,
+            "itl_ratio": 3.162026947017771,
+            "speedup_total": 3.1620269470177704,
+            "decomposition_expected": 3.162026947017771,
+            "decomposition_delta_pct": 1.4044447352635633e-14
+          },
+          {
+            "slo_per_token_ms": 150,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 58.5895127522017,
+            "itl_attacc_ms": 18.52909976224577,
+            "throughput_gpu": 1092.3456604031066,
+            "throughput_attacc": 3454.0264136525457,
+            "batch_ratio": 1.0,
+            "itl_ratio": 3.162026947017771,
+            "speedup_total": 3.1620269470177704,
+            "decomposition_expected": 3.162026947017771,
+            "decomposition_delta_pct": 1.4044447352635633e-14
+          },
+          {
+            "slo_per_token_ms": 200,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 58.5895127522017,
+            "itl_attacc_ms": 18.52909976224577,
+            "throughput_gpu": 1092.3456604031066,
+            "throughput_attacc": 3454.0264136525457,
+            "batch_ratio": 1.0,
+            "itl_ratio": 3.162026947017771,
+            "speedup_total": 3.1620269470177704,
+            "decomposition_expected": 3.162026947017771,
+            "decomposition_delta_pct": 1.4044447352635633e-14
+          }
+        ]
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "rows": [
+          {
+            "slo_per_token_ms": 30,
+            "batch_gpu": 4,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 27.130618946353977,
+            "itl_attacc_ms": 21.836801215028967,
+            "throughput_gpu": 147.43489663502686,
+            "throughput_attacc": 2930.8321933137636,
+            "batch_ratio": 16.0,
+            "itl_ratio": 1.2424264286328526,
+            "speedup_total": 19.878822858125645,
+            "decomposition_expected": 19.87882285812564,
+            "decomposition_delta_pct": -1.7871851387559892e-14
+          },
+          {
+            "slo_per_token_ms": 50,
+            "batch_gpu": 32,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 49.8760880080849,
+            "itl_attacc_ms": 21.836801215028967,
+            "throughput_gpu": 641.590013932384,
+            "throughput_attacc": 2930.8321933137636,
+            "batch_ratio": 2.0,
+            "itl_ratio": 2.28403819391634,
+            "speedup_total": 4.56807638783268,
+            "decomposition_expected": 4.56807638783268,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 70,
+            "batch_gpu": 32,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 49.8760880080849,
+            "itl_attacc_ms": 21.836801215028967,
+            "throughput_gpu": 641.590013932384,
+            "throughput_attacc": 2930.8321933137636,
+            "batch_ratio": 2.0,
+            "itl_ratio": 2.28403819391634,
+            "speedup_total": 4.56807638783268,
+            "decomposition_expected": 4.56807638783268,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 100,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 70.1593763407136,
+            "itl_attacc_ms": 21.836801215028967,
+            "throughput_gpu": 912.208792866089,
+            "throughput_attacc": 2930.8321933137636,
+            "batch_ratio": 1.0,
+            "itl_ratio": 3.2128962319090535,
+            "speedup_total": 3.2128962319090535,
+            "decomposition_expected": 3.2128962319090535,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 150,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 70.1593763407136,
+            "itl_attacc_ms": 21.836801215028967,
+            "throughput_gpu": 912.208792866089,
+            "throughput_attacc": 2930.8321933137636,
+            "batch_ratio": 1.0,
+            "itl_ratio": 3.2128962319090535,
+            "speedup_total": 3.2128962319090535,
+            "decomposition_expected": 3.2128962319090535,
+            "decomposition_delta_pct": 0.0
+          },
+          {
+            "slo_per_token_ms": 200,
+            "batch_gpu": 64,
+            "batch_attacc": 64,
+            "itl_gpu_ms": 70.1593763407136,
+            "itl_attacc_ms": 21.836801215028967,
+            "throughput_gpu": 912.208792866089,
+            "throughput_attacc": 2930.8321933137636,
+            "batch_ratio": 1.0,
+            "itl_ratio": 3.2128962319090535,
+            "speedup_total": 3.2128962319090535,
+            "decomposition_expected": 3.2128962319090535,
+            "decomposition_delta_pct": 0.0
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-06-02T01:12:03.909376Z",
+    "git_commit": "8f598b2",
+    "platform": "unspecified"
+  }
+}
