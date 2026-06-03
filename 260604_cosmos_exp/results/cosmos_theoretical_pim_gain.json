@@ -1,0 +1,4044 @@
+{
+  "experiment": "cosmos_theoretical_pim_gain",
+  "config": {
+    "phase": "3.5",
+    "host": "A6000",
+    "platform": "A6000",
+    "attacc_bw_tbs": 242.0,
+    "h100_bw_tbs": 3.35,
+    "h100_nvl_bw_tbs": 3.9,
+    "context_grid": [
+      16384,
+      32768,
+      65536,
+      131072,
+      262144
+    ],
+    "batch_grid": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "denoise_steps_grid": [
+      10,
+      20,
+      35,
+      50,
+      100
+    ],
+    "model_assumption": "AttAcc accelerates KV/attention bandwidth ONLY; weights still served by H100 at H100_BW. Time per step is max(weight/H100, KV/AttAcc) under perfect pipelining.",
+    "schema_note": "rows[] = pure analytic grid (model x ctx x batch x steps), no measured override.  measured_anchors[] = one row per Phase 3.2 status=='measured' cell.  Strict measured-lookup key is (model, batch, resolution, frames, denoise_steps, engine_tag, actual_context_tokens) -- ALL fields must match exactly; partial matches do not silently substitute."
+  },
+  "results": {
+    "rows": [
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 2415919104,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 7.02,
+          "t_H100_per_step_ms": 10.273,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.01,
+          "realized_gain_x": 1.08,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 102.7,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 2415919104,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 7.02,
+          "t_H100_per_step_ms": 10.273,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.01,
+          "realized_gain_x": 1.08,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 205.5,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 2415919104,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 7.02,
+          "t_H100_per_step_ms": 10.273,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.01,
+          "realized_gain_x": 1.08,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 359.6,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 2415919104,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 7.02,
+          "t_H100_per_step_ms": 10.273,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.01,
+          "realized_gain_x": 1.08,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 513.6,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 2415919104,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 7.02,
+          "t_H100_per_step_ms": 10.273,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.01,
+          "realized_gain_x": 1.08,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1027.3,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 109.9,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 219.9,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 384.8,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 549.8,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1099.5,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 124.4,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 248.7,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 435.3,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 621.9,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1243.7,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 153.2,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 306.4,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 536.3,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 766.1,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1532.2,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 109.9,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 219.9,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 384.8,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 549.8,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 4831838208,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 13.12,
+          "t_H100_per_step_ms": 10.995,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.02,
+          "realized_gain_x": 1.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1099.5,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 124.4,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 248.7,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 435.3,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 621.9,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1243.7,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 153.2,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 306.4,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 536.3,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 766.1,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1532.2,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 210.9,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 421.8,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 738.2,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1054.5,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2109.1,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 124.4,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 248.7,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 435.3,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 621.9,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 9663676416,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 23.19,
+          "t_H100_per_step_ms": 12.437,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0399,
+          "realized_gain_x": 1.3,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1243.7,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 153.2,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 306.4,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 536.3,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 766.1,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1532.2,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 210.9,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 421.8,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 738.2,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1054.5,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2109.1,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 326.3,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 652.6,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1142.1,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1631.5,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3263.0,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 153.2,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 306.4,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 536.3,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 766.1,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 19327352832,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 37.66,
+          "t_H100_per_step_ms": 15.322,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.0799,
+          "realized_gain_x": 1.6,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1532.2,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 210.9,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 421.8,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 738.2,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1054.5,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2109.1,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 326.3,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 652.6,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1142.1,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1631.5,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3263.0,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 557.1,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1114.1,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1949.7,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2785.3,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 5570.7,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 210.9,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 421.8,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 738.2,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1054.5,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 38654705664,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 54.71,
+          "t_H100_per_step_ms": 21.091,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.1597,
+          "realized_gain_x": 2.21,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2109.1,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 326.3,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 652.6,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1142.1,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1631.5,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 77309411328,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 70.73,
+          "t_H100_per_step_ms": 32.63,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.3195,
+          "realized_gain_x": 3.42,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3263.0,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 557.1,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1114.1,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1949.7,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2785.3,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 154618822656,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 82.85,
+          "t_H100_per_step_ms": 55.707,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 0.6389,
+          "realized_gain_x": 5.83,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 5570.7,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 309237645312,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 90.62,
+          "t_H100_per_step_ms": 101.862,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 1.2778,
+          "realized_gain_x": 10.66,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1018.6,
+        "video_total_AttAcc_ms": 95.5
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 309237645312,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 90.62,
+          "t_H100_per_step_ms": 101.862,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 1.2778,
+          "realized_gain_x": 10.66,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2037.2,
+        "video_total_AttAcc_ms": 191.0
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 309237645312,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 90.62,
+          "t_H100_per_step_ms": 101.862,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 1.2778,
+          "realized_gain_x": 10.66,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3565.2,
+        "video_total_AttAcc_ms": 334.3
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 309237645312,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 90.62,
+          "t_H100_per_step_ms": 101.862,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 1.2778,
+          "realized_gain_x": 10.66,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 5093.1,
+        "video_total_AttAcc_ms": 477.6
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 32000000000.0,
+          "kv_bytes_per_step": 309237645312,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 90.62,
+          "t_H100_per_step_ms": 101.862,
+          "t_AttAcc_per_step_ms": 9.552,
+          "t_weight_alone_ms": 9.552,
+          "t_kv_via_attacc_ms": 1.2778,
+          "realized_gain_x": 10.66,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 10186.2,
+        "video_total_AttAcc_ms": 955.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 4294967296,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 3.25,
+          "t_H100_per_step_ms": 39.491,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0177,
+          "realized_gain_x": 1.03,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 394.9,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 4294967296,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 3.25,
+          "t_H100_per_step_ms": 39.491,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0177,
+          "realized_gain_x": 1.03,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 789.8,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 4294967296,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 3.25,
+          "t_H100_per_step_ms": 39.491,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0177,
+          "realized_gain_x": 1.03,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1382.2,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 4294967296,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 3.25,
+          "t_H100_per_step_ms": 39.491,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0177,
+          "realized_gain_x": 1.03,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1974.5,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 4294967296,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 3.25,
+          "t_H100_per_step_ms": 39.491,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0177,
+          "realized_gain_x": 1.03,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3949.1,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 407.7,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 815.5,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1427.1,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2038.7,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4077.3,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 433.4,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 866.7,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1516.8,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2166.9,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4333.7,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 484.7,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 969.3,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1696.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2423.3,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 16384,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4846.6,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 407.7,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 815.5,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1427.1,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2038.7,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 8589934592,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 6.29,
+          "t_H100_per_step_ms": 40.773,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.0355,
+          "realized_gain_x": 1.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4077.3,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 433.4,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 866.7,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1516.8,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2166.9,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4333.7,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 484.7,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 969.3,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1696.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2423.3,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4846.6,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 587.2,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1174.4,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2055.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2936.1,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 32768,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 5872.2,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 433.4,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 866.7,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1516.8,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2166.9,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 17179869184,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 11.83,
+          "t_H100_per_step_ms": 43.337,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.071,
+          "realized_gain_x": 1.13,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4333.7,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 484.7,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 969.3,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1696.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2423.3,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4846.6,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 587.2,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1174.4,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2055.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2936.1,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 5872.2,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 792.4,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1584.7,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2773.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3961.8,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 65536,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 7923.6,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 484.7,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 969.3,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1696.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2423.3,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 34359738368,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 21.16,
+          "t_H100_per_step_ms": 48.466,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.142,
+          "realized_gain_x": 1.27,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4846.6,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 587.2,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1174.4,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2055.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2936.1,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 5872.2,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 792.4,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1584.7,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2773.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3961.8,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 7923.6,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1202.6,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2405.2,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4209.2,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 6013.1,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 131072,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 12026.2,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 587.2,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1174.4,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2055.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2936.1,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 1,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 68719476736,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 34.93,
+          "t_H100_per_step_ms": 58.722,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.284,
+          "realized_gain_x": 1.54,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 5872.2,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 792.4,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1584.7,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2773.3,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 3961.8,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 2,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 137438953472,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 51.78,
+          "t_H100_per_step_ms": 79.236,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 0.5679,
+          "realized_gain_x": 2.07,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 7923.6,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 1202.6,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2405.2,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4209.2,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 6013.1,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 4,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 274877906944,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 68.23,
+          "t_H100_per_step_ms": 120.262,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 1.1359,
+          "realized_gain_x": 3.15,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 12026.2,
+        "video_total_AttAcc_ms": 3820.9
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 10,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 549755813888,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 81.11,
+          "t_H100_per_step_ms": 202.315,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 2.2717,
+          "realized_gain_x": 5.29,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 2023.2,
+        "video_total_AttAcc_ms": 382.1
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 20,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 549755813888,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 81.11,
+          "t_H100_per_step_ms": 202.315,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 2.2717,
+          "realized_gain_x": 5.29,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 4046.3,
+        "video_total_AttAcc_ms": 764.2
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 35,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 549755813888,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 81.11,
+          "t_H100_per_step_ms": 202.315,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 2.2717,
+          "realized_gain_x": 5.29,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 7081.0,
+        "video_total_AttAcc_ms": 1337.3
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 50,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 549755813888,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 81.11,
+          "t_H100_per_step_ms": 202.315,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 2.2717,
+          "realized_gain_x": 5.29,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 10115.8,
+        "video_total_AttAcc_ms": 1910.5
+      },
+      {
+        "model": "Cosmos3-Super",
+        "context_tokens": 262144,
+        "batch": 8,
+        "denoise_steps": 100,
+        "per_step": {
+          "weight_bytes": 128000000000.0,
+          "kv_bytes_per_step": 549755813888,
+          "kv_source": "analytic",
+          "kv_dominance_pct": 81.11,
+          "t_H100_per_step_ms": 202.315,
+          "t_AttAcc_per_step_ms": 38.209,
+          "t_weight_alone_ms": 38.209,
+          "t_kv_via_attacc_ms": 2.2717,
+          "realized_gain_x": 5.29,
+          "upper_bound_gain_x": 72.24
+        },
+        "video_total_H100_ms": 20231.5,
+        "video_total_AttAcc_ms": 3820.9
+      }
+    ],
+    "measured_anchors": []
+  },
+  "metadata": {
+    "timestamp": "2026-06-03T20:24:06.804343Z",
+    "git_commit": "unknown",
+    "host": "A6000",
+    "platform": "A6000"
+  }
+}
