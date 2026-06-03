@@ -1,8 +1,9 @@
 # 260601 실험 runbook — VLM Simulator Calibration & Gain 측정
 
-**Last update**: 2026-06-01 v3 (R7-R11 반영)
+**Last update**: 2026-06-04 v4 (R7-R16 반영, H100 readiness)
 **Owner**: Minsik
 **Repo**: `attacc_simulator/` (origin `minsik-choi126/attacc_simulator_vlm`, branch `main`)
+**Latest commit**: `02bf5a4` (H100 readiness — hw_detect + per-host JSON copies)
 
 ## TL;DR — 노드에 도착해서 무엇을 하면 되는가
 
@@ -12,11 +13,11 @@ git pull                                                          # 최신 받�
 ls ramulator2/ramulator2* 2>/dev/null || bash set_pim_ramulator.sh # 없으면 빌드
 nvidia-smi --query-gpu=name --format=csv,noheader                 # A6000 / H100 확인
 
-# 한 줄로 전체 실험
+# 한 줄로 전체 실험 -- 스크립트가 HW 를 자동 감지해 sim 의 gpu/interface 선택
 python 260511_additional_exp/calibration/run_all.py
 
-# 끝난 후
-ls 260511_additional_exp/results/calibration_*.json
+# 끝난 후 -- 각 결과는 <name>.json (latest) 와 <name>_<host>.json (per-HW) 둘 다 저장됨
+ls 260511_additional_exp/results/{calibration_*,capacity_regime_*,slo_throughput_*}.json
 ```
 
 A6000 노드에서 한 번, H100 노드에서 한 번 돌린 후, 한 곳에서:
@@ -26,6 +27,18 @@ python 260511_additional_exp/calibration/cross_hw_compare.py --save
 ```
 
 → `results/calibration_cross_hw.json` + 콘솔 표.
+
+### 동일 명령으로 양쪽 HW — 어떻게 가능?
+
+`260511_additional_exp/shared/hw_detect.py` 가 `nvidia-smi` 로 host GPU 를 감지해서 sim 의 `gpu` / `interface` 인자를 자동 매핑:
+
+| Host GPU | sim_runner `gpu` | sim_runner `interface` | roofline ridge (ops/byte) |
+|---|---|---|---|
+| RTX A6000 | `A6000` | `NVLINK_BRIDGE` (112 GB/s) | 403 |
+| H100 SXM5 | `H100` | `NVLINK4` (900 GB/s) | 295 |
+| A100 SXM4 | `A100a` | `NVLINK3` (600 GB/s) | 201 |
+
+따라서 동일한 `run_all.py` 명령이 A6000 노드에선 A6000 sim config 를, H100 노드에선 H100 sim config 를 자동 선택. **수동 flag 불필요**.
 
 ---
 
@@ -61,12 +74,25 @@ Post-Fix-C (run_all.py 재실행 후): KV 가 AttAcc HBM 측 (8 GPU × 5 HBM × 
 | 항목 | 명령 | 기대 |
 |---|---|---|
 | GPU 인식 | `nvidia-smi --query-gpu=name --format=csv,noheader` | `NVIDIA RTX A6000` / `NVIDIA H100 80GB` |
+| hw_detect 작동 | `python 260511_additional_exp/shared/hw_detect.py` | `detected host = A6000` 또는 `H100`, sim gpu / interface 출력 |
 | Ramulator2 binary | `ls attacc_simulator/ramulator2/ramulator2*` | 파일 존재 |
-| vLLM | `python -c "import vllm; print(vllm.__version__)"` | `0.7.3` (또는 호환) |
+| vLLM | `python -c "import vllm; print(vllm.__version__)"` | A6000 노드 = `0.17.0` (실제 확인됨). H100 노드 = vLLM 0.17+ 권장 |
 | 모델 캐시 | `ls ~/.cache/huggingface/hub` | qwen / llava / internvl prefix |
 | LLM 회귀 | `python 260511_additional_exp/tier1_simulator/upstream_baseline.py` | 7 LLM 모두 `status: ok` |
 
 `upstream_baseline` 결과가 *기존 JSON 과 bit-identical* 이면 Fix A+B+C 의 LLM-side 비침입 가정 확인. 차이 있으면 *즉시 중단*하고 Fix 분기 게이트 점검.
+
+### H100 노드 첫 실행 시 추가 점검
+
+A6000 노드에서 이미 실행 완료된 상태에서 H100 노드를 처음 셋업할 때:
+
+| 항목 | 명령 | 기대 |
+|---|---|---|
+| Ramulator2 빌드 | `cd ramulator2 && mkdir -p build && cd build && cmake .. && make -j && cp ramulator2 ../ramulator2` | binary 생성 (~5 분) |
+| HF 모델 캐시 | `huggingface-cli login` (필요 시) + 첫 모델 로드 시 자동 download | 5 VLM ~ 100 GB |
+| vLLM 호환성 | 0.17 의 V1 엔진은 `RequestOutput.metrics` 제거함 → calibration 의 `_measure_vllm` 가 wall-clock 2-pass 로 측정해야 함 (A6000 에서 이미 적용된 패치) | TTFT / ITL 값이 ≠ None |
+| 메모리 여유 | H100 80 GB > A6000 48 GB 이므로 A6000 에서 OOM 이던 batch=128 cells 도 성공 가능 | LLaVA-1.5 batch=128 셀이 `ok` 또는 `oom` (capacity 한계) |
+| 디스크 공간 | per-host JSON 까지 합치면 results/ ≈ 200 MB | `df -h .` |
 
 ---
 
@@ -102,19 +128,21 @@ Post-Fix-C (run_all.py 재실행 후): KV 가 AttAcc HBM 측 (8 GPU × 5 HBM × 
 
 모든 결과 JSON 은 `attacc_simulator/260511_additional_exp/results/` 안에 저장.
 
-| JSON | 의미 |
-|---|---|
-| `calibration_a6000.json` / `calibration_h100.json` | Phase 1 sim vs vLLM 매트릭스 |
-| `calibration_cross_hw.json` | A6000 + H100 병합 |
-| `vit_recalibration.json` | s_corr / g_corr 5 VLM, legacy 비교 용 |
-| `multi_vlm_full_sim.json` | 5 VLM × 3 batch speedup matrix |
-| `slo_throughput.json` | SLO=30 ms/tok max batch, ITL, throughput |
-| `vlm_vs_llm_pair.json` | LLM↔VLM speedup delta (3 pair × 7 batch) |
-| `prefill_decomp_vlm.json` | 모델별 prefill / decode / e2e speedup + 기여% |
-| `visual_token_scaling.json` | image_size 별 visual_tokens, speedup |
-| `capacity_framing.json` | SLO throughput 의 batch_ratio × ITL_ratio 분해 |
-| `roofline_per_vlm.json` | layer AI 분류 |
-| `capacity_regime.json` | **Post-Fix-C** GPU+AttAcc 양면 capacity, max_batch |
+**Per-host JSON 컨벤션 (R16)**: HW-dependent 결과는 `<name>.json` (latest 가 overwrite) 와 `<name>_<host>.json` (per-HW 보존) 둘 다 저장. 양쪽 HW 에서 실행 후 두 종류 모두 git push 하면 A6000 / H100 결과가 공존.
+
+| JSON | per-host suffix? | 의미 |
+|---|---|---|
+| `calibration_<a6000\|h100>.json` | ✓ (이미 host suffix) | Phase 1 sim vs vLLM 매트릭스 |
+| `calibration_cross_hw.json` | — | A6000 + H100 병합 |
+| `vit_recalibration[_<host>].json` | ✓ | s_corr / g_corr 5 VLM, legacy 비교 용 |
+| `multi_vlm_full_sim[_<host>].json` | ✓ | 5 VLM × 3 batch speedup matrix |
+| `slo_throughput[_<host>].json` | ✓ | SLO=30 ms/tok max batch, ITL, throughput |
+| `vlm_vs_llm_pair[_<host>].json` | ✓ | LLM↔VLM speedup delta (3 pair × 7 batch) |
+| `prefill_decomp_vlm[_<host>].json` | ✓ | 모델별 prefill / decode / e2e speedup + 기여% |
+| `visual_token_scaling[_<host>].json` | ✓ | image_size 별 visual_tokens, speedup |
+| `capacity_framing.json` | — | SLO throughput 의 batch_ratio × ITL_ratio 분해 (HW-invariant) |
+| `roofline_per_vlm[_<host>].json` | ✓ | layer AI 분류 + host ridge |
+| `capacity_regime[_<host>].json` | ✓ | **Post-Fix-C** GPU+AttAcc 양면 capacity, max_batch |
 
 ---
 
@@ -183,6 +211,7 @@ Cross-HW:
 | R13 | `capacity_regime.json` 이 Fix C 이전 format 으로 남음 | FIXED — 로컬 재실행해서 새 필드들 (kv_resident_side / kv_per_attacc_mib / max_batch_attacc_side) 채워서 commit |
 | R14 | `get_capacity_breakdown` docstring 이 "GPU side" 라고 적혔지만 실제로 `max_batch_at_default_L` 는 system limiting batch 로 overwrite | FIXED — docstring 갱신 |
 | R15 | vLLM 프롬프트 길이 맞추기가 "영문 6 chars ≈ 1 token" 근사라 paper 의 "Lin=X" 정확성 약함 | FIXED — `_get_tokenizer(hf_id)` 로 AutoTokenizer 캐시 + 반복 prompt 사이즈 조정 (±2 token), JSON 에 `actual_lin_tokens_p50` / `actual_lin_delta_vs_target` 기록. tokenizer 못 받으면 char heuristic fallback |
+| R16 | Phase 2/3 스크립트 9 개가 `gpu="A6000"` / `interface="NVLINK_BRIDGE"` / `GPUType.A6000` 하드코딩 → H100 노드에서 같은 코드가 A6000 sim config 로 돔 | FIXED — `shared/hw_detect.py` (`detect_host` / `sim_gpu_tag` / `sim_interface_tag` / `gputype_enum`) 신규 + 9 개 스크립트 (vit_recalibration, multi_vlm_full_sim, vlm_vs_llm_pair, prefill_decomp_vlm, visual_token_scaling, ablation_contribution, slo_throughput, capacity_regime, roofline_per_vlm) 자동 분기. 또한 7 개 결과 JSON 이 `<name>_<host>.json` 추가 사본 저장 |
 
 ---
 
@@ -202,6 +231,7 @@ Cross-HW:
 - **2026-06-01 v1** — 초안
 - **2026-06-01 v2** — risks 부록 추가 (R1-R6)
 - **2026-06-01 v3** — R7-R11 반영. 가이드 명료화 (TL;DR, Step 0 환경 점검, 시뮬레이터 코드 검증 표, capacity_regime 의 88→197 정량 변화 명시)
+- **2026-06-04 v4** — R12-R16 반영. H100 readiness — `hw_detect.py` 신규 + 9 스크립트 자동 분기 + per-host JSON 사본. TL;DR 에 HW 자동 매핑 표 (A6000/H100/A100 → sim gpu/interface/ridge) 추가. H100 노드 첫 실행 시 추가 점검 표 추가. 출력 위치 표를 per-host suffix 컨벤션 반영하여 갱신.
 
 ---
 
