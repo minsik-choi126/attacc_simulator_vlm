@@ -16,6 +16,11 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
+from hw_detect import detect_host, sim_gpu_tag, sim_interface_tag
+
+HOST = detect_host()
+SIM_GPU = sim_gpu_tag(HOST)
+SIM_INTERFACE = sim_interface_tag(HOST)
 
 MODELS = [
     ("Qwen3-VL-4B",            672,  569),
@@ -33,8 +38,8 @@ FUTURE_SYSTEMS = [("dgx-attacc", 2, "AttAcc A2")]
 
 def measure(model, img, lin, batch, system, ngpu=1):
     m = sr.run(
-        model=model, system=system, gpu="A6000",
-        ngpu=ngpu, tp=ngpu, num_attacc=ngpu, num_hbm=5, interface="NVLINK_BRIDGE",
+        model=model, system=system, gpu=SIM_GPU,
+        ngpu=ngpu, tp=ngpu, num_attacc=ngpu, num_hbm=5, interface=SIM_INTERFACE,
         pim="bank", lin=lin, lout=LOUT, batch=batch,
         image_size=img,
         prefill_chunk=512, prefill_samples=8, max_L=4096,
@@ -90,13 +95,15 @@ def main():
                 model, label, ngpu, len(curve)))
         results.append(per_model)
 
-    save("slo_throughput",
-         {"batches": BATCHES, "lout": LOUT,
-          "slo_per_token_ms": SLO_LIST_MS,
-          "deployment_scope": "A1 TP=1 only",
-          "future_hooks": [label for _, _, label in FUTURE_SYSTEMS],
-          "platform": "A6000 simulator A1"},
-         {"models": results})
+    meta = {"batches": BATCHES, "lout": LOUT,
+            "slo_per_token_ms": SLO_LIST_MS,
+            "deployment_scope": "A1 TP=1 only",
+            "future_hooks": [label for _, _, label in FUTURE_SYSTEMS],
+            "platform": f"{HOST} simulator A1",
+            "host_detected": HOST}
+    payload = {"models": results}
+    save("slo_throughput", meta, payload)
+    save(f"slo_throughput_{HOST.lower()}", meta, payload)
     print("Done")
 
 

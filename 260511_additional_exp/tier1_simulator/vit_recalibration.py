@@ -16,6 +16,11 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
+from hw_detect import detect_host, sim_gpu_tag, sim_interface_tag
+
+HOST = detect_host()
+SIM_GPU = sim_gpu_tag(HOST)
+SIM_INTERFACE = sim_interface_tag(HOST)
 
 
 # Measured TTFT p50 (ms) from prior campaign (results/r9_*.json or r7_*.json).
@@ -49,9 +54,9 @@ def simulate_one(model, image_size, lin, lout):
     m = sr.run(
         model=model,
         system="dgx",                     # GPU only -- matches vLLM
-        gpu="A6000",
+        gpu=SIM_GPU,
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK_BRIDGE",
+        interface=SIM_INTERFACE,
         pim="bank",
         lin=lin, lout=lout, batch=1,
         image_size=image_size,
@@ -112,13 +117,15 @@ def main():
         print("  {:25s} {:>6d} {:>6d} {:>8d} {:>10.2e} {:>8.2f}".format(
             model, L, H, T, flops, s_corr if s_corr else 0))
 
-    save("vit_recalibration",
-         {"purpose": "Derive per-model s_corr to identify _build_vit() fix path",
-          "method": "compare simulated TTFT vs vLLM measured TTFT p50 (MMMU-Pro)",
-          "platform": "A6000 simulator vs prior H100x1 vLLM measurement "
-                       "(measured numbers re-used from earlier campaign)"},
-         {"per_model": rows, "architecture_diag": diag,
-          "decode_g_corr_universal_est": 1.46})
+    meta = {"purpose": "Derive per-model s_corr to identify _build_vit() fix path",
+            "method": "compare simulated TTFT vs vLLM measured TTFT p50 (MMMU-Pro)",
+            "host_detected": HOST,
+            "platform": f"{HOST} simulator vs prior H100x1 vLLM measurement "
+                         "(measured numbers re-used from earlier campaign)"}
+    payload = {"per_model": rows, "architecture_diag": diag,
+               "decode_g_corr_universal_est": 1.46}
+    save("vit_recalibration", meta, payload)
+    save(f"vit_recalibration_{HOST.lower()}", meta, payload)
     print("\nDone -- Paper figure source for prefill correction breakdown")
 
 

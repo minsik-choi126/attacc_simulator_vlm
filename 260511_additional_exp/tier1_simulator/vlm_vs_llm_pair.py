@@ -24,6 +24,11 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
+from hw_detect import detect_host, sim_gpu_tag, sim_interface_tag
+
+HOST = detect_host()
+SIM_GPU = sim_gpu_tag(HOST)
+SIM_INTERFACE = sim_interface_tag(HOST)
 
 
 # (LLM_label, VLM_label, image_size for VLM, lin for matched runs)
@@ -47,9 +52,9 @@ def _e2e_ms(metrics):
 
 def _run(model, system, batch, lin, image_size):
     return sr.run(
-        model=model, system=system, gpu="A6000",
+        model=model, system=system, gpu=SIM_GPU,
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK_BRIDGE", pim="bank",
+        interface=SIM_INTERFACE, pim="bank",
         lin=lin, lout=LOUT, batch=batch,
         image_size=image_size,
         prefill_chunk=512, prefill_samples=8,
@@ -122,11 +127,13 @@ def main():
             print(f"  b={b:>3d}  speedup_llm={sl_s:>7s}  "
                   f"speedup_vlm={sv_s:>7s}  delta={d_s}")
 
-    save("vlm_vs_llm_pair",
-         {"pairs": [(l, v) for l, v, _, _ in PAIRS],
-          "batches": BATCHES, "systems": SYSTEMS, "lout": LOUT},
-         {"rows": results})
-    print("\nSaved -> results/vlm_vs_llm_pair.json")
+    meta = {"pairs": [(l, v) for l, v, _, _ in PAIRS],
+            "batches": BATCHES, "systems": SYSTEMS, "lout": LOUT,
+            "host_detected": HOST}
+    payload = {"rows": results}
+    save("vlm_vs_llm_pair", meta, payload)
+    save(f"vlm_vs_llm_pair_{HOST.lower()}", meta, payload)
+    print(f"\nSaved -> results/vlm_vs_llm_pair{{,_{HOST.lower()}}}.json")
 
 
 if __name__ == "__main__":

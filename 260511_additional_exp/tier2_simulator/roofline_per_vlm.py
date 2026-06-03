@@ -23,12 +23,22 @@ ROOT = HERE.parent.parent
 sys.path.insert(0, str(ROOT))
 
 from result_aggregator import save
+from hw_detect import detect_host
+
+HOST = detect_host()
 
 
 # Hardware ridges (ops/byte at FP16)
-A6000_RIDGE = 309.7e12 / 768e9         # ~403 (deployment default)
-H100_RIDGE  = 989.4e12 / 3352e9        # ~295 (paper reference)
-HOST_RIDGE  = A6000_RIDGE              # primary ridge for verdict labelling
+A6000_RIDGE = 309.7e12 / 768e9         # ~403 (RTX A6000)
+H100_RIDGE  = 989.4e12 / 3352e9        # ~295 (H100 SXM5)
+A100_RIDGE  = 312e12   / 1555e9        # ~201 (A100 80GB)
+# Verdict labelling uses the *host* ridge (which device decides whether
+# a layer is host-memory-bound).  Falls back to A6000 for unknown HW.
+HOST_RIDGE  = {
+    "A6000": A6000_RIDGE,
+    "H100":  H100_RIDGE,
+    "A100":  A100_RIDGE,
+}.get(HOST, A6000_RIDGE)
 ATTACC_RIDGE_PER = 670.4e9 * 9         # internal scale 9
 # Effective PIM ridge per AttAcc (no compute saturation in AttAcc)
 # AttAcc has GEMV+softmax dedicated, so ridge is roughly 1 op/byte (BW-bound).
@@ -126,14 +136,19 @@ def main():
                 print("    {:8s} AI={:>7.2f}  {}".format(
                     r["layer"], r["ai"], r["verdict"]))
 
-    save("roofline_per_vlm",
-         {"A6000_ridge_ops_per_byte": round(A6000_RIDGE, 2),
-          "H100_ridge_ops_per_byte": round(H100_RIDGE, 2),
-          "host_ridge_used": "A6000",
-          "regimes": ["prefill_L569", "decode_L1"],
-          "models": list(MODELS.keys()),
-          "platform": "A6000 roofline (A6000 ridge primary, H100 paper ref)"},
-         {"matrix": results})
+    meta = {"A6000_ridge_ops_per_byte": round(A6000_RIDGE, 2),
+            "H100_ridge_ops_per_byte": round(H100_RIDGE, 2),
+            "A100_ridge_ops_per_byte": round(A100_RIDGE, 2),
+            "host_detected": HOST,
+            "host_ridge_used": HOST,
+            "host_ridge_ops_per_byte": round(HOST_RIDGE, 2),
+            "regimes": ["prefill_L569", "decode_L1"],
+            "models": list(MODELS.keys()),
+            "platform": f"{HOST} roofline (host ridge primary)"}
+    payload = {"matrix": results}
+    save("roofline_per_vlm", meta, payload)
+    # Per-host copy so A6000 and H100 runs can coexist for paper figures.
+    save(f"roofline_per_vlm_{HOST.lower()}", meta, payload)
     print("Done")
 
 

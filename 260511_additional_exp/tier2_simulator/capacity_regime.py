@@ -20,6 +20,15 @@ from src.type import DataType, DeviceType, GPUType, InterfaceType, PIMType
 from src.config import make_pim_config
 
 from result_aggregator import save
+from hw_detect import detect_host, gputype_enum
+
+HOST = detect_host()
+HOST_GPUTYPE = gputype_enum(HOST)
+HOST_INTERFACE = {
+    "A6000": InterfaceType.NVLINK_BRIDGE,
+    "H100":  InterfaceType.NVLINK4,
+    "A100":  InterfaceType.NVLINK3,
+}[HOST]
 
 
 MODELS = [
@@ -36,8 +45,8 @@ FUTURE_DEPLOYMENTS = [("A2 (TP=2)", 2)]
 
 def make_system(tp):
     model_cfg = make_model_config("Qwen3-VL-4B", DataType.W16A16)
-    xpu_cfg = make_xpu_config(GPUType.A6000, num_gpu=tp)
-    pim_cfg = make_pim_config(PIMType.BA, InterfaceType.NVLINK_BRIDGE,
+    xpu_cfg = make_xpu_config(HOST_GPUTYPE, num_gpu=tp)
+    pim_cfg = make_pim_config(PIMType.BA, HOST_INTERFACE,
                                num_attacc=tp, num_hbm=5)
     system = System(xpu_cfg["GPU"], model_cfg, max_L=2048)
     system.set_accelerator(model_cfg, DeviceType.PIM, pim_cfg)
@@ -47,8 +56,8 @@ def make_system(tp):
 def estimate_max_batch(model_name, lin, tp):
     """Use get_capacity_breakdown() with batch=1 -> derive max."""
     model_cfg = make_model_config(model_name, DataType.W16A16)
-    xpu_cfg = make_xpu_config(GPUType.A6000, num_gpu=tp)
-    pim_cfg = make_pim_config(PIMType.BA, InterfaceType.NVLINK_BRIDGE,
+    xpu_cfg = make_xpu_config(HOST_GPUTYPE, num_gpu=tp)
+    pim_cfg = make_pim_config(PIMType.BA, HOST_INTERFACE,
                                num_attacc=tp, num_hbm=5)
     system = System(xpu_cfg["GPU"], model_cfg, max_L=2048)
     system.set_accelerator(model_cfg, DeviceType.PIM, pim_cfg)
@@ -102,22 +111,26 @@ def main():
                           model, tp_label, weight_mib,
                           kv_gpu_mib, max_batch))
 
-    save("capacity_regime",
-         {"platform": "A6000 48 GB GPU + AttAcc HBM (post-Fix-C)",
-          "deployment_scope": "A1 TP=1 only",
-          "future_hooks": [label for label, _ in FUTURE_DEPLOYMENTS],
-          "note": ("max_batch_estimate = system limiting batch; "
-                   "kv_resident_side tells which device holds KV "
-                   "(GPU under dgx, AttAcc under dgx-attacc).  After "
-                   "Fix C the AttAcc-side fields are populated for "
-                   "dgx-attacc, replacing the prior buggy GPU-only "
-                   "accounting (LLaVA 88/91 -> 197/209 corrected)")},
-         {"rows": rows,
-          "interpretation": {
-              "capacity_bound": ["LLaVA-1.5-7B", "LLaVA-Next-Mistral-7B"],
-              "throughput_bound": ["Qwen3-VL-4B", "Qwen2.5-VL-7B",
-                                     "InternVL3-8B-hf"],
-          }})
+    # Save twice so users get a stable filename (capacity_regime.json,
+    # whatever ran last) and a per-host filename for cross-HW reference.
+    meta = {"platform": f"{HOST} GPU + AttAcc HBM (post-Fix-C)",
+            "host_detected": HOST,
+            "deployment_scope": "A1 TP=1 only",
+            "future_hooks": [label for label, _ in FUTURE_DEPLOYMENTS],
+            "note": ("max_batch_estimate = system limiting batch; "
+                     "kv_resident_side tells which device holds KV "
+                     "(GPU under dgx, AttAcc under dgx-attacc).  After "
+                     "Fix C the AttAcc-side fields are populated for "
+                     "dgx-attacc, replacing the prior buggy GPU-only "
+                     "accounting (LLaVA 88/91 -> 197/209 corrected)")}
+    payload = {"rows": rows,
+               "interpretation": {
+                   "capacity_bound": ["LLaVA-1.5-7B", "LLaVA-Next-Mistral-7B"],
+                   "throughput_bound": ["Qwen3-VL-4B", "Qwen2.5-VL-7B",
+                                          "InternVL3-8B-hf"],
+               }}
+    save("capacity_regime", meta, payload)
+    save(f"capacity_regime_{HOST.lower()}", meta, payload)
     print("Done")
 
 

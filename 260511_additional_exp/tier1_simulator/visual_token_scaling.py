@@ -18,6 +18,11 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
+from hw_detect import detect_host, sim_gpu_tag, sim_interface_tag
+
+HOST = detect_host()
+SIM_GPU = sim_gpu_tag(HOST)
+SIM_INTERFACE = sim_interface_tag(HOST)
 
 # Pull Transformer to call compute_visual_tokens for annotation only.
 # parents[1] is the repo root (.../<repo>/260511_additional_exp/tier1_simulator
@@ -44,9 +49,9 @@ LOUT = 128
 
 def _run(model, system, batch, image_size, lin):
     return sr.run(
-        model=model, system=system, gpu="A6000",
+        model=model, system=system, gpu=SIM_GPU,
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK_BRIDGE", pim="bank",
+        interface=SIM_INTERFACE, pim="bank",
         lin=lin, lout=LOUT, batch=batch,
         image_size=image_size,
         prefill_chunk=512, prefill_samples=8,
@@ -115,13 +120,14 @@ def main():
                     "status": "ok",
                 })
 
-    save("visual_token_scaling",
-         {"models": MODELS, "image_sizes": IMAGE_SIZES,
-          "batches": BATCHES,
-          "lin_policy": "visual_tokens + text_tokens (text_tokens = 64)",
-          "text_tokens": TEXT_TOKENS, "lout": LOUT},
-         {"rows": rows})
-    print("\nSaved -> results/visual_token_scaling.json")
+    meta = {"models": MODELS, "image_sizes": IMAGE_SIZES,
+            "batches": BATCHES, "host_detected": HOST,
+            "lin_policy": "visual_tokens + text_tokens (text_tokens = 64)",
+            "text_tokens": TEXT_TOKENS, "lout": LOUT}
+    payload = {"rows": rows}
+    save("visual_token_scaling", meta, payload)
+    save(f"visual_token_scaling_{HOST.lower()}", meta, payload)
+    print(f"\nSaved -> results/visual_token_scaling{{,_{HOST.lower()}}}.json")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,11 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
+from hw_detect import detect_host, sim_gpu_tag, sim_interface_tag
+
+HOST = detect_host()
+SIM_GPU = sim_gpu_tag(HOST)
+SIM_INTERFACE = sim_interface_tag(HOST)
 
 # 5 in-framework VLM configs (A6000 x 1, A1 deployment)
 VLM_CONFIGS = [
@@ -37,9 +42,9 @@ def run_one(cfg, batch, system):
     return sr.run(
         model=cfg["model"],
         system=system,
-        gpu="A6000",
+        gpu=SIM_GPU,
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK_BRIDGE",
+        interface=SIM_INTERFACE,
         pim="bank",
         lin=cfg["lin"], lout=LOUT, batch=batch,
         image_size=cfg["image_size"],
@@ -83,11 +88,13 @@ def main():
                       base_total or -1, acc_total or -1, speedup or 0))
         matrix.append(per_model)
 
-    save("multi_vlm_full_sim",
-         {"platform": "A6000 x 1 A1", "lout": LOUT, "batches": BATCHES,
-          "system": "dgx vs dgx-attacc"},
-         {"models": matrix})
-    print("\nDone -- see results/multi_vlm_full_sim.json")
+    meta = {"platform": f"{HOST} x 1 A1", "host_detected": HOST,
+            "lout": LOUT, "batches": BATCHES,
+            "system": "dgx vs dgx-attacc"}
+    payload = {"models": matrix}
+    save("multi_vlm_full_sim", meta, payload)
+    save(f"multi_vlm_full_sim_{HOST.lower()}", meta, payload)
+    print(f"\nDone -- results/multi_vlm_full_sim{{,_{HOST.lower()}}}.json")
 
 
 if __name__ == "__main__":

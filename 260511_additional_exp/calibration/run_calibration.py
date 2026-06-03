@@ -31,6 +31,9 @@ import time
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "shared"))
+# Make `src.*` importable so _approx_visual_tokens can compute_visual_tokens
+# regardless of cwd at invocation.  HERE.parents[1] = attacc_simulator/.
+sys.path.insert(0, str(HERE.parents[1]))
 
 import sim_runner as sr
 from result_aggregator import save

@@ -23,6 +23,11 @@ sys.path.insert(0, str(HERE.parent / "shared"))
 
 import sim_runner as sr
 from result_aggregator import save
+from hw_detect import detect_host, sim_gpu_tag, sim_interface_tag
+
+HOST = detect_host()
+SIM_GPU = sim_gpu_tag(HOST)
+SIM_INTERFACE = sim_interface_tag(HOST)
 
 
 MODELS = [
@@ -38,9 +43,9 @@ LOUT = 128
 
 def _run(model, system, batch, lin, image_size):
     return sr.run(
-        model=model, system=system, gpu="A6000",
+        model=model, system=system, gpu=SIM_GPU,
         ngpu=1, tp=1, num_attacc=1, num_hbm=5,
-        interface="NVLINK_BRIDGE", pim="bank",
+        interface=SIM_INTERFACE, pim="bank",
         lin=lin, lout=LOUT, batch=batch,
         image_size=image_size,
         prefill_chunk=512, prefill_samples=8,
@@ -100,11 +105,13 @@ def main():
             rows.append({"model": model, "image_size": img, "lin": lin,
                          "batch": b, **dec, "status": "ok"})
 
-    save("prefill_decomp_vlm",
-         {"models": [m[0] for m in MODELS], "batches": BATCHES, "lout": LOUT,
-          "method": "prefill_contrib = 100 * (s_dgx-s_att) / (e2e_dgx-e2e_att)"},
-         {"rows": rows})
-    print("\nSaved -> results/prefill_decomp_vlm.json")
+    meta = {"models": [m[0] for m in MODELS], "batches": BATCHES, "lout": LOUT,
+            "host_detected": HOST,
+            "method": "prefill_contrib = 100 * (s_dgx-s_att) / (e2e_dgx-e2e_att)"}
+    payload = {"rows": rows}
+    save("prefill_decomp_vlm", meta, payload)
+    save(f"prefill_decomp_vlm_{HOST.lower()}", meta, payload)
+    print(f"\nSaved -> results/prefill_decomp_vlm{{,_{HOST.lower()}}}.json")
 
 
 if __name__ == "__main__":
