@@ -30,12 +30,20 @@ SIM_GPU = sim_gpu_tag(HOST)
 SIM_INTERFACE = sim_interface_tag(HOST)
 
 
+# lin MUST be >= visual_tokens(model, image_size) -- otherwise the
+# simulator cell is infeasible.  visual_tokens (compute_visual_tokens):
+#   Qwen3-VL-4B            672 -> 441    -> lin=569  OK
+#   Qwen2.5-VL-7B          672 -> 576    -> lin=704  OK
+#   InternVL3-8B-hf        448 -> 256    -> lin=704  OK
+#   LLaVA-1.5-7B           336 -> 576    -> lin=704  OK
+#   LLaVA-Next-Mistral-7B  672 -> 2928   -> lin=3008 OK (was 704, INVALID)
+# LLaVA-Next-Mistral lin bumped to match calibration's (672, 3008) cell.
 MODELS = [
     ("Qwen3-VL-4B",            672, 569),
     ("Qwen2.5-VL-7B",          672, 704),
     ("InternVL3-8B-hf",        448, 704),
     ("LLaVA-1.5-7B",           336, 704),
-    ("LLaVA-Next-Mistral-7B",  672, 704),
+    ("LLaVA-Next-Mistral-7B",  672, 3008),
 ]
 BATCHES = [1, 4, 8]
 LOUT = 128

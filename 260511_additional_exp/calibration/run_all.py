@@ -33,7 +33,8 @@ ROOT = HERE.parents[1]
 #
 # Ordering invariant: any step that *consumes* a JSON must run AFTER any step
 # that *produces* it.  In particular capacity_framing.py reads
-# slo_throughput.json, so slo_throughput refresh runs first.  Move ordering
+# slo_throughput_<host>.json (fail-fast if missing -- 260601_experiment.md
+# v5 finding High-1), so slo_throughput refresh runs first.  Move ordering
 # changes carefully -- see 260601_experiment.md 'Run summary' for the
 # dependency notes.
 STEPS = [
@@ -47,9 +48,11 @@ STEPS = [
         "Step 2  ViT recalibration (legacy comparison)", "phase1"),
     # --- Phase 2 prerequisites ---
     # slo_throughput is tagged phase2 because Step 8 (capacity_framing /
-    # B4) consumes results/slo_throughput.json.  Running --skip phase3
-    # must still produce a fresh JSON, otherwise B4 reanalyzes 5/11
-    # legacy numbers.  multi_vlm_full_sim has no Phase 2 dependency.
+    # B4) consumes results/slo_throughput_<host>.json (fail-fast if the
+    # per-host file is missing).  Running --skip phase3 must still
+    # produce a fresh JSON on this host, otherwise B4 exits rc=2 and
+    # the run logs show the per-host requirement.  multi_vlm_full_sim
+    # has no Phase 2 dependency.
     ("260511_additional_exp/tier1_simulator/multi_vlm_full_sim.py",
         "Step 3  Multi-VLM speedup matrix refresh",      "phase3"),
     ("260511_additional_exp/tier2_simulator/slo_throughput.py",
@@ -63,7 +66,7 @@ STEPS = [
         "Step 7  Visual token sensitivity (B3)",         "phase2"),
     ("260511_additional_exp/tier1_simulator/capacity_framing.py",
         "Step 8  Capacity argument framing (B4) "
-        "[reads results/slo_throughput.json]",           "phase2"),
+        "[reads results/slo_throughput_<host>.json]",    "phase2"),
     # --- Remaining Phase 3 refreshes ---
     ("260511_additional_exp/tier2_simulator/roofline_per_vlm.py",
         "Step 9  Roofline refresh",                      "phase3"),

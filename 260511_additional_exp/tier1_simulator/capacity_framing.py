@@ -25,9 +25,16 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "shared"))
 
 from result_aggregator import save
+from hw_detect import detect_host
 
+HOST = detect_host()
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-SLO_JSON = ROOT / "260511_additional_exp" / "results" / "slo_throughput.json"
+# Per-host slo_throughput is REQUIRED so we never accidentally consume
+# another host's SLO numbers (e.g. running capacity_framing on H100 and
+# silently picking up an A6000-era `slo_throughput.json`).  If the
+# per-host file is missing, fail-fast in main().
+_RESULTS_DIR = ROOT / "260511_additional_exp" / "results"
+SLO_JSON = _RESULTS_DIR / f"slo_throughput_{HOST.lower()}.json"
 
 
 def frame_one(model_entry):
@@ -77,11 +84,17 @@ def frame_one(model_entry):
 
 
 def main():
-    print("B4 -- Capacity argument framing (data reuse from slo_throughput)")
+    print(f"B4 -- Capacity argument framing on host={HOST} "
+          f"(data reuse from slo_throughput)")
     if not SLO_JSON.exists():
-        print(f"  MISSING input: {SLO_JSON}")
-        print("  Run tier2_simulator/slo_throughput.py first.")
-        return
+        # Fail-fast.  Do NOT fall back to host-agnostic slo_throughput.json
+        # -- that file may contain another host's results, which would
+        # silently contaminate the capacity-framing output labelled as
+        # this host.  See 260601_experiment.md, v5 finding High-1.
+        print(f"  MISSING per-host input: {SLO_JSON}")
+        print(f"  Run tier2_simulator/slo_throughput.py on host={HOST} "
+               f"first to produce slo_throughput_{HOST.lower()}.json.")
+        sys.exit(2)
     data = json.loads(SLO_JSON.read_text(encoding="utf-8"))
     models = data["results"]["models"]
     out = []
@@ -103,11 +116,14 @@ def main():
                   f"{r['speedup_total']:>6.2f}x "
                   f"{r['decomposition_delta_pct']:>+5.1f}%")
 
-    save("capacity_framing",
-         {"source": "slo_throughput.json",
-          "decomposition": "speedup_total = batch_ratio x itl_ratio"},
-         {"models": out})
-    print("\nSaved -> results/capacity_framing.json")
+    meta = {"source": str(SLO_JSON.name),
+            "host_detected": HOST,
+            "platform": f"{HOST} simulator A1 (capacity-framing decomp)",
+            "decomposition": "speedup_total = batch_ratio x itl_ratio"}
+    payload = {"models": out}
+    save("capacity_framing", meta, payload)
+    save(f"capacity_framing_{HOST.lower()}", meta, payload)
+    print(f"\nSaved -> results/capacity_framing{{,_{HOST.lower()}}}.json")
 
 
 if __name__ == "__main__":

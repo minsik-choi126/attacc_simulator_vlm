@@ -1,9 +1,12 @@
 # 260601 실험 runbook — VLM Simulator Calibration & Gain 측정
 
-**Last update**: 2026-06-04 v4 (R7-R16 반영, H100 readiness)
+**Last update**: 2026-06-04 v5 (R7-R16 + B1/B2 invalid-lin fix, capacity_framing HW-aware + fail-fast, 체크리스트 가설 reframe, H100 main 선언)
 **Owner**: Minsik
 **Repo**: `attacc_simulator/` (origin `minsik-choi126/attacc_simulator_vlm`, branch `main`)
-**Latest commit**: `02bf5a4` (H100 readiness — hw_detect + per-host JSON copies)
+**Latest commit**: `2b1be3b` (Runbook v4 — H100 readiness + R16 + hw_detect 문서화). 본 갱신 (v5) 은 그 위에 stage 됨.
+
+> **Canonical HW = H100 (paper main table source).**
+> A6000 결과는 *sanity / reference* 용으로만 인용. paper figure / main table 수치는 H100 결과 (`*_h100.json`) 로 작성. cross-HW 비교 (R12 / cross_hw_compare) 가 필요하면 두 HW 결과 모두 git push 후 별도 정합성 표만 추가.
 
 ## TL;DR — 노드에 도착해서 무엇을 하면 되는가
 
@@ -140,9 +143,34 @@ A6000 노드에서 이미 실행 완료된 상태에서 H100 노드를 처음 �
 | `vlm_vs_llm_pair[_<host>].json` | ✓ | LLM↔VLM speedup delta (3 pair × 7 batch) |
 | `prefill_decomp_vlm[_<host>].json` | ✓ | 모델별 prefill / decode / e2e speedup + 기여% |
 | `visual_token_scaling[_<host>].json` | ✓ | image_size 별 visual_tokens, speedup |
-| `capacity_framing.json` | — | SLO throughput 의 batch_ratio × ITL_ratio 분해 (HW-invariant) |
+| `capacity_framing[_<host>].json` | ✓ | SLO throughput 의 batch_ratio × ITL_ratio 분해. **HW-dependent** — 입력 slo_throughput_<host>.json 이 host 별이라 분해 결과도 host 별. v5 부터 per-host suffix 저장 |
 | `roofline_per_vlm[_<host>].json` | ✓ | layer AI 분류 + host ridge |
 | `capacity_regime[_<host>].json` | ✓ | **Post-Fix-C** GPU+AttAcc 양면 capacity, max_batch |
+
+### ⚠ 현재 `results/` 의 R16 per-host 진척 상황 (2026-06-04)
+
+R16 (per-host JSON save) 코드가 적용된 후 *실측 재실행* 된 결과는 **`calibration_a6000.json` 한 개뿐**. 나머지 `results/*.json` 은 R16 이전 (≈ `8f598b2` ~ `3fea285`) 산출물 → host-agnostic 단일 파일만 존재. H100 노드에서 돌리기 전, 또는 A6000 결과 보존을 원하면 아래 스크립트를 R16 코드로 **A6000 에서 재실행** 해서 `*_a6000.json` 도 생성해두는 게 좋음:
+
+- `multi_vlm_full_sim.py`, `slo_throughput.py`, `vlm_vs_llm_pair.py`, `prefill_decomp_vlm.py`
+- `visual_token_scaling.py`, `vit_recalibration.py`, `roofline_per_vlm.py`, `capacity_regime.py`
+- `capacity_framing.py` (v5 부터 per-host save)
+- `ablation_contribution.py`
+
+### ⚠ `calibration_a6000.json` 은 R15 이전 stale 결과
+
+현재 `results/calibration_a6000.json` 의 cells 64/64 가 `actual_lin_delta_vs_target ≈ 98` + `visual_tokens_estimated == 0` 으로 R15 (tokenizer 기반 prompt sizing + visual_tokens telemetry) **이전** 산출물. 코드 (`run_calibration.py`) 는 이미 R15 fix 가 들어가 있지만 *결과 JSON 이 그 fix 적용 전* 의 것. 따라서:
+
+- **이 파일을 paper-grade Lin=X anchor 로 인용 금지**.
+- H100 에서 돌리거나 A6000 에서 재실행 후 새 결과로 덮어쓸 것.
+
+### ⚠ B1 / B2 의 LLaVA-Next-Mistral lin invalid (v5 fix)
+
+v4 까지 B1 / B2 의 LLaVA-Next-Mistral cell 은 `lin=704` 였으나 `compute_visual_tokens` 가 1776 (img=336) / 2928 (img=672) 을 줘서 *lin ≤ visual_tokens* invalid. v5 부터:
+
+- `vlm_vs_llm_pair.py` 의 (Mistral-7B ↔ LLaVA-Next-Mistral-7B, 336): **lin 704 → 1856**
+- `prefill_decomp_vlm.py` 의 (LLaVA-Next-Mistral-7B, 672): **lin 704 → 3008**
+
+이 두 값은 calibration 의 LLaVA-Next-Mistral (336, 1856) / (672, 3008) cell 과 일치. 기존 `vlm_vs_llm_pair.json` / `prefill_decomp_vlm.json` 의 LLaVA-Next-Mistral row 는 invalid 였으니 폐기 + 재실행 필요.
 
 ---
 
@@ -150,20 +178,32 @@ A6000 노드에서 이미 실행 완료된 상태에서 H100 노드를 처음 �
 
 각 실험 완료 후 확인:
 
+### Sanity (실패 시 코드 / 실행 환경 의심)
+
 - [ ] Step 0 — `upstream_baseline.json` 의 7 LLM s_time/g_time 이 origin 의 값과 일치 (bit-identical 회귀)
 - [ ] Step 1 — `calibration_<hw>.json` 의 모든 cell `status == "ok"` 또는 `oom` / `lin_below_visual_tokens`. 의도하지 않은 `error` 없음
-- [ ] Step 1 — 5 VLM 평균 `s_corr ∈ [0.85, 1.20]`
 - [ ] Step 1 — 각 cell 의 `vllm.actual_lin_tokens_p50` vs `lin` 목표 차이 (`actual_lin_delta_vs_target`) 가 ±5% 안 (예: lin=704 cell 의 actual 이 670-740 사이). 5% 이상 벗어나면 paper 의 "Lin=X" 주장이 약해짐 → `_make_prompt_for_lin` 의 iter 수 / phrase chunk 조정 필요
-- [ ] Step 2 — `vit_recalibration.json` 의 Qwen2.5-VL `s_corr` 7.9× → 1.0× 근처로 떨어짐
 - [ ] Step 4 — `slo_throughput.json` 의 GPU only 컬럼이 batch 4-16 에서 SLO 만족 ceiling 잡힘
-- [ ] Step 5 — `vlm_vs_llm_pair.json` 의 3 pair 중 최소 2 pair 에서 `delta > 0` (VLM 이 LLM 보다 큰 speedup)
-- [ ] Step 6 — `prefill_decomp_vlm.json` 의 VLM `prefill_contrib_pct > 0` (visual token 효과 확인)
-- [ ] Step 7 — `visual_token_scaling.json` 의 speedup vs visual_tokens monotonic 증가
 - [ ] Step 8 — `capacity_framing.json` 의 `decomposition_delta_pct ≤ 5%` (batch_ratio × itl_ratio 분해 sanity)
-- [ ] Step 10 — `capacity_regime.json` 의 LLaVA 가 capacity-bound (max_batch < 250) 유지. 단 *수치는 88/91 → 197/209 로 갱신됨* (paper-correct)
+
+### 검증할 가설 (실패가 paper story 자체에 대한 정보가 됨 — 자동 fail 처리 금지)
+
+A6000 기존 실행에서 *이미 반대로 나온* 항목이 있음. H100 main 에서 같은 결과가 나오면 paper 방향 자체를 재고해야 하므로, 체크리스트의 통과 / 실패 모두 분석 대상이다.
+
+- [ ] Step 1 — 5 VLM 평균 `s_corr ∈ [0.85, 1.20]`
+  - 현재 A6000: Qwen2.5-VL / LLaVA-1.5 가 `s_corr < 0.5` (sim over-predicts). H100 에서도 비슷하면 vLLM 0.17 FlashAttn 효과 → ViT cost model 재조정 필요
+- [ ] Step 2 — `vit_recalibration.json` 의 Qwen2.5-VL `s_corr` 7.9× → 1.0× 근처로 떨어짐
+  - Fix A+B 적용 가설. H100 에서도 1.0× 근처면 model.py 수정이 valid; 아니면 Cosmos 측 별도 보정 필요
+- [ ] Step 5 — `vlm_vs_llm_pair.json` 의 3 pair 중 최소 2 pair 에서 `delta > 0` (VLM > LLM speedup)
+  - **현재 A6000: 3 pair 모두 `delta < 0`**. H100 에서도 음수면 "VLM 이 LLM 보다 AttAcc 의 강한 case" 라는 paper hook 폐기 → Topic 재정의
+- [ ] Step 6 — `prefill_decomp_vlm.json` 의 VLM `prefill_speedup > 1` (visual token 으로 prefill 메모리 압박 → PIM 효과)
+  - **현재 A6000: `prefill_speedup ≈ 0.95×`** (PIM 이 VLM prefill 에 도움 안 됨). H100 에서도 동일하면 Topic B 의 "diffusion + AR" angle 만으로 paper hook 정당화 필요
+- [ ] Step 7 — `visual_token_scaling.json` 의 e2e speedup vs visual_tokens monotonic 증가
+  - **현재 A6000: 반대로 감소** (visual_tokens ↑ → e2e_speedup ↓). H100 동일하면 *"고해상도 VLM 이 AttAcc 의 strong case"* 가설 폐기
+- [ ] Step 10 — `capacity_regime.json` 의 LLaVA 가 capacity-bound (max_batch < 250) 유지. Fix-C 후 수치는 88/91 → 197/209 로 갱신됨 (paper-correct)
 
 Cross-HW:
-- [ ] `cross_hw_compare.py` 출력의 각 cell `consistency_delta_pct ≤ 10%`
+- [ ] `cross_hw_compare.py` 출력의 각 cell `consistency_delta_pct ≤ 10%`. A6000 ↔ H100 의 절대 latency 는 다르지만 simulator-vs-vLLM *비율* 은 같아야 함. 두 host 사이의 비율 deviation 이 크면 hw_detect / interface mapping 검토
 
 ---
 

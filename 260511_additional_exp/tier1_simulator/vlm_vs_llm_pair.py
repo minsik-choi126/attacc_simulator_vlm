@@ -32,9 +32,15 @@ SIM_INTERFACE = sim_interface_tag(HOST)
 
 
 # (LLM_label, VLM_label, image_size for VLM, lin for matched runs)
+# lin MUST be >= visual_tokens(VLM, image_size); otherwise the simulator
+# cell is infeasible.  visual_tokens (from Transformer.compute_visual_tokens):
+#   LLaVA-1.5-7B           336 -> 576       -> lin=704  OK
+#   LLaVA-Next-Mistral-7B  336 -> 1776      -> lin=1856 OK  (was 704, INVALID)
+#   Qwen3-VL-4B            672 -> 441       -> lin=569  OK
+# LLaVA-Next-Mistral lin bumped to match calibration's (336, 1856) cell.
 PAIRS = [
     ("Vicuna-7B",   "LLaVA-1.5-7B",            336, 704),
-    ("Mistral-7B",  "LLaVA-Next-Mistral-7B",   336, 704),
+    ("Mistral-7B",  "LLaVA-Next-Mistral-7B",   336, 1856),
     ("Qwen3-4B",    "Qwen3-VL-4B",             672, 569),
 ]
 BATCHES = [1, 2, 4, 8, 16, 32, 64]
