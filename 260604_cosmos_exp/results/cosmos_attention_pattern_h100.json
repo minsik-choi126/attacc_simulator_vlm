@@ -1,0 +1,241 @@
+{
+  "experiment": "cosmos_attention_pattern",
+  "config": {
+    "phase": "2.1",
+    "host": "H100",
+    "platform": "H100",
+    "model": "Cosmos3-Nano",
+    "tp": 1,
+    "batch": 1,
+    "resolution": "480p",
+    "frames": 24,
+    "denoise_steps": 5,
+    "prompt": "a self-driving car turning right",
+    "max_layers_recorded": 4
+  },
+  "results": {
+    "sampled_attn_layers": [
+      "layers.0.self_attn",
+      "layers.9.self_attn",
+      "layers.18.self_attn",
+      "layers.27.self_attn"
+    ],
+    "per_layer_stats": {
+      "0": [
+        {
+          "sparsity_frac": 0.363,
+          "effective_keys": 1533.37,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.4147,
+          "effective_keys": 1474.89,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.3809,
+          "effective_keys": 1490.2,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.431,
+          "effective_keys": 1433.92,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.4631,
+          "effective_keys": 1292.23,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.4929,
+          "effective_keys": 1277.97,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.5386,
+          "effective_keys": 1110.49,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.5482,
+          "effective_keys": 1138.62,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.569,
+          "effective_keys": 1037.48,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.5831,
+          "effective_keys": 1050.59,
+          "seqlen": 2520
+        }
+      ],
+      "1": [
+        {
+          "sparsity_frac": 0.7485,
+          "effective_keys": 605.38,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.7298,
+          "effective_keys": 680.9,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.7548,
+          "effective_keys": 590.13,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.7487,
+          "effective_keys": 633.38,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.7586,
+          "effective_keys": 581.08,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.7624,
+          "effective_keys": 598.78,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.7791,
+          "effective_keys": 531.82,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.785,
+          "effective_keys": 541.88,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.8112,
+          "effective_keys": 454.54,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.8184,
+          "effective_keys": 457.52,
+          "seqlen": 2520
+        }
+      ],
+      "2": [
+        {
+          "sparsity_frac": 0.6329,
+          "effective_keys": 883.72,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.6233,
+          "effective_keys": 949.29,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.7253,
+          "effective_keys": 661.27,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.717,
+          "effective_keys": 713.14,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.8102,
+          "effective_keys": 456.93,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.8104,
+          "effective_keys": 477.68,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.8339,
+          "effective_keys": 399.9,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.8379,
+          "effective_keys": 408.59,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.8443,
+          "effective_keys": 374.85,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.8495,
+          "effective_keys": 379.29,
+          "seqlen": 2520
+        }
+      ],
+      "3": [
+        {
+          "sparsity_frac": 0.4245,
+          "effective_keys": 1385.32,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.423,
+          "effective_keys": 1453.94,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.4911,
+          "effective_keys": 1225.04,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.5039,
+          "effective_keys": 1250.27,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.5604,
+          "effective_keys": 1058.21,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.5742,
+          "effective_keys": 1073.13,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.5843,
+          "effective_keys": 1000.62,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.6007,
+          "effective_keys": 1006.32,
+          "seqlen": 2520
+        },
+        {
+          "sparsity_frac": 0.5905,
+          "effective_keys": 985.57,
+          "seqlen": 2407
+        },
+        {
+          "sparsity_frac": 0.6076,
+          "effective_keys": 988.79,
+          "seqlen": 2520
+        }
+      ]
+    },
+    "threshold": 0.0001
+  },
+  "metadata": {
+    "timestamp": "2026-06-04T00:20:26.359527Z",
+    "git_commit": "unknown",
+    "host": "H100",
+    "platform": "H100"
+  }
+}

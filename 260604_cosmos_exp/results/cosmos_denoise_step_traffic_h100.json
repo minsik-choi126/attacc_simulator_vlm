@@ -1,0 +1,54 @@
+{
+  "experiment": "cosmos_denoise_step_traffic",
+  "config": {
+    "phase": "3.2",
+    "host": "H100",
+    "platform": "H100",
+    "model": "Cosmos3-Nano",
+    "framework": "pytorch",
+    "tp": 1,
+    "batch": 1,
+    "resolution": "480p",
+    "frames": 24,
+    "denoise_steps": 10,
+    "analytic_context_tokens": 131072,
+    "legacy_context_tokens": null,
+    "text_tokens_approx": 256,
+    "engine_tag": "PyTorch",
+    "nsys_available": true
+  },
+  "results": {
+    "rows": [
+      {
+        "model": "Cosmos3-Nano",
+        "batch": 1,
+        "resolution": "480p",
+        "frames": 24,
+        "denoise_steps": 10,
+        "engine_tag": "PyTorch",
+        "actual_context_tokens": 4936,
+        "text_tokens_approx": 256,
+        "analytic_context_anchor_tokens": 131072,
+        "kv_bytes_per_request_analytic_at_anchor": 19327352832,
+        "analytic_upper_per_step_bytes": 51327352832.0,
+        "weight_bytes": 32000000000.0,
+        "measured_total_bytes_in_capture": null,
+        "measured_per_step_bytes_in_capture": null,
+        "kv_per_step_derived_bytes": null,
+        "status": "analytic_only"
+      }
+    ],
+    "nsys_rep": "/root/pim/attacc_simulator/260604_cosmos_exp/results/nsys_reports/step_traffic_H100_Cosmos3-Nano_tp1_b1_480p_f24_s10_1780526235.nsys-rep",
+    "nsys_csv": null,
+    "nsys_rc": 3,
+    "parse_diag": null,
+    "schema_note": "Match measured rows by (model, batch, resolution, frames, denoise_steps, engine_tag, actual_context_tokens).  Do NOT match on analytic_context_anchor_tokens -- that field is for label / anchor printing only.",
+    "boundary_note": "status='measured' iff capture-range bound nsys CSV parse succeeded.  per_step is total / n_inference_steps within the rep window (model load + warmup are excluded by cudaProfilerStart/Stop, but text encode + denoise loop + VAE decode are all included -- amortized).  kv_per_step_derived = per_step - weight_bytes (assumes weights are read once per step)."
+  },
+  "metadata": {
+    "timestamp": "2026-06-03T22:37:40.622683Z",
+    "git_commit": "unknown",
+    "host": "H100",
+    "platform": "H100"
+  }
+}

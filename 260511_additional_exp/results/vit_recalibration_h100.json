@@ -1,0 +1,78 @@
+{
+  "experiment": "vit_recalibration_h100",
+  "config": {
+    "purpose": "Derive per-model s_corr to identify _build_vit() fix path",
+    "method": "compare simulated TTFT vs vLLM measured TTFT p50 (MMMU-Pro)",
+    "host_detected": "H100",
+    "platform": "H100 simulator vs prior H100x1 vLLM measurement (measured numbers re-used from earlier campaign)"
+  },
+  "results": {
+    "per_model": [
+      {
+        "model": "Qwen2.5-VL-7B",
+        "image_size": 672,
+        "lin_text": 334,
+        "sim_s_ms": 43.175,
+        "sim_g_ms": 5.8095,
+        "meas_ttft_ms": 107.43,
+        "meas_itl_ms": 8.72,
+        "s_corr": 2.488,
+        "g_corr": 1.501
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "image_size": 336,
+        "lin_text": 620,
+        "sim_s_ms": 40.734,
+        "sim_g_ms": 5.9727,
+        "meas_ttft_ms": 41.16,
+        "meas_itl_ms": 7.27,
+        "s_corr": 1.01,
+        "g_corr": 1.217
+      },
+      {
+        "model": "LLaVA-Next-Mistral-7B",
+        "image_size": 672,
+        "lin_text": 1979,
+        "sim_s_ms": 116.257,
+        "sim_g_ms": 7.3364,
+        "meas_ttft_ms": 102.53,
+        "meas_itl_ms": 7.63,
+        "s_corr": 0.882,
+        "g_corr": 1.04
+      }
+    ],
+    "architecture_diag": [
+      {
+        "model": "Qwen2.5-VL-7B",
+        "vit_layers": 32,
+        "vit_hidden": 1280,
+        "vit_tokens": 2304,
+        "flops_est": 4783519825920,
+        "s_corr": 2.488
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "vit_layers": 24,
+        "vit_hidden": 1024,
+        "vit_tokens": 576,
+        "flops_est": 538145980416,
+        "s_corr": 1.01
+      },
+      {
+        "model": "LLaVA-Next-Mistral-7B",
+        "vit_layers": 24,
+        "vit_hidden": 1024,
+        "vit_tokens": 2304,
+        "flops_est": 2348273369088,
+        "s_corr": 0.882
+      }
+    ],
+    "decode_g_corr_universal_est": 1.46
+  },
+  "metadata": {
+    "timestamp": "2026-06-03T21:59:40.360638Z",
+    "git_commit": "355361f",
+    "platform": "H100 simulator vs prior H100x1 vLLM measurement (measured numbers re-used from earlier campaign)"
+  }
+}

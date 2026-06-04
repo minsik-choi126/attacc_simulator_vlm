@@ -1,0 +1,303 @@
+{
+  "experiment": "cosmos_modality_kv_breakdown",
+  "config": {
+    "phase": "2.5",
+    "host": "H100",
+    "platform": "H100",
+    "scenarios": {
+      "drive_assist": {
+        "text": 64,
+        "image": [
+          "720p",
+          1
+        ],
+        "video": [
+          "720p",
+          24
+        ],
+        "audio_s": 8
+      },
+      "robot_planner": {
+        "text": 128,
+        "image": [
+          "480p",
+          4
+        ],
+        "video": [
+          "480p",
+          48
+        ],
+        "audio_s": 4
+      },
+      "video_gen_only": {
+        "text": 32,
+        "image": null,
+        "video": [
+          "720p",
+          189
+        ],
+        "audio_s": 0
+      },
+      "audio_caption": {
+        "text": 32,
+        "image": null,
+        "video": null,
+        "audio_s": 32
+      },
+      "world_model": {
+        "text": 256,
+        "image": [
+          "720p",
+          4
+        ],
+        "video": [
+          "720p",
+          96
+        ],
+        "audio_s": 16
+      }
+    },
+    "audio_tokens_per_sec": 50,
+    "action_tokens_per_sec": 30
+  },
+  "results": {
+    "rows": [
+      {
+        "model": "Cosmos3-Nano",
+        "scenario": "drive_assist",
+        "tokens": {
+          "text": 64,
+          "image": 880,
+          "video": 10560,
+          "audio": 400
+        },
+        "kv_bytes": {
+          "text": 9437184,
+          "image": 129761280,
+          "video": 1557135360,
+          "audio": 58982400
+        },
+        "total_kv_bytes": 1755316224,
+        "share_of_total_kv": {
+          "text": 0.0054,
+          "image": 0.0739,
+          "video": 0.8871,
+          "audio": 0.0336
+        }
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "scenario": "robot_planner",
+        "tokens": {
+          "text": 128,
+          "image": 1560,
+          "video": 9360,
+          "audio": 200
+        },
+        "kv_bytes": {
+          "text": 18874368,
+          "image": 230031360,
+          "video": 1380188160,
+          "audio": 29491200
+        },
+        "total_kv_bytes": 1658585088,
+        "share_of_total_kv": {
+          "text": 0.0114,
+          "image": 0.1387,
+          "video": 0.8321,
+          "audio": 0.0178
+        }
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "scenario": "video_gen_only",
+        "tokens": {
+          "text": 32,
+          "image": 0,
+          "video": 83600,
+          "audio": 0
+        },
+        "kv_bytes": {
+          "text": 4718592,
+          "image": 0,
+          "video": 12327321600,
+          "audio": 0
+        },
+        "total_kv_bytes": 12332040192,
+        "share_of_total_kv": {
+          "text": 0.0004,
+          "image": 0.0,
+          "video": 0.9996,
+          "audio": 0.0
+        }
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "scenario": "audio_caption",
+        "tokens": {
+          "text": 32,
+          "image": 0,
+          "video": 0,
+          "audio": 1600
+        },
+        "kv_bytes": {
+          "text": 4718592,
+          "image": 0,
+          "video": 0,
+          "audio": 235929600
+        },
+        "total_kv_bytes": 240648192,
+        "share_of_total_kv": {
+          "text": 0.0196,
+          "image": 0.0,
+          "video": 0.0,
+          "audio": 0.9804
+        }
+      },
+      {
+        "model": "Cosmos3-Nano",
+        "scenario": "world_model",
+        "tokens": {
+          "text": 256,
+          "image": 3520,
+          "video": 42240,
+          "audio": 800
+        },
+        "kv_bytes": {
+          "text": 37748736,
+          "image": 519045120,
+          "video": 6228541440,
+          "audio": 117964800
+        },
+        "total_kv_bytes": 6903300096,
+        "share_of_total_kv": {
+          "text": 0.0055,
+          "image": 0.0752,
+          "video": 0.9023,
+          "audio": 0.0171
+        }
+      },
+      {
+        "model": "Cosmos3-Super",
+        "scenario": "drive_assist",
+        "tokens": {
+          "text": 64,
+          "image": 880,
+          "video": 10560,
+          "audio": 400
+        },
+        "kv_bytes": {
+          "text": 16777216,
+          "image": 230686720,
+          "video": 2768240640,
+          "audio": 104857600
+        },
+        "total_kv_bytes": 3120562176,
+        "share_of_total_kv": {
+          "text": 0.0054,
+          "image": 0.0739,
+          "video": 0.8871,
+          "audio": 0.0336
+        }
+      },
+      {
+        "model": "Cosmos3-Super",
+        "scenario": "robot_planner",
+        "tokens": {
+          "text": 128,
+          "image": 1560,
+          "video": 9360,
+          "audio": 200
+        },
+        "kv_bytes": {
+          "text": 33554432,
+          "image": 408944640,
+          "video": 2453667840,
+          "audio": 52428800
+        },
+        "total_kv_bytes": 2948595712,
+        "share_of_total_kv": {
+          "text": 0.0114,
+          "image": 0.1387,
+          "video": 0.8321,
+          "audio": 0.0178
+        }
+      },
+      {
+        "model": "Cosmos3-Super",
+        "scenario": "video_gen_only",
+        "tokens": {
+          "text": 32,
+          "image": 0,
+          "video": 83600,
+          "audio": 0
+        },
+        "kv_bytes": {
+          "text": 8388608,
+          "image": 0,
+          "video": 21915238400,
+          "audio": 0
+        },
+        "total_kv_bytes": 21923627008,
+        "share_of_total_kv": {
+          "text": 0.0004,
+          "image": 0.0,
+          "video": 0.9996,
+          "audio": 0.0
+        }
+      },
+      {
+        "model": "Cosmos3-Super",
+        "scenario": "audio_caption",
+        "tokens": {
+          "text": 32,
+          "image": 0,
+          "video": 0,
+          "audio": 1600
+        },
+        "kv_bytes": {
+          "text": 8388608,
+          "image": 0,
+          "video": 0,
+          "audio": 419430400
+        },
+        "total_kv_bytes": 427819008,
+        "share_of_total_kv": {
+          "text": 0.0196,
+          "image": 0.0,
+          "video": 0.0,
+          "audio": 0.9804
+        }
+      },
+      {
+        "model": "Cosmos3-Super",
+        "scenario": "world_model",
+        "tokens": {
+          "text": 256,
+          "image": 3520,
+          "video": 42240,
+          "audio": 800
+        },
+        "kv_bytes": {
+          "text": 67108864,
+          "image": 922746880,
+          "video": 11072962560,
+          "audio": 209715200
+        },
+        "total_kv_bytes": 12272533504,
+        "share_of_total_kv": {
+          "text": 0.0055,
+          "image": 0.0752,
+          "video": 0.9023,
+          "audio": 0.0171
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-06-03T22:47:01.517165Z",
+    "git_commit": "unknown",
+    "host": "H100",
+    "platform": "H100"
+  }
+}

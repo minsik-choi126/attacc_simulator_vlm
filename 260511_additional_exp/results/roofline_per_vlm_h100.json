@@ -1,0 +1,382 @@
+{
+  "experiment": "roofline_per_vlm_h100",
+  "config": {
+    "A6000_ridge_ops_per_byte": 403.26,
+    "H100_ridge_ops_per_byte": 295.17,
+    "A100_ridge_ops_per_byte": 200.64,
+    "host_detected": "H100",
+    "host_ridge_used": "H100",
+    "host_ridge_ops_per_byte": 295.17,
+    "regimes": [
+      "prefill_L569",
+      "decode_L1"
+    ],
+    "models": [
+      "Qwen3-VL-4B",
+      "Qwen2.5-VL-7B",
+      "InternVL3-8B-hf",
+      "LLaVA-1.5-7B",
+      "LLaVA-Next-Mistral-7B"
+    ],
+    "platform": "H100 roofline (host ridge primary)"
+  },
+  "results": {
+    "matrix": [
+      {
+        "regime": "prefill_L569",
+        "model": "Qwen3-VL-4B",
+        "L": 569,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 432.74,
+            "flops": 17899192320,
+            "bytes": 41362432,
+            "verdict": "compute-bound (no PIM benefit)"
+          },
+          {
+            "layer": "score",
+            "ai": 99.91,
+            "flops": 2652250112,
+            "bytes": 26547264,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "context",
+            "ai": 99.91,
+            "flops": 2652250112,
+            "bytes": 26547264,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 444.27,
+            "flops": 85021163520,
+            "bytes": 191373312,
+            "verdict": "compute-bound (no PIM benefit)"
+          }
+        ]
+      },
+      {
+        "regime": "prefill_L569",
+        "model": "Qwen2.5-VL-7B",
+        "L": 569,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 443.75,
+            "flops": 18794151936,
+            "bytes": 42352640,
+            "verdict": "compute-bound (no PIM benefit)"
+          },
+          {
+            "layer": "score",
+            "ai": 101.82,
+            "flops": 2320718848,
+            "bytes": 22791864,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "context",
+            "ai": 101.82,
+            "flops": 2320718848,
+            "bytes": 22791864,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 478.64,
+            "flops": 231794540544,
+            "bytes": 484282368,
+            "verdict": "compute-bound (no PIM benefit)"
+          }
+        ]
+      },
+      {
+        "regime": "prefill_L569",
+        "model": "InternVL3-8B-hf",
+        "L": 569,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 443.75,
+            "flops": 18794151936,
+            "bytes": 42352640,
+            "verdict": "compute-bound (no PIM benefit)"
+          },
+          {
+            "layer": "score",
+            "ai": 101.82,
+            "flops": 2320718848,
+            "bytes": 22791864,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "context",
+            "ai": 101.82,
+            "flops": 2320718848,
+            "bytes": 22791864,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 478.64,
+            "flops": 231794540544,
+            "bytes": 484282368,
+            "verdict": "compute-bound (no PIM benefit)"
+          }
+        ]
+      },
+      {
+        "regime": "prefill_L569",
+        "model": "LLaVA-1.5-7B",
+        "L": 569,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 480.08,
+            "flops": 57277415424,
+            "bytes": 119308288,
+            "verdict": "compute-bound (no PIM benefit)"
+          },
+          {
+            "layer": "score",
+            "ai": 88.28,
+            "flops": 2652250112,
+            "bytes": 30043200,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "context",
+            "ai": 88.28,
+            "flops": 2652250112,
+            "bytes": 30043200,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 477.91,
+            "flops": 153933053952,
+            "bytes": 322097664,
+            "verdict": "compute-bound (no PIM benefit)"
+          }
+        ]
+      },
+      {
+        "regime": "prefill_L569",
+        "model": "LLaVA-Next-Mistral-7B",
+        "L": 569,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 462.03,
+            "flops": 28638707712,
+            "bytes": 61984768,
+            "verdict": "compute-bound (no PIM benefit)"
+          },
+          {
+            "layer": "score",
+            "ai": 99.91,
+            "flops": 2652250112,
+            "bytes": 26547264,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "context",
+            "ai": 99.91,
+            "flops": 2652250112,
+            "bytes": 26547264,
+            "verdict": "marginal (PIM may help)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 482.77,
+            "flops": 200470953984,
+            "bytes": 415248384,
+            "verdict": "compute-bound (no PIM benefit)"
+          }
+        ]
+      },
+      {
+        "regime": "decode_L1",
+        "model": "Qwen3-VL-4B",
+        "L": 1,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 1.0,
+            "flops": 31457280,
+            "bytes": 31474688,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "score",
+            "ai": 0.8,
+            "flops": 8192,
+            "bytes": 10304,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "context",
+            "ai": 0.8,
+            "flops": 8192,
+            "bytes": 10304,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 1.0,
+            "flops": 149422080,
+            "bytes": 149495808,
+            "verdict": "memory-bound (PIM target)"
+          }
+        ]
+      },
+      {
+        "regime": "decode_L1",
+        "model": "Qwen2.5-VL-7B",
+        "L": 1,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 1.0,
+            "flops": 33030144,
+            "bytes": 33046528,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "score",
+            "ai": 0.87,
+            "flops": 7168,
+            "bytes": 8248,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "context",
+            "ai": 0.87,
+            "flops": 7168,
+            "bytes": 8248,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 1.0,
+            "flops": 407371776,
+            "bytes": 407506944,
+            "verdict": "memory-bound (PIM target)"
+          }
+        ]
+      },
+      {
+        "regime": "decode_L1",
+        "model": "InternVL3-8B-hf",
+        "L": 1,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 1.0,
+            "flops": 33030144,
+            "bytes": 33046528,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "score",
+            "ai": 0.87,
+            "flops": 7168,
+            "bytes": 8248,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "context",
+            "ai": 0.87,
+            "flops": 7168,
+            "bytes": 8248,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 1.0,
+            "flops": 407371776,
+            "bytes": 407506944,
+            "verdict": "memory-bound (PIM target)"
+          }
+        ]
+      },
+      {
+        "regime": "decode_L1",
+        "model": "LLaVA-1.5-7B",
+        "L": 1,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 1.0,
+            "flops": 100663296,
+            "bytes": 100696064,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "score",
+            "ai": 0.5,
+            "flops": 8192,
+            "bytes": 16448,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "context",
+            "ai": 0.5,
+            "flops": 8192,
+            "bytes": 16448,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 1.0,
+            "flops": 270532608,
+            "bytes": 270623232,
+            "verdict": "memory-bound (PIM target)"
+          }
+        ]
+      },
+      {
+        "regime": "decode_L1",
+        "model": "LLaVA-Next-Mistral-7B",
+        "L": 1,
+        "layers": [
+          {
+            "layer": "qkv",
+            "ai": 1.0,
+            "flops": 50331648,
+            "bytes": 50352128,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "score",
+            "ai": 0.8,
+            "flops": 8192,
+            "bytes": 10304,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "context",
+            "ai": 0.8,
+            "flops": 8192,
+            "bytes": 10304,
+            "verdict": "memory-bound (PIM target)"
+          },
+          {
+            "layer": "ffn",
+            "ai": 1.0,
+            "flops": 352321536,
+            "bytes": 352432128,
+            "verdict": "memory-bound (PIM target)"
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-06-04T00:43:20.356080Z",
+    "git_commit": "355361f",
+    "platform": "H100 roofline (host ridge primary)"
+  }
+}

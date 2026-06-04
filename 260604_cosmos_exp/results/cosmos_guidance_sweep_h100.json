@@ -1,0 +1,290 @@
+{
+  "experiment": "cosmos_guidance_sweep",
+  "config": {
+    "phase": "3.6",
+    "host": "H100",
+    "platform": "H100",
+    "model": "Cosmos3-Nano",
+    "framework": "pytorch",
+    "tp": 1,
+    "batches": [
+      1,
+      4
+    ],
+    "resolution": "480p",
+    "frames": 48,
+    "denoise_steps": 20,
+    "guidance_grid": [
+      1.0,
+      6.0,
+      12.0
+    ],
+    "flow_shift_grid": [
+      3.0,
+      10.0
+    ],
+    "reps": 2
+  },
+  "results": {
+    "rows": [
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 3.0,
+        "guidance_scale": 1.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          6.080815568566322,
+          6.1066540870815516
+        ],
+        "e2e_s": 6.1066540870815516,
+        "p50_s": 6.1066540870815516,
+        "min_s": 6.080815568566322,
+        "max_s": 6.1066540870815516,
+        "mean_s": 6.093734827823937,
+        "guidance": 1.0,
+        "batch": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 3.0,
+        "guidance_scale": 1.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          6.127672018483281,
+          6.075958917848766
+        ],
+        "e2e_s": 6.127672018483281,
+        "p50_s": 6.127672018483281,
+        "min_s": 6.075958917848766,
+        "max_s": 6.127672018483281,
+        "mean_s": 6.1018154681660235,
+        "guidance": 1.0,
+        "batch": 4
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 1.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          6.124748967587948,
+          6.066260942257941
+        ],
+        "e2e_s": 6.124748967587948,
+        "p50_s": 6.124748967587948,
+        "min_s": 6.066260942257941,
+        "max_s": 6.124748967587948,
+        "mean_s": 6.095504954922944,
+        "guidance": 1.0,
+        "batch": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 1.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          6.13482278957963,
+          6.034541574306786
+        ],
+        "e2e_s": 6.13482278957963,
+        "p50_s": 6.13482278957963,
+        "min_s": 6.034541574306786,
+        "max_s": 6.13482278957963,
+        "mean_s": 6.084682181943208,
+        "guidance": 1.0,
+        "batch": 4
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 3.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.15936405211687,
+          10.165373752824962
+        ],
+        "e2e_s": 10.165373752824962,
+        "p50_s": 10.165373752824962,
+        "min_s": 10.15936405211687,
+        "max_s": 10.165373752824962,
+        "mean_s": 10.162368902470917,
+        "guidance": 6.0,
+        "batch": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 3.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.210933591239154,
+          10.188431678339839
+        ],
+        "e2e_s": 10.210933591239154,
+        "p50_s": 10.210933591239154,
+        "min_s": 10.188431678339839,
+        "max_s": 10.210933591239154,
+        "mean_s": 10.199682634789497,
+        "guidance": 6.0,
+        "batch": 4
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.210604569874704,
+          10.24081795476377
+        ],
+        "e2e_s": 10.24081795476377,
+        "p50_s": 10.24081795476377,
+        "min_s": 10.210604569874704,
+        "max_s": 10.24081795476377,
+        "mean_s": 10.225711262319237,
+        "guidance": 6.0,
+        "batch": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.214943785220385,
+          10.146194448694587
+        ],
+        "e2e_s": 10.214943785220385,
+        "p50_s": 10.214943785220385,
+        "min_s": 10.146194448694587,
+        "max_s": 10.214943785220385,
+        "mean_s": 10.180569116957486,
+        "guidance": 6.0,
+        "batch": 4
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 3.0,
+        "guidance_scale": 12.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.284109868109226,
+          10.157133755274117
+        ],
+        "e2e_s": 10.284109868109226,
+        "p50_s": 10.284109868109226,
+        "min_s": 10.157133755274117,
+        "max_s": 10.284109868109226,
+        "mean_s": 10.220621811691672,
+        "guidance": 12.0,
+        "batch": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 3.0,
+        "guidance_scale": 12.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.204357068054378,
+          10.172992683947086
+        ],
+        "e2e_s": 10.204357068054378,
+        "p50_s": 10.204357068054378,
+        "min_s": 10.172992683947086,
+        "max_s": 10.204357068054378,
+        "mean_s": 10.188674876000732,
+        "guidance": 12.0,
+        "batch": 4
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 12.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.164108831435442,
+          10.28390372917056
+        ],
+        "e2e_s": 10.28390372917056,
+        "p50_s": 10.28390372917056,
+        "min_s": 10.164108831435442,
+        "max_s": 10.28390372917056,
+        "mean_s": 10.224006280303001,
+        "guidance": 12.0,
+        "batch": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 12.0,
+        "denoise_steps": 20,
+        "rep_seconds": [
+          10.184814435429871,
+          10.129348006099463
+        ],
+        "e2e_s": 10.184814435429871,
+        "p50_s": 10.184814435429871,
+        "min_s": 10.129348006099463,
+        "max_s": 10.184814435429871,
+        "mean_s": 10.157081220764667,
+        "guidance": 12.0,
+        "batch": 4
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-06-03T22:45:58.930022Z",
+    "git_commit": "unknown",
+    "host": "H100",
+    "platform": "H100"
+  }
+}

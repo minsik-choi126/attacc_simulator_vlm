@@ -1,0 +1,188 @@
+{
+  "experiment": "multi_vlm_full_sim_h100",
+  "config": {
+    "platform": "H100 x 1 A1",
+    "host_detected": "H100",
+    "lout": 128,
+    "batches": [
+      1,
+      4,
+      8
+    ],
+    "system": "dgx vs dgx-attacc"
+  },
+  "results": {
+    "models": [
+      {
+        "model": "Qwen3-VL-4B",
+        "image_size": 672,
+        "lin": 569,
+        "lout": 128,
+        "max_L": 2048,
+        "batches": [
+          {
+            "batch": 1,
+            "dgx_s_ms": 39.5900940814145,
+            "dgx_g_ms": 4.105530269868133,
+            "attacc_s_ms": 53.92137013112812,
+            "attacc_g_ms": 1.6296451280899225,
+            "speedup_e2e": 2.15
+          },
+          {
+            "batch": 4,
+            "dgx_s_ms": 73.49652487332234,
+            "dgx_g_ms": 4.113636120887536,
+            "attacc_s_ms": 86.88642072903593,
+            "attacc_g_ms": 2.0808487629129178,
+            "speedup_e2e": 1.697
+          },
+          {
+            "batch": 8,
+            "dgx_s_ms": 124.1854528390733,
+            "dgx_g_ms": 4.674282945130452,
+            "attacc_s_ms": 136.01272857450056,
+            "attacc_g_ms": 2.4403485172182764,
+            "speedup_e2e": 1.61
+          }
+        ]
+      },
+      {
+        "model": "Qwen2.5-VL-7B",
+        "image_size": 672,
+        "lin": 704,
+        "lout": 128,
+        "max_L": 2048,
+        "batches": [
+          {
+            "batch": 1,
+            "dgx_s_ms": 55.072958390196966,
+            "dgx_g_ms": 6.059039500394107,
+            "attacc_s_ms": 77.16081939489372,
+            "attacc_g_ms": 1.7275296823508344,
+            "speedup_e2e": 2.78
+          },
+          {
+            "batch": 4,
+            "dgx_s_ms": 128.25461110778454,
+            "dgx_g_ms": 6.068983648073717,
+            "attacc_s_ms": 140.73184141381466,
+            "attacc_g_ms": 2.612506151622142,
+            "speedup_e2e": 1.903
+          },
+          {
+            "batch": 8,
+            "dgx_s_ms": 233.84921230132528,
+            "dgx_g_ms": 6.600958962580092,
+            "attacc_s_ms": 243.1187305773855,
+            "attacc_g_ms": 3.317136068968687,
+            "speedup_e2e": 1.614
+          }
+        ]
+      },
+      {
+        "model": "InternVL3-8B-hf",
+        "image_size": 448,
+        "lin": 384,
+        "lout": 128,
+        "max_L": 2048,
+        "batches": [
+          {
+            "batch": 1,
+            "dgx_s_ms": 34.80125392629985,
+            "dgx_g_ms": 5.84318438316822,
+            "attacc_s_ms": 43.83088726665495,
+            "attacc_g_ms": 1.721655006760283,
+            "speedup_e2e": 2.96
+          },
+          {
+            "batch": 4,
+            "dgx_s_ms": 63.190990623734486,
+            "dgx_g_ms": 5.853128530847832,
+            "attacc_s_ms": 68.81853167608958,
+            "attacc_g_ms": 2.60914919414183,
+            "speedup_e2e": 2.015
+          },
+          {
+            "batch": 8,
+            "dgx_s_ms": 104.62744963170776,
+            "dgx_g_ms": 6.169248728128324,
+            "attacc_s_ms": 109.78053519241796,
+            "attacc_g_ms": 3.3137791114883726,
+            "speedup_e2e": 1.674
+          }
+        ]
+      },
+      {
+        "model": "LLaVA-1.5-7B",
+        "image_size": 336,
+        "lin": 704,
+        "lout": 128,
+        "max_L": 2048,
+        "batches": [
+          {
+            "batch": 1,
+            "dgx_s_ms": 43.61757487629572,
+            "dgx_g_ms": 6.037497708356545,
+            "attacc_s_ms": 57.91735729283806,
+            "attacc_g_ms": 2.581280481896021,
+            "speedup_e2e": 2.101
+          },
+          {
+            "batch": 4,
+            "dgx_s_ms": 85.80930553672019,
+            "dgx_g_ms": 6.2417978460190495,
+            "attacc_s_ms": 121.03771178259584,
+            "attacc_g_ms": 3.3109505751508492,
+            "speedup_e2e": 1.622
+          },
+          {
+            "batch": 8,
+            "dgx_s_ms": 150.10468637448466,
+            "dgx_g_ms": 6.847840645007398,
+            "attacc_s_ms": 220.57882289823598,
+            "attacc_g_ms": 3.875347370832432,
+            "speedup_e2e": 1.431
+          }
+        ]
+      },
+      {
+        "model": "LLaVA-Next-Mistral-7B",
+        "image_size": 672,
+        "lin": 3008,
+        "lout": 128,
+        "max_L": 4096,
+        "batches": [
+          {
+            "batch": 1,
+            "dgx_s_ms": 198.74215040304884,
+            "dgx_g_ms": 8.129647337540405,
+            "attacc_s_ms": 399.3448631311866,
+            "attacc_g_ms": 2.111029012615207,
+            "speedup_e2e": 1.845
+          },
+          {
+            "batch": 4,
+            "dgx_s_ms": 392.92583372002537,
+            "dgx_g_ms": 8.139985593317604,
+            "attacc_s_ms": 545.0506920694964,
+            "attacc_g_ms": 2.962251844800261,
+            "speedup_e2e": 1.549
+          },
+          {
+            "batch": 8,
+            "dgx_s_ms": 763.1940218894888,
+            "dgx_g_ms": 10.912378000778755,
+            "attacc_s_ms": 820.9637109404308,
+            "attacc_g_ms": 3.822954939946913,
+            "speedup_e2e": 1.645
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-06-04T00:44:52.707193Z",
+    "git_commit": "355361f",
+    "platform": "H100 x 1 A1"
+  }
+}

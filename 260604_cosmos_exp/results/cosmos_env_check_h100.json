@@ -1,0 +1,91 @@
+{
+  "experiment": "cosmos_env_check",
+  "config": {
+    "phase": "0.1",
+    "host": "H100",
+    "platform": "H100",
+    "gpu_count": 2,
+    "peak_bw_tbs": 3.35,
+    "model_facts": {
+      "Nano": {
+        "hidden": 4096,
+        "n_layers": 36,
+        "n_kv_heads": 8,
+        "d_head": 128,
+        "max_position_embeddings": 262144
+      },
+      "Super": {
+        "hidden": 5120,
+        "n_layers": 64,
+        "n_kv_heads": 8,
+        "d_head": 128,
+        "max_position_embeddings": 262144
+      }
+    }
+  },
+  "results": {
+    "frameworks": {
+      "torch": {
+        "present": true,
+        "version": "2.10.0+cu128"
+      },
+      "diffusers": {
+        "present": true,
+        "version": "0.39.0.dev0"
+      },
+      "transformers": {
+        "present": true,
+        "version": "5.10.1"
+      },
+      "vllm": {
+        "present": true,
+        "version": "0.17.0"
+      },
+      "vllm_omni": {
+        "present": false,
+        "error": "No module named 'openai.types.responses'"
+      },
+      "flash_attn": {
+        "present": false,
+        "error": "No module named 'flash_attn'"
+      }
+    },
+    "weights": {
+      "Cosmos3-Nano": {
+        "repo_id": "nvidia/Cosmos3-Nano",
+        "present": true,
+        "size_gb": 69.8
+      },
+      "Cosmos3-Super": {
+        "repo_id": "nvidia/Cosmos3-Super",
+        "present": true,
+        "size_gb": 269.2
+      },
+      "Cosmos3-Reasoner1-7B": {
+        "repo_id": "nvidia/Cosmos-Reason1-7B",
+        "present": false,
+        "size_gb": null
+      },
+      "Cosmos3-Predict2-Diffusion": {
+        "repo_id": "nvidia/Cosmos-Predict2",
+        "present": false,
+        "size_gb": null
+      }
+    },
+    "disk_free_gb": 14322.1,
+    "nvidia_smi": "NVIDIA H100 80GB HBM3, 81559 MiB, 81076 MiB, 580.82.07\nNVIDIA H100 80GB HBM3, 81559 MiB, 81076 MiB, 580.82.07",
+    "readiness": {
+      "Cosmos3-Nano_TP1": true,
+      "Cosmos3-Nano_TP2": true,
+      "Cosmos3-Super_TP2": true,
+      "vLLM-Omni": false,
+      "PyTorch+Diffusers": true
+    }
+  },
+  "metadata": {
+    "timestamp": "2026-06-03T21:58:55.328158Z",
+    "git_commit": "unknown",
+    "host": "H100",
+    "platform": "H100"
+  }
+}

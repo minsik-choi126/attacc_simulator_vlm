@@ -49,54 +49,95 @@ def main():
     print(f"[Phase 2.1] attention_pattern on host={host}")
     try:
         import torch
-        import torch.nn as nn
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from diffusers import Cosmos3OmniPipeline
+        from diffusers.schedulers.scheduling_unipc_multistep import (
+            UniPCMultistepScheduler,
+        )
+        sys.path.insert(0, str(HERE.parents[1] / "shared"))
+        from cosmos_facts import (NEGATIVE_PROMPT_T2V, DEFAULT_FLOW_SHIFT,
+                                  DEFAULT_FPS)
+
         repo = HF_REPOS[args.model]
-        mdl = AutoModelForCausalLM.from_pretrained(
-            repo, torch_dtype=torch.bfloat16,
-            trust_remote_code=True).to("cuda")
-        mdl.eval()
-        tok = AutoTokenizer.from_pretrained(repo, trust_remote_code=True)
+        pipe = Cosmos3OmniPipeline.from_pretrained(
+            repo, torch_dtype=torch.bfloat16, device_map="cuda",
+            enable_safety_checker=False)
+        pipe.scheduler = UniPCMultistepScheduler.from_config(
+            pipe.scheduler.config, flow_shift=DEFAULT_FLOW_SHIFT)
+        if hasattr(pipe, "set_progress_bar_config"):
+            pipe.set_progress_bar_config(disable=True)
 
-        captured = {}      # layer_idx -> sparsity stats
+        captured = {}      # layer_idx -> list of sparsity stats per call
 
-        def make_hook(idx):
-            def hook(module, args_, output):
-                # output may be (attn_out, attn_weights) — depends on model
-                if isinstance(output, tuple) and len(output) > 1:
-                    w = output[1]
-                    if w is not None and w.dim() >= 3:
-                        flat = w.float().reshape(-1, w.shape[-1])
-                        sparsity = (flat < THRESHOLD).float().mean().item()
-                        eff = (flat > THRESHOLD).float().sum(-1).mean().item()
-                        captured.setdefault(idx, []).append(
-                            {"sparsity_frac": round(sparsity, 4),
-                             "effective_keys": round(eff, 2),
-                             "seqlen": int(flat.shape[-1])})
-            return hook
+        def _rotate_half(x):
+            half = x.shape[-1] // 2
+            return torch.cat((-x[..., half:], x[..., :half]), dim=-1)
 
-        # Try to find attention modules
-        attn_layers = []
-        for name, m in mdl.named_modules():
-            if m.__class__.__name__.endswith("Attention"):
-                attn_layers.append((name, m))
-        sampled = attn_layers[:args.max_layers_recorded]
-        handles = [m.register_forward_hook(make_hook(i))
-                   for i, (n, m) in enumerate(sampled)]
+        class SparsityProcessor:
+            """Cosmos3PackedMoTAttention wrapper: recompute generation-pathway
+            softmax to measure attention sparsity, then delegate to base."""
+            def __init__(self, base, idx):
+                self.base = base
+                self.idx = idx
 
-        ids = tok([args.prompt] * args.batch,
-                   return_tensors="pt").input_ids.to("cuda")
-        with torch.inference_mode():
-            _ = mdl(ids, output_attentions=True)
+            def __call__(self, attn, und_seq, gen_seq, rotary_emb):
+                try:
+                    with torch.no_grad():
+                        cos_und, sin_und, cos_gen, sin_gen = rotary_emb
+                        hd = attn.head_dim
+                        Hq, Hkv = attn.num_attention_heads, attn.num_key_value_heads
+                        groups = Hq // Hkv
+                        q_gen = attn.add_q_proj(gen_seq).view(-1, Hq, hd)
+                        k_und = attn.to_k(und_seq).view(-1, Hkv, hd)
+                        k_gen = attn.add_k_proj(gen_seq).view(-1, Hkv, hd)
+                        q_gen = attn.norm_added_q(q_gen)
+                        k_und = attn.norm_k(k_und); k_gen = attn.norm_added_k(k_gen)
+                        cg, sg = cos_gen.unsqueeze(1), sin_gen.unsqueeze(1)
+                        cu, su = cos_und.unsqueeze(1), sin_und.unsqueeze(1)
+                        q_gen = q_gen * cg + _rotate_half(q_gen) * sg
+                        k_gen = k_gen * cg + _rotate_half(k_gen) * sg
+                        k_und = k_und * cu + _rotate_half(k_und) * su
+                        all_k = torch.cat([k_und, k_gen], dim=0).repeat_interleave(
+                            groups, dim=1)
+                        K = all_k.shape[0]; scale = hd ** -0.5
+                        sp = 0.0; eff = 0.0
+                        for h in range(Hq):
+                            s = torch.matmul(q_gen[:, h, :],
+                                             all_k[:, h, :].transpose(0, 1)).float() * scale
+                            w = torch.softmax(s, dim=-1)
+                            sp += (w < THRESHOLD).float().mean().item()
+                            eff += (w > THRESHOLD).float().sum(-1).mean().item()
+                        captured.setdefault(self.idx, []).append(
+                            {"sparsity_frac": round(sp / Hq, 4),
+                             "effective_keys": round(eff / Hq, 2),
+                             "seqlen": int(K)})
+                except Exception as ex:
+                    captured.setdefault("diag", []).append(str(ex)[:200])
+                return self.base(attn, und_seq, gen_seq, rotary_emb)
 
-        for h in handles:
-            h.remove()
+        attn_mods = [(n, m) for n, m in pipe.transformer.named_modules()
+                     if m.__class__.__name__.endswith("Attention")
+                     and hasattr(m, "add_q_proj")]
+        if not attn_mods:
+            raise RuntimeError("No Cosmos3PackedMoTAttention in transformer")
+        # sample evenly across the stack
+        step = max(1, len(attn_mods) // args.max_layers_recorded)
+        sampled = attn_mods[::step][:args.max_layers_recorded]
+        for i, (n, m) in enumerate(sampled):
+            m.processor = SparsityProcessor(m.processor, i)
+
+        W, H = RES[args.resolution]
+        gen = torch.Generator(device="cuda").manual_seed(123)
+        _ = pipe(prompt=[args.prompt] * args.batch,
+                 negative_prompt=[NEGATIVE_PROMPT_T2V] * args.batch,
+                 num_frames=args.frames, height=H, width=W,
+                 num_inference_steps=args.denoise_steps,
+                 guidance_scale=6.0, fps=DEFAULT_FPS, generator=gen)
 
         out = {"sampled_attn_layers": [n for n, _ in sampled],
-               "per_layer_stats": captured,
+               "per_layer_stats": {str(k): v for k, v in captured.items()},
                "threshold": THRESHOLD}
         for k, v in captured.items():
-            print(f"  layer[{k}] {v}")
+            print(f"  layer[{k}] {v[:2] if isinstance(v,list) else v}")
         save("cosmos_attention_pattern",
               {"phase": "2.1", "host": host, "platform": host, **vars(args)},
               out)

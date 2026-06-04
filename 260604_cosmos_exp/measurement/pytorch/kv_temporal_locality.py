@@ -68,52 +68,85 @@ def main():
         # capturing version.  This avoids the diffusers
         # output_attentions= flag (which the Cosmos pipeline does not
         # forward to the transformer).
-        captured_per_call = []   # list[ tensor (..., seqlen) of softmax ]
+        captured_per_call = []   # list[ tensor (1, K) of mean softmax mass ]
+        capture_diag = []
+
+        def _rotate_half(x):
+            half = x.shape[-1] // 2
+            return torch.cat((-x[..., half:], x[..., :half]), dim=-1)
 
         class CapturingProcessor:
+            """Cosmos3PackedMoTAttention dual-pathway processor wrapper.
+
+            Cosmos3 uses a packed Mixture-of-Transformers attention whose
+            processor signature is (attn, und_seq, gen_seq, rotary_emb) and
+            whose real kernel (dispatch_attention_fn) does not return softmax
+            weights.  We mirror the *generation* pathway's Q/K projection +
+            RMSNorm + rotary to recompute scores -> softmax for the locality
+            histogram (gen queries attend to all = und(old context) + gen
+            keys, so bucket 0 = oldest tokens), then delegate to the base
+            processor for the actual (und_out, gen_out) so the pipeline output
+            is unchanged.
+            """
+
             def __init__(self, base):
                 self.base = base
 
-            def __call__(self, attn, hidden_states, encoder_hidden_states=None,
-                         attention_mask=None, **kw):
-                # Compute Q, K, V via the base attn module's projections so
-                # we get the exact tensors the layer would have used.
-                B = hidden_states.shape[0]
-                q = attn.to_q(hidden_states)
-                k_src = (encoder_hidden_states if encoder_hidden_states
-                         is not None else hidden_states)
-                k = attn.to_k(k_src)
-                v = attn.to_v(k_src)
-                head_dim = q.shape[-1] // attn.heads
-                q = q.view(B, -1, attn.heads, head_dim).transpose(1, 2)
-                k = k.view(B, -1, attn.heads, head_dim).transpose(1, 2)
-                v = v.view(B, -1, attn.heads, head_dim).transpose(1, 2)
-                scores = torch.matmul(q, k.transpose(-1, -2)) / (head_dim ** 0.5)
-                if attention_mask is not None:
-                    scores = scores + attention_mask
-                w = torch.softmax(scores.float(), dim=-1)
-                # Sample: average across batch + head to keep memory low.
-                captured_per_call.append(
-                    w.mean(dim=(0, 1)).detach().cpu())
-                out = torch.matmul(w.to(v.dtype), v)
-                out = out.transpose(1, 2).reshape(B, -1, attn.heads * head_dim)
-                return attn.to_out[0](out) if isinstance(attn.to_out,
-                                                          torch.nn.ModuleList) \
-                    else attn.to_out(out)
+            def __call__(self, attn, und_seq, gen_seq, rotary_emb):
+                try:
+                    with torch.no_grad():
+                        cos_und, sin_und, cos_gen, sin_gen = rotary_emb
+                        hd = attn.head_dim
+                        Hq = attn.num_attention_heads
+                        Hkv = attn.num_key_value_heads
+                        groups = Hq // Hkv
+                        # generation queries, und+gen keys (the "all keys"
+                        # the full pathway cross-attends to)
+                        q_gen = attn.add_q_proj(gen_seq).view(-1, Hq, hd)
+                        k_und = attn.to_k(und_seq).view(-1, Hkv, hd)
+                        k_gen = attn.add_k_proj(gen_seq).view(-1, Hkv, hd)
+                        q_gen = attn.norm_added_q(q_gen)
+                        k_und = attn.norm_k(k_und)
+                        k_gen = attn.norm_added_k(k_gen)
+                        cg, sg = cos_gen.unsqueeze(1), sin_gen.unsqueeze(1)
+                        cu, su = cos_und.unsqueeze(1), sin_und.unsqueeze(1)
+                        q_gen = q_gen * cg + _rotate_half(q_gen) * sg
+                        k_gen = k_gen * cg + _rotate_half(k_gen) * sg
+                        k_und = k_und * cu + _rotate_half(k_und) * su
+                        all_k = torch.cat([k_und, k_gen], dim=0)  # (K,Hkv,hd)
+                        # GQA expand kv heads to query heads
+                        all_k = all_k.repeat_interleave(groups, dim=1)  # (K,Hq,hd)
+                        K = all_k.shape[0]
+                        scale = hd ** -0.5
+                        # accumulate mean softmax mass per key position,
+                        # head-by-head to bound memory on long sequences
+                        mass = torch.zeros(K, dtype=torch.float32,
+                                           device=q_gen.device)
+                        for h in range(Hq):
+                            s = torch.matmul(q_gen[:, h, :],
+                                             all_k[:, h, :].transpose(0, 1))
+                            s = s.float() * scale          # (Qg, K)
+                            w = torch.softmax(s, dim=-1)
+                            mass += w.sum(dim=0)
+                        mass /= (Hq * q_gen.shape[0])       # mean over heads+queries
+                        captured_per_call.append(mass.unsqueeze(0).cpu())  # (1,K)
+                except Exception as ex:  # never break the pipeline
+                    capture_diag.append(str(ex)[:200])
+                return self.base(attn, und_seq, gen_seq, rotary_emb)
 
-        # Find a mid-layer attention module to capture (one is enough
-        # for the locality story; capturing all is too much memory).
-        target_attn = None
-        for name, m in pipe.transformer.named_modules():
-            if m.__class__.__name__.endswith("Attention"):
-                target_attn = m
-                break
-        if target_attn is None:
-            raise RuntimeError("No Attention module in pipe.transformer")
-        if hasattr(target_attn, "processor"):
-            target_attn.processor = CapturingProcessor(target_attn.processor)
-        else:
+        # Patch a mid-stack attention layer (one is enough for the locality
+        # story; capturing all is too much memory).  Cosmos3's class is
+        # Cosmos3PackedMoTAttention -> endswith("Attention").
+        attn_mods = [m for _, m in pipe.transformer.named_modules()
+                     if m.__class__.__name__.endswith("Attention")
+                     and hasattr(m, "to_q") and hasattr(m, "add_q_proj")]
+        if not attn_mods:
+            raise RuntimeError(
+                "No Cosmos3PackedMoTAttention module found in pipe.transformer")
+        target_attn = attn_mods[len(attn_mods) // 2]
+        if not hasattr(target_attn, "processor"):
             raise RuntimeError("Attention module has no processor slot")
+        target_attn.processor = CapturingProcessor(target_attn.processor)
 
         W, H = RESOLUTIONS[args.resolution]
         gen = torch.Generator(device="cuda").manual_seed(123)
@@ -148,6 +181,8 @@ def main():
         save("cosmos_kv_temporal_locality",
               {"phase": "2.2", "host": host, "platform": host, **vars(args)},
               {"per_call_buckets": out_rows,
+               "n_calls_captured": len(captured_per_call),
+               "capture_diag": capture_diag[:5],
                "note": "mass_fraction_per_bucket[i] = fraction of softmax "
                         "mass landing on token positions [i*bucket, "
                         "(i+1)*bucket).  Old / new mapping requires the "
