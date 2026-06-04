@@ -1,0 +1,98 @@
+{
+  "experiment": "cosmos_nvidia_repro",
+  "config": {
+    "phase": "0.2",
+    "host": "H100",
+    "platform": "H100",
+    "nvidia_gpu_key": "H100_NVL",
+    "tolerance": 0.15
+  },
+  "results": {
+    "comparisons": [
+      {
+        "measured_s": 50.89894359186292,
+        "reference_s": 84.12,
+        "delta_pct": -39.49,
+        "within_tolerance": false,
+        "tolerance_pct": 15.0,
+        "model": "Cosmos3-Nano",
+        "task": "t2v",
+        "engine": "PyTorch",
+        "col": "480p/1",
+        "caveats": []
+      },
+      {
+        "measured_s": 50.80502929352224,
+        "reference_s": 84.12,
+        "delta_pct": -39.6,
+        "within_tolerance": false,
+        "tolerance_pct": 15.0,
+        "model": "Cosmos3-Nano",
+        "task": "t2v",
+        "engine": "PyTorch",
+        "col": "480p/1",
+        "caveats": []
+      },
+      {
+        "measured_s": 50.72242603916675,
+        "reference_s": 84.12,
+        "delta_pct": -39.7,
+        "within_tolerance": false,
+        "tolerance_pct": 15.0,
+        "model": "Cosmos3-Nano",
+        "task": "t2v",
+        "engine": "PyTorch",
+        "col": "480p/1",
+        "caveats": []
+      },
+      {
+        "measured_s": 170.10048187710345,
+        "reference_s": 297.27,
+        "delta_pct": -42.78,
+        "within_tolerance": false,
+        "tolerance_pct": 15.0,
+        "model": "Cosmos3-Nano",
+        "task": "t2v",
+        "engine": "PyTorch",
+        "col": "720p/1",
+        "caveats": []
+      },
+      {
+        "measured_s": 170.81710126902908,
+        "reference_s": 297.27,
+        "delta_pct": -42.54,
+        "within_tolerance": false,
+        "tolerance_pct": 15.0,
+        "model": "Cosmos3-Nano",
+        "task": "t2v",
+        "engine": "PyTorch",
+        "col": "720p/1",
+        "caveats": []
+      },
+      {
+        "measured_s": 169.92940899264067,
+        "reference_s": 297.27,
+        "delta_pct": -42.84,
+        "within_tolerance": false,
+        "tolerance_pct": 15.0,
+        "model": "Cosmos3-Nano",
+        "task": "t2v",
+        "engine": "PyTorch",
+        "col": "720p/1",
+        "caveats": []
+      }
+    ],
+    "coverage": {
+      "checked": 6,
+      "no_reference": 0,
+      "no_match": 3
+    },
+    "any_drift": true
+  },
+  "metadata": {
+    "timestamp": "2026-06-04T01:18:58.456043Z",
+    "git_commit": "unknown",
+    "host": "H100",
+    "platform": "H100"
+  }
+}

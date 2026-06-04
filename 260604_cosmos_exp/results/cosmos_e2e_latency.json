@@ -1,0 +1,272 @@
+{
+  "experiment": "cosmos_e2e_latency",
+  "config": {
+    "phase": "1.1",
+    "host": "H100",
+    "platform": "H100",
+    "n_gpu": 2,
+    "peak_bw_tbs": 3.35,
+    "parallel_driver": "GPU0+GPU1 work-stealing",
+    "axes": {
+      "models": [
+        "Cosmos3-Nano"
+      ],
+      "tps": [
+        1
+      ],
+      "batches": [
+        1,
+        4,
+        8
+      ],
+      "frameworks": [
+        "pytorch"
+      ],
+      "tasks": [
+        "t2v"
+      ],
+      "resolutions": [
+        "256p",
+        "480p",
+        "720p"
+      ],
+      "frames": 121,
+      "reps": 1
+    }
+  },
+  "results": {
+    "rows": [
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          12.359453882090747
+        ],
+        "e2e_s": 12.359453882090747,
+        "p50_s": 12.359453882090747,
+        "min_s": 12.359453882090747,
+        "max_s": 12.359453882090747,
+        "mean_s": 12.359453882090747,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 1,
+        "resolution": "256p",
+        "frames": 121,
+        "wall_s": 40.4,
+        "gpu": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          12.378767751157284
+        ],
+        "e2e_s": 12.378767751157284,
+        "p50_s": 12.378767751157284,
+        "min_s": 12.378767751157284,
+        "max_s": 12.378767751157284,
+        "mean_s": 12.378767751157284,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 4,
+        "resolution": "256p",
+        "frames": 121,
+        "wall_s": 41.5,
+        "gpu": 0
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          12.366251530125737
+        ],
+        "e2e_s": 12.366251530125737,
+        "p50_s": 12.366251530125737,
+        "min_s": 12.366251530125737,
+        "max_s": 12.366251530125737,
+        "mean_s": 12.366251530125737,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 8,
+        "resolution": "256p",
+        "frames": 121,
+        "wall_s": 40.1,
+        "gpu": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          50.89894359186292
+        ],
+        "e2e_s": 50.89894359186292,
+        "p50_s": 50.89894359186292,
+        "min_s": 50.89894359186292,
+        "max_s": 50.89894359186292,
+        "mean_s": 50.89894359186292,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 1,
+        "resolution": "480p",
+        "frames": 121,
+        "wall_s": 116.0,
+        "gpu": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          50.80502929352224
+        ],
+        "e2e_s": 50.80502929352224,
+        "p50_s": 50.80502929352224,
+        "min_s": 50.80502929352224,
+        "max_s": 50.80502929352224,
+        "mean_s": 50.80502929352224,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 4,
+        "resolution": "480p",
+        "frames": 121,
+        "wall_s": 116.7,
+        "gpu": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          50.72242603916675
+        ],
+        "e2e_s": 50.72242603916675,
+        "p50_s": 50.72242603916675,
+        "min_s": 50.72242603916675,
+        "max_s": 50.72242603916675,
+        "mean_s": 50.72242603916675,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 8,
+        "resolution": "480p",
+        "frames": 121,
+        "wall_s": 117.8,
+        "gpu": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          170.10048187710345
+        ],
+        "e2e_s": 170.10048187710345,
+        "p50_s": 170.10048187710345,
+        "min_s": 170.10048187710345,
+        "max_s": 170.10048187710345,
+        "mean_s": 170.10048187710345,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 1,
+        "resolution": "720p",
+        "frames": 121,
+        "wall_s": 355.5,
+        "gpu": 0
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          170.81710126902908
+        ],
+        "e2e_s": 170.81710126902908,
+        "p50_s": 170.81710126902908,
+        "min_s": 170.81710126902908,
+        "max_s": 170.81710126902908,
+        "mean_s": 170.81710126902908,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 4,
+        "resolution": "720p",
+        "frames": 121,
+        "wall_s": 359.2,
+        "gpu": 1
+      },
+      {
+        "status": "ok",
+        "framework": "pytorch",
+        "task": "t2v",
+        "pipeline_path": "diffusers.Cosmos3OmniPipeline",
+        "scheduler": "UniPCMultistepScheduler",
+        "flow_shift": 10.0,
+        "guidance_scale": 6.0,
+        "denoise_steps": 35,
+        "rep_seconds": [
+          169.92940899264067
+        ],
+        "e2e_s": 169.92940899264067,
+        "p50_s": 169.92940899264067,
+        "min_s": 169.92940899264067,
+        "max_s": 169.92940899264067,
+        "mean_s": 169.92940899264067,
+        "model": "Cosmos3-Nano",
+        "tp": 1,
+        "batch": 8,
+        "resolution": "720p",
+        "frames": 121,
+        "wall_s": 356.0,
+        "gpu": 0
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": "2026-06-04T01:18:42.562392Z",
+    "git_commit": "unknown",
+    "host": "H100",
+    "platform": "H100"
+  }
+}

@@ -96,8 +96,14 @@ def measure(model, task, tp, batch, resolution, frames, denoise_steps, reps,
     common_load = dict(torch_dtype=torch.bfloat16,
                         enable_safety_checker=False)
     if tp > 1:
+        # Force GPU-only placement across the visible GPUs.  Omitting "cpu"
+        # from max_memory makes accelerate error rather than silently CPU-
+        # offload (which made Super run on CPU = effectively hung).  Cosmos3
+        # Super transformer is ~128 GB bf16, so 2x H100-80GB is needed.
+        _n = torch.cuda.device_count()
+        _mm = {i: "76GiB" for i in range(_n)}
         pipe = pipeline_cls.from_pretrained(
-            repo, device_map="balanced", **common_load)
+            repo, device_map="balanced", max_memory=_mm, **common_load)
     else:
         pipe = pipeline_cls.from_pretrained(
             repo, device_map="cuda", **common_load)
